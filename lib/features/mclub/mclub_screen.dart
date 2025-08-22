@@ -10,7 +10,8 @@ class MClubScreen extends StatefulWidget {
   State<MClubScreen> createState() => _MClubScreenState();
 }
 
-class _MClubScreenState extends State<MClubScreen> with SingleTickerProviderStateMixin {
+class _MClubScreenState extends State<MClubScreen>
+    with SingleTickerProviderStateMixin {
   final _api = ApiService();
 
   List<dynamic> _categories = [];
@@ -32,7 +33,6 @@ class _MClubScreenState extends State<MClubScreen> with SingleTickerProviderStat
   static const _fallbackLat = 25.1972;
   static const _fallbackLng = 55.2744;
 
-
   @override
   void initState() {
     super.initState();
@@ -44,6 +44,8 @@ class _MClubScreenState extends State<MClubScreen> with SingleTickerProviderStat
   void dispose() {
     _tabController?.removeListener(_centerSelectedTab);
     _tabController?.dispose();
+    _tabController = null;
+    _tabScrollController = null;
     super.dispose();
   }
 
@@ -54,7 +56,8 @@ class _MClubScreenState extends State<MClubScreen> with SingleTickerProviderStat
         perm = await Geolocator.requestPermission();
       }
 
-      if (perm == LocationPermission.deniedForever || perm == LocationPermission.denied) {
+      if (perm == LocationPermission.deniedForever ||
+          perm == LocationPermission.denied) {
         _curLat = _fallbackLat;
         _curLng = _fallbackLng;
       } else {
@@ -82,8 +85,10 @@ class _MClubScreenState extends State<MClubScreen> with SingleTickerProviderStat
       final cats = await _api.fetchCategories();
       final offers = await _api.fetchBenefits();
 
-      _tabController?.removeListener(_centerSelectedTab);
+      if (!mounted) return;
+
       _tabController?.dispose();
+      _tabController = null;
       _tabController = TabController(length: cats.length + 1, vsync: this);
       _tabController!.addListener(() {
         if (!_tabController!.indexIsChanging) {
@@ -92,15 +97,18 @@ class _MClubScreenState extends State<MClubScreen> with SingleTickerProviderStat
       });
       _tabKeys = List.generate(cats.length + 1, (_) => GlobalKey());
 
-      setState(() {
-        _categories = cats;
-        _offers = offers;
-        _selectedCategoryId = null;
-      });
+      if (mounted) {
+        setState(() {
+          _categories = cats;
+          _offers = offers;
+          _selectedCategoryId = null;
+        });
+      }
 
       WidgetsBinding.instance.addPostFrameCallback((_) {
-        _tabScrollController =
-            Scrollable.of(_tabBarKey.currentContext!)?.widget.controller;
+        _tabScrollController = Scrollable.of(
+          _tabBarKey.currentContext!,
+        )?.widget.controller;
       });
     } catch (e, stack) {
       // Log the exception so debugging information is available in the console
@@ -112,11 +120,10 @@ class _MClubScreenState extends State<MClubScreen> with SingleTickerProviderStat
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text('Не удалось загрузить данные: $e')),
         );
+        setState(() => _error = 'Не удалось загрузить данные');
       }
-
-      setState(() => _error = 'Не удалось загрузить данные');
     } finally {
-      setState(() => _isLoading = false);
+      if (mounted) setState(() => _isLoading = false);
     }
   }
 
@@ -124,9 +131,11 @@ class _MClubScreenState extends State<MClubScreen> with SingleTickerProviderStat
     List<dynamic> filtered = _selectedCategoryId == null
         ? List<dynamic>.from(_offers)
         : _offers.where((offer) {
-      final categories = offer['category'] as List<dynamic>? ?? [];
-      return categories.any((c) => c['id'].toString() == _selectedCategoryId);
-    }).toList();
+            final categories = offer['category'] as List<dynamic>? ?? [];
+            return categories.any(
+              (c) => c['id'].toString() == _selectedCategoryId,
+            );
+          }).toList();
 
     if (_sortMode == 'alphabet') {
       filtered.sort((a, b) {
@@ -146,7 +155,10 @@ class _MClubScreenState extends State<MClubScreen> with SingleTickerProviderStat
   }
 
   double _minDistanceMeters(List<dynamic>? branches) {
-    if (branches == null || branches.isEmpty || _curLat == null || _curLng == null) {
+    if (branches == null ||
+        branches.isEmpty ||
+        _curLat == null ||
+        _curLng == null) {
       return double.infinity;
     }
     double best = double.infinity;
@@ -178,7 +190,8 @@ class _MClubScreenState extends State<MClubScreen> with SingleTickerProviderStat
     final tabWidth = box.size.width;
     final position = box.localToGlobal(Offset.zero);
     final screenWidth = MediaQuery.of(ctx).size.width;
-    final target = _tabScrollController!.offset +
+    final target =
+        _tabScrollController!.offset +
         position.dx +
         tabWidth / 2 -
         screenWidth / 2;
@@ -232,7 +245,10 @@ class _MClubScreenState extends State<MClubScreen> with SingleTickerProviderStat
           children: [
             Text(_error!, style: const TextStyle(color: Colors.red)),
             const SizedBox(height: 8),
-            ElevatedButton(onPressed: _loadData, child: const Text('Повторить')),
+            ElevatedButton(
+              onPressed: _loadData,
+              child: const Text('Повторить'),
+            ),
           ],
         ),
       );
@@ -247,9 +263,7 @@ class _MClubScreenState extends State<MClubScreen> with SingleTickerProviderStat
                 child: DecoratedBox(
                   decoration: BoxDecoration(
                     border: Border(
-                      bottom: BorderSide(
-                        color: Theme.of(context).dividerColor,
-                      ),
+                      bottom: BorderSide(color: Theme.of(context).dividerColor),
                     ),
                   ),
                   child: TabBar(
@@ -264,8 +278,9 @@ class _MClubScreenState extends State<MClubScreen> with SingleTickerProviderStat
                     ),
                     onTap: (i) {
                       setState(() {
-                        _selectedCategoryId =
-                            i == 0 ? null : _categories[i - 1]['id'].toString();
+                        _selectedCategoryId = i == 0
+                            ? null
+                            : _categories[i - 1]['id'].toString();
                       });
                       _centerSelectedTab();
                     },
@@ -273,7 +288,10 @@ class _MClubScreenState extends State<MClubScreen> with SingleTickerProviderStat
                       Tab(key: _tabKeys[0], text: 'Все'),
                       ...List.generate(
                         _categories.length,
-                        (i) => Tab(key: _tabKeys[i + 1], text: _categories[i]['name']),
+                        (i) => Tab(
+                          key: _tabKeys[i + 1],
+                          text: _categories[i]['name'],
+                        ),
                       ),
                     ],
                   ),
@@ -288,99 +306,100 @@ class _MClubScreenState extends State<MClubScreen> with SingleTickerProviderStat
                     child: ListView.builder(
                       itemCount: _filteredOffers.length,
                       itemBuilder: (context, index) {
-                      final offer = _filteredOffers[index];
-                      final photo = (offer['photo_url'] ?? '').toString();
-                      final title = (offer['title'] ?? '').toString();
-                      final descr =
-                          (offer['description_short'] ?? '').toString();
+                        final offer = _filteredOffers[index];
+                        final photo = (offer['photo_url'] ?? '').toString();
+                        final title = (offer['title'] ?? '').toString();
+                        final descr = (offer['description_short'] ?? '')
+                            .toString();
 
-                      double? distance;
-                      if (_sortMode == 'distance') {
-                        final d = _minDistanceMeters(offer['branches']);
-                        if (d != double.infinity) {
-                          distance = d;
+                        double? distance;
+                        if (_sortMode == 'distance') {
+                          final d = _minDistanceMeters(offer['branches']);
+                          if (d != double.infinity) {
+                            distance = d;
+                          }
                         }
-                      }
 
-                      return GestureDetector(
-                        onTap: () {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                                builder: (_) =>
-                                    OfferDetailScreen(offer: offer)),
-                          );
-                        },
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            if (photo.isNotEmpty)
-                              Image.network(
-                                photo,
-                                width: double.infinity,
-                                height:
-                                    MediaQuery.of(context).size.width * 0.6,
-                                fit: BoxFit.cover,
-                                errorBuilder: (_, __, ___) => Container(
-                                  height: MediaQuery.of(context).size.width *
-                                      0.6,
+                        return GestureDetector(
+                          onTap: () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (_) => OfferDetailScreen(offer: offer),
+                              ),
+                            );
+                          },
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              if (photo.isNotEmpty)
+                                Image.network(
+                                  photo,
+                                  width: double.infinity,
+                                  height:
+                                      MediaQuery.of(context).size.width * 0.6,
+                                  fit: BoxFit.cover,
+                                  errorBuilder: (_, __, ___) => Container(
+                                    height:
+                                        MediaQuery.of(context).size.width * 0.6,
+                                    color: Colors.grey.shade200,
+                                  ),
+                                )
+                              else
+                                Container(
+                                  width: double.infinity,
+                                  height:
+                                      MediaQuery.of(context).size.width * 0.6,
                                   color: Colors.grey.shade200,
                                 ),
-                              )
-                            else
-                              Container(
-                                width: double.infinity,
-                                height:
-                                    MediaQuery.of(context).size.width * 0.6,
-                                color: Colors.grey.shade200,
-                              ),
-                            Padding(
-                              padding: const EdgeInsets.all(12),
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Text(
-                                    title,
-                                    style: const TextStyle(
-                                      fontSize: 18,
-                                      fontWeight: FontWeight.w400,
-                                      fontFamily: 'Roboto',
-                                    ),
-                                  ),
-                                  if (distance != null)
-                                    Padding(
-                                      padding: const EdgeInsets.only(top: 4),
-                                      child: Text(
-                                        _formatDistance(distance),
-                                        style: const TextStyle(
-                                          fontSize: 14,
-                                          color: Colors.grey,
-                                        ),
+                              Padding(
+                                padding: const EdgeInsets.all(12),
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text(
+                                      title,
+                                      style: const TextStyle(
+                                        fontSize: 18,
+                                        fontWeight: FontWeight.w400,
+                                        fontFamily: 'Roboto',
                                       ),
                                     ),
-                                ],
-                              ),
-                            ),
-                            Padding(
-                              padding:
-                                  const EdgeInsets.symmetric(horizontal: 12),
-                              child: Text(
-                                descr,
-                                style: const TextStyle(
-                                  fontSize: 14,
-                                  fontWeight: FontWeight.w300,
-                                  fontFamily: 'Roboto',
+                                    if (distance != null)
+                                      Padding(
+                                        padding: const EdgeInsets.only(top: 4),
+                                        child: Text(
+                                          _formatDistance(distance),
+                                          style: const TextStyle(
+                                            fontSize: 14,
+                                            color: Colors.grey,
+                                          ),
+                                        ),
+                                      ),
+                                  ],
                                 ),
                               ),
-                            ),
-                            const SizedBox(height: 8),
-                            const Divider(height: 1),
-                          ],
-                        ),
-                      );
-                    },
+                              Padding(
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 12,
+                                ),
+                                child: Text(
+                                  descr,
+                                  style: const TextStyle(
+                                    fontSize: 14,
+                                    fontWeight: FontWeight.w300,
+                                    fontFamily: 'Roboto',
+                                  ),
+                                ),
+                              ),
+                              const SizedBox(height: 8),
+                              const Divider(height: 1),
+                            ],
+                          ),
+                        );
+                      },
+                    ),
                   ),
-                ),
           ),
         ],
       );
