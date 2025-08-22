@@ -325,8 +325,6 @@ class _MClubScreenState extends State<MClubScreen> with TickerProviderStateMixin
                         final title = (offer['title'] ?? '').toString();
                         final descr =
                             (offer['description_short'] ?? '').toString();
-                        int? userVote =
-                            (offer['vote'] as num?)?.toInt();
 
                         double? distance;
                         if (_sortMode == 'distance') {
@@ -337,8 +335,8 @@ class _MClubScreenState extends State<MClubScreen> with TickerProviderStateMixin
                         }
 
                         return GestureDetector(
-                          onTap: () async {
-                            final vote = await Navigator.push<int?>(
+                          onTap: () {
+                            Navigator.push(
                               context,
                               MaterialPageRoute(
                                 builder: (_) => OfferDetailScreen(
@@ -347,13 +345,6 @@ class _MClubScreenState extends State<MClubScreen> with TickerProviderStateMixin
                                 ),
                               ),
                             );
-                            if (vote != null) {
-                              setState(() {
-                                _offers[index]['vote'] = vote;
-                                offer['vote'] = vote;
-                                userVote = vote;
-                              });
-                            }
                           },
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
@@ -417,31 +408,6 @@ class _MClubScreenState extends State<MClubScreen> with TickerProviderStateMixin
                                     fontFamily: 'Roboto',
                                   ),
                                 ),
-                              ),
-                              Row(
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                children: [
-                                  IconButton(
-                                    icon: Icon(
-                                      userVote == 1
-                                          ? Icons.thumb_up
-                                          : Icons.thumb_up_outlined,
-                                      color:
-                                          userVote == 1 ? Colors.green : Colors.grey,
-                                    ),
-                                    onPressed: () {},
-                                  ),
-                                  IconButton(
-                                    icon: Icon(
-                                      userVote == -1
-                                          ? Icons.thumb_down
-                                          : Icons.thumb_down_outlined,
-                                      color:
-                                          userVote == -1 ? Colors.red : Colors.grey,
-                                    ),
-                                    onPressed: () {},
-                                  ),
-                                ],
                               ),
                               const SizedBox(height: 8),
                               const Divider(height: 1),
