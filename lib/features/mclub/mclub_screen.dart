@@ -29,7 +29,6 @@ class _MClubScreenState extends State<MClubScreen> with SingleTickerProviderStat
   static const _fallbackLat = 25.1972;
   static const _fallbackLng = 55.2744;
 
-  IconData get _sortIcon => Icons.filter_list;
 
   @override
   void initState() {
@@ -142,12 +141,42 @@ class _MClubScreenState extends State<MClubScreen> with SingleTickerProviderStat
     }
   }
 
+  void _openSortModal() {
+    showModalBottomSheet(
+      context: context,
+      builder: (context) {
+        return SafeArea(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              ListTile(
+                title: const Text('По алфавиту'),
+                onTap: () {
+                  setState(() => _sortMode = 'alphabet');
+                  Navigator.pop(context);
+                },
+              ),
+              ListTile(
+                title: const Text('По расстоянию'),
+                onTap: () {
+                  setState(() => _sortMode = 'distance');
+                  Navigator.pop(context);
+                },
+              ),
+            ],
+          ),
+        );
+      },
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
-    if (_isLoading) return const Center(child: CircularProgressIndicator());
-
-    if (_error != null) {
-      return Center(
+    Widget body;
+    if (_isLoading) {
+      body = const Center(child: CircularProgressIndicator());
+    } else if (_error != null) {
+      body = Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
@@ -157,148 +186,147 @@ class _MClubScreenState extends State<MClubScreen> with SingleTickerProviderStat
           ],
         ),
       );
-    }
-
-    return Column(
-      children: [
-        if (_tabController != null)
-          Material(
-            color: Colors.white,
-            child: Padding(
-              padding: const EdgeInsets.only(right: 4),
-              child: Row(
-                children: [
-                  Expanded(
-                    child: TabBar(
-                      controller: _tabController,
-                      isScrollable: true,
-                      labelColor: const Color(0xFF182857),
-                      unselectedLabelColor: Colors.black54,
-                      indicatorColor: const Color(0xFF182857),
-                      onTap: (i) {
-                        setState(() {
-                          _selectedCategoryId =
+    } else {
+      body = Column(
+        children: [
+          if (_tabController != null)
+            Material(
+              color: Colors.white,
+              child: Padding(
+                padding: const EdgeInsets.only(right: 4),
+                child: TabBar(
+                  controller: _tabController,
+                  isScrollable: true,
+                  labelColor: const Color(0xFF182857),
+                  unselectedLabelColor: Colors.black54,
+                  indicatorColor: const Color(0xFF182857),
+                  onTap: (i) {
+                    setState(() {
+                      _selectedCategoryId =
                           i == 0 ? null : _categories[i - 1]['id'].toString();
-                        });
-                      },
-                      tabs: [
-                        const Tab(text: 'Все'),
-                        ..._categories.map((c) => Tab(text: c['name'])).toList(),
-                      ],
-                    ),
-                  ),
-                  PopupMenuButton<String>(
-                    tooltip: 'Сортировка',
-                    icon: Icon(_sortIcon, color: const Color(0xFF182857)),
-                    onSelected: (v) => setState(() => _sortMode = v),
-                    itemBuilder: (context) => const [
-                      PopupMenuItem(
-                        value: 'alphabet',
-                        child: Text('По алфавиту'),
-                      ),
-                      PopupMenuItem(
-                        value: 'distance',
-                        child: Text('По расстоянию'),
-                      ),
-                    ],
-                  ),
-                ],
+                    });
+                  },
+                  tabs: [
+                    const Tab(text: 'Все'),
+                    ..._categories.map((c) => Tab(text: c['name'])).toList(),
+                  ],
+                ),
               ),
             ),
-          ),
-        Expanded(
-          child: _filteredOffers.isEmpty
-              ? const Center(child: Text('Нет предложений'))
-              : ListView.builder(
-            itemCount: _filteredOffers.length,
-            itemBuilder: (context, index) {
-              final offer = _filteredOffers[index];
-              final photo = (offer['photo_url'] ?? '').toString();
-              final title = (offer['title'] ?? '').toString();
-              final descr = (offer['description_short'] ?? '').toString();
+          Expanded(
+            child: _filteredOffers.isEmpty
+                ? const Center(child: Text('Нет предложений'))
+                : ListView.builder(
+                    itemCount: _filteredOffers.length,
+                    itemBuilder: (context, index) {
+                      final offer = _filteredOffers[index];
+                      final photo = (offer['photo_url'] ?? '').toString();
+                      final title = (offer['title'] ?? '').toString();
+                      final descr =
+                          (offer['description_short'] ?? '').toString();
 
-              double? distance;
-              if (_sortMode == 'distance') {
-                final d = _minDistanceMeters(offer['branches']);
-                if (d != double.infinity) {
-                  distance = d;
-                }
-              }
+                      double? distance;
+                      if (_sortMode == 'distance') {
+                        final d = _minDistanceMeters(offer['branches']);
+                        if (d != double.infinity) {
+                          distance = d;
+                        }
+                      }
 
-              return GestureDetector(
-                onTap: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(builder: (_) => OfferDetailScreen(offer: offer)),
-                  );
-                },
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    if (photo.isNotEmpty)
-                      Image.network(
-                        photo,
-                        width: double.infinity,
-                        height: MediaQuery.of(context).size.width * 0.6,
-                        fit: BoxFit.cover,
-                        errorBuilder: (_, __, ___) => Container(
-                          height: MediaQuery.of(context).size.width * 0.6,
-                          color: Colors.grey.shade200,
-                        ),
-                      )
-                    else
-                      Container(
-                        width: double.infinity,
-                        height: MediaQuery.of(context).size.width * 0.6,
-                        color: Colors.grey.shade200,
-                      ),
-                    Padding(
-                      padding: const EdgeInsets.all(12),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            title,
-                            style: const TextStyle(
-                              fontSize: 18,
-                              fontWeight: FontWeight.w400,
-                              fontFamily: 'Roboto',
-                            ),
-                          ),
-                          if (distance != null)
+                      return GestureDetector(
+                        onTap: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                                builder: (_) =>
+                                    OfferDetailScreen(offer: offer)),
+                          );
+                        },
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            if (photo.isNotEmpty)
+                              Image.network(
+                                photo,
+                                width: double.infinity,
+                                height:
+                                    MediaQuery.of(context).size.width * 0.6,
+                                fit: BoxFit.cover,
+                                errorBuilder: (_, __, ___) => Container(
+                                  height: MediaQuery.of(context).size.width *
+                                      0.6,
+                                  color: Colors.grey.shade200,
+                                ),
+                              )
+                            else
+                              Container(
+                                width: double.infinity,
+                                height:
+                                    MediaQuery.of(context).size.width * 0.6,
+                                color: Colors.grey.shade200,
+                              ),
                             Padding(
-                              padding: const EdgeInsets.only(top: 4),
+                              padding: const EdgeInsets.all(12),
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    title,
+                                    style: const TextStyle(
+                                      fontSize: 18,
+                                      fontWeight: FontWeight.w400,
+                                      fontFamily: 'Roboto',
+                                    ),
+                                  ),
+                                  if (distance != null)
+                                    Padding(
+                                      padding: const EdgeInsets.only(top: 4),
+                                      child: Text(
+                                        _formatDistance(distance),
+                                        style: const TextStyle(
+                                          fontSize: 14,
+                                          color: Colors.grey,
+                                        ),
+                                      ),
+                                    ),
+                                ],
+                              ),
+                            ),
+                            Padding(
+                              padding:
+                                  const EdgeInsets.symmetric(horizontal: 12),
                               child: Text(
-                                _formatDistance(distance),
+                                descr,
                                 style: const TextStyle(
                                   fontSize: 14,
-                                  color: Colors.grey,
+                                  fontWeight: FontWeight.w300,
+                                  fontFamily: 'Roboto',
                                 ),
                               ),
                             ),
-                        ],
-                      ),
-                    ),
-                    Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 12),
-                      child: Text(
-                        descr,
-                        style: const TextStyle(
-                          fontSize: 14,
-                          fontWeight: FontWeight.w300,
-                          fontFamily: 'Roboto',
+                            const SizedBox(height: 8),
+                            const Divider(height: 1),
+                          ],
                         ),
-                      ),
-                    ),
-                    const SizedBox(height: 8),
-                    const Divider(height: 1),
-                  ],
-                ),
-              );
-            },
+                      );
+                    },
+                  ),
           ),
-        ),
-      ],
+        ],
+      );
+    }
+
+    return Scaffold(
+      appBar: AppBar(
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.tune),
+            tooltip: 'Фильтр',
+            onPressed: _openSortModal,
+          ),
+        ],
+      ),
+      body: body,
     );
   }
 }
