@@ -1,0 +1,41 @@
+import 'package:flutter/material.dart';
+import '../../features/auth/auth_email_screen.dart';
+import '../services/api_service.dart' show ApiService;
+
+/// Показывает либо `child` (приложение), либо экран авторизации —
+/// в зависимости от того, есть ли сохранённый токен в SecureStorage.
+class AuthGate extends StatefulWidget {
+  final Widget child;
+  const AuthGate({super.key, required this.child});
+
+  @override
+  State<AuthGate> createState() => _AuthGateState();
+}
+
+class _AuthGateState extends State<AuthGate> {
+  bool _loading = true;
+  bool _loggedIn = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _check();
+  }
+
+  Future<void> _check() async {
+    final ok = await ApiService().isLoggedIn();
+    if (!mounted) return;
+    setState(() {
+      _loggedIn = ok;
+      _loading = false;
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    if (_loading) {
+      return const Scaffold(body: Center(child: CircularProgressIndicator()));
+    }
+    return _loggedIn ? widget.child : const AuthEmailScreen();
+  }
+}

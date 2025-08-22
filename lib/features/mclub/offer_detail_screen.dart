@@ -1,0 +1,440 @@
+// lib/features/mclub/offer_detail_screen.dart
+import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+import 'package:flutter_html/flutter_html.dart';
+import 'package:geolocator/geolocator.dart';
+import 'package:share_plus/share_plus.dart';
+import 'package:url_launcher/url_launcher.dart';
+
+class OfferDetailScreen extends StatefulWidget {
+  final Map<String, dynamic> offer;
+  const OfferDetailScreen({super.key, required this.offer});
+
+  @override
+  State<OfferDetailScreen> createState() => _OfferDetailScreenState();
+}
+
+class _OfferDetailScreenState extends State<OfferDetailScreen> {
+  bool _collapsed = false; // схлопнут ли appbar
+  final _scrollController = ScrollController();
+
+  static const double _expandedHeight = 320;
+
+  // текущие координаты (для расстояния)
+  double? _curLat;
+  double? _curLng;
+  static const _fallbackLat = 25.1972; // Burj Khalifa — фолбэк
+  static const _fallbackLng = 55.2744;
+
+  @override
+  void initState() {
+    super.initState();
+    _scrollController.addListener(_onScroll);
+    _initLocation();
+  }
+
+  @override
+  void dispose() {
+    _scrollController.removeListener(_onScroll);
+    _scrollController.dispose();
+    super.dispose();
+  }
+
+  void _onScroll() {
+    // порог коллапса = expandedHeight - (toolbar + статус-бар)
+    if (!mounted) return;
+    final topPad = MediaQuery.of(context).padding.top;
+    final threshold = _expandedHeight - (kToolbarHeight + topPad);
+    final nowCollapsed = _scrollController.positions.isNotEmpty &&
+        _scrollController.offset >= threshold;
+    if (nowCollapsed != _collapsed) {
+      setState(() => _collapsed = nowCollapsed);
+    }
+  }
+
+  Future<void> _initLocation() async {
+    try {
+      var perm = await Geolocator.checkPermission();
+      if (perm == LocationPermission.denied) {
+        perm = await Geolocator.requestPermission();
+      }
+
+      if (perm == LocationPermission.deniedForever || perm == LocationPermission.denied) {
+        _curLat = _fallbackLat;
+        _curLng = _fallbackLng;
+      } else {
+        // совместимо со старыми версиями geolocator
+        final pos = await Geolocator.getCurrentPosition(desiredAccuracy: LocationAccuracy.high);
+        _curLat = pos.latitude;
+        _curLng = pos.longitude;
+      }
+    } catch (_) {
+      _curLat = _fallbackLat;
+      _curLng = _fallbackLng;
+    } finally {
+      if (mounted) setState(() {});
+    }
+  }
+
+  // ===== helpers
+
+  void _shareOffer() {
+    final o = widget.offer;
+    final title = (o['title'] ?? o['name'] ?? '').toString();
+    final link = (o['share_url'] ?? o['link'] ?? o['url'] ?? '').toString();
+    final text = [title, link].where((e) => e.trim().isNotEmpty).join('\n');
+    if (text.isNotEmpty) Share.share(text);
+  }
+
+  Future<void> _openPhone(String phone) async {
+    if (phone.trim().isEmpty) return;
+    final uri = Uri.parse('tel:${phone.replaceAll(' ', '')}');
+    if (await canLaunchUrl(uri)) {
+      await launchUrl(uri);
+    }
+  }
+
+  Future<void> _mailto(String email, {String? subject, String? body}) async {
+    if (email.trim().isEmpty) return;
+    final uri = Uri(
+      scheme: 'mailto',
+      path: email,
+      queryParameters: {
+        if (subject != null) 'subject': subject,
+        if (body != null) 'body': body,
+      },
+    );
+    await launchUrl(uri);
+  }
+
+  Future<void> _openSite(String url) async {
+    var u = url.trim();
+    if (u.isEmpty) return;
+    if (!u.startsWith('http')) u = 'https://$u';
+    final uri = Uri.parse(u);
+    if (await canLaunchUrl(uri)) {
+      await launchUrl(uri, mode: LaunchMode.externalApplication);
+    }
+  }
+
+  Future<void> _openRouteTo(double lat, double lng) async {
+    final uri = Uri.parse('https://maps.google.com/?q=$lat,$lng');
+    if (await canLaunchUrl(uri)) {
+      await launchUrl(uri, mode: LaunchMode.externalApplication);
+    }
+  }
+
+  String _distanceLabelTo(double? lat, double? lng) {
+    if (lat == null || lng == null || _curLat == null || _curLng == null) return '';
+    final meters = Geolocator.distanceBetween(_curLat!, _curLng!, lat, lng);
+    return meters >= 1000
+        ? '${(meters / 1000).toStringAsFixed(1)} км'
+        : '${meters.round()} м';
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final o = widget.offer;
+
+    final title = (o['title'] ?? o['name'] ?? '').toString();
+    // ФОТО — используем оригинальный ключ и запасные варианты
+    final photoUrl = (o['photo_url'] ?? o['photo'] ?? o['image'] ?? '').toString();
+    // Короткое описание — показываем ПОД заголовком на фото
+    final descShortHtml = (o['description_short'] ?? '').toString();
+    final descShortPlain = descShortHtml
+        .replaceAll(RegExp(r'<[^>]*>'), ' ')
+        .replaceAll(RegExp(r'\s+'), ' ')
+        .trim();
+
+    final descHtml = (o['description'] ?? '').toString();
+    final branches = (o['branches'] as List?)?.cast<Map<String, dynamic>>() ?? const <Map<String, dynamic>>[];
+
+    int likes = int.tryParse((o['likes'] ?? '0').toString()) ?? 0;
+    int dislikes = int.tryParse((o['dislikes'] ?? '0').toString()) ?? 0;
+    bool? userLiked;
+    final rating = likes - dislikes;
+    final ratingColor = rating > 0 ? Colors.green : (rating < 0 ? Colors.red : Colors.grey);
+
+    final iconColor = _collapsed ? Colors.black87 : Colors.white;
+    final overlayStyle = _collapsed ? SystemUiOverlayStyle.dark : SystemUiOverlayStyle.light;
+
+    return AnnotatedRegion<SystemUiOverlayStyle>(
+      value: overlayStyle,
+      child: Scaffold(
+        body: CustomScrollView(
+          controller: _scrollController,
+          slivers: [
+            // ==== Шапка с фото, кнопкой "назад" и "поделиться"
+            SliverAppBar(
+              backgroundColor: Colors.white,
+              elevation: 0,
+              pinned: true,
+              expandedHeight: _expandedHeight,
+              leading: IconButton(
+                icon: Icon(Icons.arrow_back, color: iconColor),
+                onPressed: () => Navigator.of(context).pop(),
+                tooltip: 'Назад',
+              ),
+              actions: [
+                IconButton(
+                  icon: Icon(Icons.share, color: iconColor),
+                  onPressed: _shareOffer,
+                  tooltip: 'Поделиться',
+                ),
+              ],
+              systemOverlayStyle: overlayStyle,
+              flexibleSpace: FlexibleSpaceBar(
+                background: Stack(
+                  fit: StackFit.expand,
+                  children: [
+                    if (photoUrl.isEmpty)
+                      Container(color: Colors.grey.shade200)
+                    else
+                      Image.network(
+                        photoUrl,
+                        fit: BoxFit.cover,
+                        errorBuilder: (_, __, ___) => Container(color: Colors.grey.shade200),
+                      ),
+                    // мягкий градиент для читаемости текста на светлых фото
+                    Positioned.fill(
+                      child: IgnorePointer(
+                        child: DecoratedBox(
+                          decoration: BoxDecoration(
+                            gradient: LinearGradient(
+                              begin: Alignment.topCenter,
+                              end: Alignment.bottomCenter,
+                              colors: [
+                                Colors.transparent,
+                                Colors.black.withOpacity(0.1),
+                                Colors.black.withOpacity(0.3),
+                                Colors.black.withOpacity(0.5),
+                              ],
+                              stops: const [0.5, 0.75, 0.9, 1.0],
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
+                    // Заголовок и КОРОТКОЕ описание под ним
+                    Positioned(
+                      left: 12,
+                      right: 12,
+                      bottom: 12,
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            title,
+                            maxLines: 2,
+                            overflow: TextOverflow.ellipsis,
+                            style: const TextStyle(
+                              color: Colors.white,
+                              fontSize: 22,
+                              fontWeight: FontWeight.w600,
+                              height: 1.2,
+                              shadows: [Shadow(color: Colors.black54, blurRadius: 4, offset: Offset(0, 1))],
+                            ),
+                          ),
+                          const SizedBox(height: 8),
+                          if (descShortPlain.isNotEmpty)
+                            Text(
+                              descShortPlain,
+                              maxLines: 3,
+                              overflow: TextOverflow.ellipsis,
+                              style: const TextStyle(
+                                color: Colors.white,
+                                fontSize: 18,
+                                height: 1.25,
+                                shadows: [Shadow(color: Colors.black54, blurRadius: 4, offset: Offset(0, 1))],
+                              ),
+                            ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+
+            // ==== Контент карточки (описание и т.п.)
+            SliverToBoxAdapter(
+              child: Padding(
+                padding: const EdgeInsets.fromLTRB(16, 16, 16, 24),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    // Рейтинг и лайки/дизлайки
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        IconButton(
+                          icon: Icon(
+                            userLiked == true ? Icons.thumb_up : Icons.thumb_up_outlined,
+                            color: userLiked == true ? Colors.green : Colors.grey,
+                          ),
+                          onPressed: () {
+                            setState(() {
+                              if (userLiked == true) {
+                                likes--;
+                                userLiked = null;
+                              } else {
+                                if (userLiked == false) dislikes--;
+                                likes++;
+                                userLiked = true;
+                              }
+                            });
+                          },
+                        ),
+                        Text(
+                          '$rating',
+                          style: TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.w600,
+                            color: ratingColor,
+                          ),
+                        ),
+                        IconButton(
+                          icon: Icon(
+                            userLiked == false ? Icons.thumb_down : Icons.thumb_down_outlined,
+                            color: userLiked == false ? Colors.red : Colors.grey,
+                          ),
+                          onPressed: () {
+                            setState(() {
+                              if (userLiked == false) {
+                                dislikes--;
+                                userLiked = null;
+                              } else {
+                                if (userLiked == true) likes--;
+                                dislikes++;
+                                userLiked = false;
+                              }
+                            });
+                          },
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 16),
+
+                    // Описание — HTML (заголовок "Описание" убран, как было у вас)
+                    if (descHtml.isNotEmpty)
+                      Html(
+                        data: descHtml,
+                        style: {
+                          'body': Style(
+                            fontSize: FontSize(16),
+                            lineHeight: const LineHeight(1.5),
+                            fontWeight: FontWeight.w300,
+                            margin: Margins.zero,
+                            color: Colors.black87,
+                          ),
+                          'p': Style(margin: Margins.only(bottom: 12)),
+                          'ul': Style(margin: Margins.only(bottom: 12, left: 20)),
+                          'ol': Style(margin: Margins.only(bottom: 12, left: 20)),
+                          'li': Style(margin: Margins.zero),
+                          'a': Style(textDecoration: TextDecoration.underline),
+                        },
+                        onLinkTap: (url, _, __) {
+                          if (url != null) _openSite(url);
+                        },
+                      ),
+
+                    // Подзаголовок "Адреса"
+                    if (branches.isNotEmpty) ...[
+                      const SizedBox(height: 24),
+                      Text(
+                        'Адреса',
+                        style: Theme.of(context).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w500),
+                      ),
+                      const SizedBox(height: 4),
+                    ],
+                  ],
+                ),
+              ),
+            ),
+
+            // ==== ФИЛИАЛЫ — дизайн из прошлой версии
+            if (branches.isNotEmpty)
+              SliverList.builder(
+                itemCount: branches.length,
+                itemBuilder: (_, i) {
+                  final b = branches[i];
+                  final lat = double.tryParse((b['lattitude'] ?? '').toString());
+                  final lng = double.tryParse((b['longitude'] ?? '').toString());
+                  final phone = (b['phone'] ?? '').toString();
+                  final email = (b['email'] ?? '').toString();
+                  final address = (b['address'] ?? 'Филиал').toString();
+                  final distanceLabel = (lat != null && lng != null) ? _distanceLabelTo(lat, lng) : '';
+
+                  return Column(
+                    children: [
+                      Padding(
+                        padding: const EdgeInsets.fromLTRB(16, 8, 16, 12),
+                        child: Row(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            const Icon(Icons.location_on_outlined),
+                            const SizedBox(width: 12),
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    address,
+                                    style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                                      fontWeight: FontWeight.w400,
+                                      height: 1.2,
+                                    ),
+                                  ),
+                                  if (phone.isNotEmpty)
+                                    Padding(
+                                      padding: const EdgeInsets.only(top: 2),
+                                      child: Text(
+                                        phone,
+                                        style: Theme.of(context).textTheme.bodySmall?.copyWith(color: Colors.black54),
+                                      ),
+                                    ),
+                                  if (distanceLabel.isNotEmpty)
+                                    Padding(
+                                      padding: const EdgeInsets.only(top: 2),
+                                      child: Text(
+                                        distanceLabel,
+                                        style: Theme.of(context).textTheme.bodySmall?.copyWith(color: Colors.black54),
+                                      ),
+                                    ),
+                                ],
+                              ),
+                            ),
+                            if (lat != null && lng != null)
+                              IconButton(
+                                tooltip: 'Маршрут',
+                                icon: const Icon(Icons.directions),
+                                onPressed: () => _openRouteTo(lat, lng),
+                              ),
+                            if (phone.isNotEmpty)
+                              IconButton(
+                                tooltip: 'Позвонить',
+                                icon: const Icon(Icons.call),
+                                onPressed: () => _openPhone(phone),
+                              ),
+                            if (email.isNotEmpty)
+                              IconButton(
+                                tooltip: 'Написать',
+                                icon: const Icon(Icons.mail_outline),
+                                onPressed: () => _mailto(email),
+                              ),
+                          ],
+                        ),
+                      ),
+                      const Divider(height: 1),
+                    ],
+                  );
+                },
+              ),
+
+            const SliverToBoxAdapter(child: SizedBox(height: 24)),
+          ],
+        ),
+      ),
+    );
+  }
+}
