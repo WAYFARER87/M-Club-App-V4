@@ -118,7 +118,6 @@ class _AuthEmailScreenState extends State<AuthEmailScreen> {
           (_) => false,
     );
   }
-
   @override
   Widget build(BuildContext context) {
     final t = _L.of(context);
@@ -128,15 +127,24 @@ class _AuthEmailScreenState extends State<AuthEmailScreen> {
     );
 
     return Scaffold(
-      // верх без заголовка
+      backgroundColor: Colors.transparent,
+      extendBodyBehindAppBar: true,
       appBar: AppBar(
-        backgroundColor: Colors.white,
+        backgroundColor: Colors.transparent,
         elevation: 0,
         automaticallyImplyLeading: false,
       ),
-      body: Padding(
-        padding: const EdgeInsets.all(16),
-        child: Form(
+      body: Container(
+        decoration: const BoxDecoration(
+          gradient: LinearGradient(
+            begin: Alignment.topCenter,
+            end: Alignment.bottomCenter,
+            colors: [Color(0xFFF5F5F5), Color(0xFFECEFF1)],
+          ),
+        ),
+        child: Padding(
+          padding: const EdgeInsets.all(16),
+          child: Form(
           key: _formKey,
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -248,8 +256,8 @@ class _AuthEmailScreenState extends State<AuthEmailScreen> {
           ),
         ),
       ),
-    );
-  }
+    ),
+  );
 }
 
 /// ===== Экран ввода кода: прозрачный TextField над ячейками (поддержка нативной вставки)
@@ -397,14 +405,24 @@ class _AuthCodeScreenState extends State<_AuthCodeScreen> {
     final t = _L.of(context);
 
     return Scaffold(
+      backgroundColor: Colors.transparent,
+      extendBodyBehindAppBar: true,
       appBar: AppBar(
-        backgroundColor: Colors.white,
+        backgroundColor: Colors.transparent,
         elevation: 0,
         title: Text(t.codeTitle),
       ),
-      body: Padding(
-        padding: const EdgeInsets.all(16),
-        child: Column(
+      body: Container(
+        decoration: const BoxDecoration(
+          gradient: LinearGradient(
+            begin: Alignment.topCenter,
+            end: Alignment.bottomCenter,
+            colors: [Color(0xFFF5F5F5), Color(0xFFECEFF1)],
+          ),
+        ),
+        child: Padding(
+          padding: const EdgeInsets.all(16),
+          child: Column(
           children: [
             const SizedBox(height: 24),
             SvgPicture.asset('assets/images/mclub_logo.svg', height: 80),
@@ -485,6 +503,7 @@ class _AuthCodeScreenState extends State<_AuthCodeScreen> {
           ],
         ),
       ),
-    );
-  }
+    ),
+  );
+}
 }
