@@ -122,7 +122,10 @@ class _AuthEmailScreenState extends State<AuthEmailScreen> {
   @override
   Widget build(BuildContext context) {
     final t = _L.of(context);
-    const border = OutlineInputBorder(borderRadius: BorderRadius.zero);
+    final border = OutlineInputBorder(
+      borderRadius: BorderRadius.circular(12),
+      borderSide: BorderSide(color: Colors.grey.shade300, width: 1),
+    );
 
     return Scaffold(
       // верх без заголовка
@@ -154,12 +157,19 @@ class _AuthEmailScreenState extends State<AuthEmailScreen> {
               TextFormField(
                 controller: _emailCtrl,
                 keyboardType: TextInputType.emailAddress,
+                style: TextStyle(color: _primary.withOpacity(0.8)),
+                cursorColor: _primary.withOpacity(0.8),
                 decoration: InputDecoration(
                   labelText: t.emailLabel,
                   hintText: t.emailHint,
+                  filled: true,
+                  fillColor: Colors.grey[50],
                   border: border,
                   enabledBorder: border,
-                  focusedBorder: border,
+                  focusedBorder: border.copyWith(
+                    borderSide:
+                        BorderSide(color: _primary.withOpacity(0.7), width: 1),
+                  ),
                 ),
                 validator: (v) => _validateEmail(context, v),
                 autofillHints: const [AutofillHints.email],
@@ -189,9 +199,12 @@ class _AuthEmailScreenState extends State<AuthEmailScreen> {
                 child: ElevatedButton(
                   onPressed: (!_loading && _agreed) ? _sendCode : null,
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: _primary,
+                    backgroundColor: _primary.withOpacity(0.9),
                     foregroundColor: Colors.white,
-                    shape: const RoundedRectangleBorder(borderRadius: BorderRadius.zero),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    side: BorderSide(color: Colors.grey.shade300, width: 1),
                   ),
                   child: _loading
                       ? const SizedBox(height: 20, width: 20, child: CircularProgressIndicator(strokeWidth: 2))
