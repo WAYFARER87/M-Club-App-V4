@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:geolocator/geolocator.dart';
 import '../../core/services/api_service.dart';
 import 'offer_detail_screen.dart';
+import 'offer_model.dart';
 
 class MClubScreen extends StatefulWidget {
   const MClubScreen({super.key});
@@ -338,7 +339,10 @@ class _MClubScreenState extends State<MClubScreen> with TickerProviderStateMixin
                             Navigator.push(
                               context,
                               MaterialPageRoute(
-                                builder: (_) => OfferDetailScreen(offer: offer),
+                                builder: (_) => OfferDetailScreen(
+                                  offer: Offer.fromJson(
+                                      offer as Map<String, dynamic>),
+                                ),
                               ),
                             );
                           },

@@ -20,6 +20,8 @@ class Offer {
 
   final List<Branch> branches;
   final OfferLinks links;
+  final int rating;                 // текущий рейтинг
+  final int? vote;                  // голос пользователя
 
   Offer({
     required this.id,
@@ -37,6 +39,8 @@ class Offer {
     required this.photosUrl,
     required this.branches,
     required this.links,
+    required this.rating,
+    required this.vote,
   });
 
   factory Offer.fromJson(Map<String, dynamic> json) {
@@ -105,6 +109,8 @@ class Offer {
       photosUrl: photos,
       branches: branches,
       links: OfferLinks.fromJson(json['links'] as Map<String, dynamic>? ?? const {}),
+      rating: int.tryParse((json['rating'] ?? '0').toString()) ?? 0,
+      vote: json['vote'] == null ? null : int.tryParse(json['vote'].toString()),
     );
   }
 }

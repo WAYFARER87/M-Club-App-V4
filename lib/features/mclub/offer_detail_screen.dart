@@ -6,9 +6,10 @@ import 'package:geolocator/geolocator.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:url_launcher/url_launcher.dart';
 import '../../core/services/api_service.dart';
+import 'offer_model.dart';
 
 class OfferDetailScreen extends StatefulWidget {
-  final Map<String, dynamic> offer;
+  final Offer offer;
   const OfferDetailScreen({super.key, required this.offer});
 
   @override
@@ -37,10 +38,8 @@ class _OfferDetailScreenState extends State<OfferDetailScreen> {
     super.initState();
     _scrollController.addListener(_onScroll);
     _initLocation();
-    final o = widget.offer;
-    _rating = int.tryParse((o['rating'] ?? '0').toString()) ?? 0;
-    final v = o['vote'];
-    _userVote = v == null ? null : int.tryParse(v.toString());
+    _rating = widget.offer.rating;
+    _userVote = widget.offer.vote;
   }
 
   @override
@@ -89,9 +88,8 @@ class _OfferDetailScreenState extends State<OfferDetailScreen> {
   // ===== helpers
 
   void _shareOffer() {
-    final o = widget.offer;
-    final title = (o['title'] ?? o['name'] ?? '').toString();
-    final link = (o['share_url'] ?? o['link'] ?? o['url'] ?? '').toString();
+    final title = widget.offer.title;
+    final link = widget.offer.links.shareUrl ?? '';
     final text = [title, link].where((e) => e.trim().isNotEmpty).join('\n');
     if (text.isNotEmpty) Share.share(text);
   }
@@ -144,7 +142,7 @@ class _OfferDetailScreenState extends State<OfferDetailScreen> {
 
   Future<void> _sendVote(int vote) async {
     if (_isVoting) return;
-    final id = int.tryParse((widget.offer['id'] ?? '').toString());
+    final id = int.tryParse(widget.offer.id);
     if (id == null) return;
     setState(() => _isVoting = true);
     try {
@@ -166,18 +164,18 @@ class _OfferDetailScreenState extends State<OfferDetailScreen> {
   Widget build(BuildContext context) {
     final o = widget.offer;
 
-    final title = (o['title'] ?? o['name'] ?? '').toString();
+    final title = o.title;
     // ФОТО — используем оригинальный ключ и запасные варианты
-    final photoUrl = (o['photo_url'] ?? o['photo'] ?? o['image'] ?? '').toString();
+    final photoUrl = o.photoUrl ?? '';
     // Короткое описание — показываем ПОД заголовком на фото
-    final descShortHtml = (o['description_short'] ?? '').toString();
+    final descShortHtml = o.descriptionShort;
     final descShortPlain = descShortHtml
         .replaceAll(RegExp(r'<[^>]*>'), ' ')
         .replaceAll(RegExp(r'\s+'), ' ')
         .trim();
 
-    final descHtml = (o['description'] ?? '').toString();
-    final branches = (o['branches'] as List?)?.cast<Map<String, dynamic>>() ?? const <Map<String, dynamic>>[];
+    final descHtml = o.descriptionHtml;
+    final branches = o.branches;
     final ratingColor = _rating > 0 ? Colors.green : (_rating < 0 ? Colors.red : Colors.grey);
 
     final iconColor = _collapsed ? Colors.black87 : Colors.white;
@@ -366,12 +364,12 @@ class _OfferDetailScreenState extends State<OfferDetailScreen> {
                 itemCount: branches.length,
                 itemBuilder: (_, i) {
                   final b = branches[i];
-                  final lat = double.tryParse((b['lattitude'] ?? '').toString());
-                  final lng = double.tryParse((b['longitude'] ?? '').toString());
-                  final phone = (b['phone'] ?? '').toString();
-                  final email = (b['email'] ?? '').toString();
-                  final address = (b['address'] ?? 'Филиал').toString();
-                  final distanceLabel = (lat != null && lng != null) ? _distanceLabelTo(lat, lng) : '';
+                  final lat = b.lat;
+                  final lng = b.lng;
+                  final phone = b.phone ?? '';
+                  final email = b.email ?? '';
+                  final address = b.address ?? 'Филиал';
+                  final distanceLabel = _distanceLabelTo(lat, lng);
 
                   return Column(
                     children: [
