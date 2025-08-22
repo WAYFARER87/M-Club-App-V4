@@ -272,9 +272,11 @@ class _MClubScreenState extends State<MClubScreen> with SingleTickerProviderStat
           Expanded(
             child: _filteredOffers.isEmpty
                 ? const Center(child: Text('Нет предложений'))
-                : ListView.builder(
-                    itemCount: _filteredOffers.length,
-                    itemBuilder: (context, index) {
+                : RefreshIndicator(
+                    onRefresh: _loadData,
+                    child: ListView.builder(
+                      itemCount: _filteredOffers.length,
+                      itemBuilder: (context, index) {
                       final offer = _filteredOffers[index];
                       final photo = (offer['photo_url'] ?? '').toString();
                       final title = (offer['title'] ?? '').toString();
@@ -367,6 +369,7 @@ class _MClubScreenState extends State<MClubScreen> with SingleTickerProviderStat
                       );
                     },
                   ),
+                ),
           ),
         ],
       );
