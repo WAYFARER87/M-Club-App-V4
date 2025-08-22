@@ -181,21 +181,26 @@ class _OfferDetailScreenState extends State<OfferDetailScreen> {
     final iconColor = _collapsed ? Colors.black87 : Colors.white;
     final overlayStyle = _collapsed ? SystemUiOverlayStyle.dark : SystemUiOverlayStyle.light;
 
-    return AnnotatedRegion<SystemUiOverlayStyle>(
-      value: overlayStyle,
-      child: Scaffold(
-        body: CustomScrollView(
-          controller: _scrollController,
-          slivers: [
-            // ==== Шапка с фото, кнопкой "назад" и "поделиться"
-            SliverAppBar(
+    return WillPopScope(
+      onWillPop: () async {
+        Navigator.of(context).pop(_userVote);
+        return false;
+      },
+      child: AnnotatedRegion<SystemUiOverlayStyle>(
+        value: overlayStyle,
+        child: Scaffold(
+          body: CustomScrollView(
+            controller: _scrollController,
+            slivers: [
+              // ==== Шапка с фото, кнопкой "назад" и "поделиться"
+              SliverAppBar(
               backgroundColor: Colors.white,
               elevation: 0,
               pinned: true,
               expandedHeight: _expandedHeight,
               leading: IconButton(
                 icon: Icon(Icons.arrow_back, color: iconColor),
-                onPressed: () => Navigator.of(context).pop(),
+                onPressed: () => Navigator.of(context).pop(_userVote),
                 tooltip: 'Назад',
               ),
               actions: [
