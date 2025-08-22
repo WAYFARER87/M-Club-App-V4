@@ -102,7 +102,18 @@ class _MClubScreenState extends State<MClubScreen> with SingleTickerProviderStat
         _tabScrollController =
             Scrollable.of(_tabBarKey.currentContext!)?.widget.controller;
       });
-    } catch (e) {
+    } catch (e, stack) {
+      // Log the exception so debugging information is available in the console
+      debugPrint('Failed to load mClub data: $e');
+      debugPrintStack(stackTrace: stack);
+
+      // Inform the user about the failure with the actual error details
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Не удалось загрузить данные: $e')),
+        );
+      }
+
       setState(() => _error = 'Не удалось загрузить данные');
     } finally {
       setState(() => _isLoading = false);
