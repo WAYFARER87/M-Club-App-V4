@@ -194,22 +194,34 @@ class _MClubScreenState extends State<MClubScreen> with SingleTickerProviderStat
               color: Colors.white,
               child: Padding(
                 padding: const EdgeInsets.only(right: 4),
-                child: TabBar(
-                  controller: _tabController,
-                  isScrollable: true,
-                  labelColor: const Color(0xFF182857),
-                  unselectedLabelColor: Colors.black54,
-                  indicatorColor: const Color(0xFF182857),
-                  onTap: (i) {
-                    setState(() {
-                      _selectedCategoryId =
-                          i == 0 ? null : _categories[i - 1]['id'].toString();
-                    });
-                  },
-                  tabs: [
-                    const Tab(text: 'Все'),
-                    ..._categories.map((c) => Tab(text: c['name'])).toList(),
-                  ],
+                child: DecoratedBox(
+                  decoration: BoxDecoration(
+                    border: Border(
+                      bottom: BorderSide(
+                        color: Theme.of(context).dividerColor,
+                      ),
+                    ),
+                  ),
+                  child: TabBar(
+                    controller: _tabController,
+                    isScrollable: true,
+                    labelColor: const Color(0xFF182857),
+                    unselectedLabelColor: Colors.black54,
+                    indicatorColor: Colors.transparent,
+                    indicator: const UnderlineTabIndicator(
+                      borderSide: BorderSide(color: Color(0xFF182857)),
+                    ),
+                    onTap: (i) {
+                      setState(() {
+                        _selectedCategoryId =
+                            i == 0 ? null : _categories[i - 1]['id'].toString();
+                      });
+                    },
+                    tabs: [
+                      const Tab(text: 'Все'),
+                      ..._categories.map((c) => Tab(text: c['name'])).toList(),
+                    ],
+                  ),
                 ),
               ),
             ),
