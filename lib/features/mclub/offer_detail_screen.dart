@@ -5,6 +5,7 @@ import 'package:flutter_html/flutter_html.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:url_launcher/url_launcher.dart';
+import '../../core/services/api_service.dart';
 
 class OfferDetailScreen extends StatefulWidget {
   final Map<String, dynamic> offer;
@@ -26,11 +27,20 @@ class _OfferDetailScreenState extends State<OfferDetailScreen> {
   static const _fallbackLat = 25.1972; // Burj Khalifa — фолбэк
   static const _fallbackLng = 55.2744;
 
+  final _api = ApiService();
+  int _rating = 0;
+  int? _userVote; // -1 дизлайк, 1 лайк, null — не голосовал
+  bool _isVoting = false;
+
   @override
   void initState() {
     super.initState();
     _scrollController.addListener(_onScroll);
     _initLocation();
+    final o = widget.offer;
+    _rating = int.tryParse((o['rating'] ?? '0').toString()) ?? 0;
+    final v = o['vote'];
+    _userVote = v == null ? null : int.tryParse(v.toString());
   }
 
   @override
@@ -132,6 +142,26 @@ class _OfferDetailScreenState extends State<OfferDetailScreen> {
         : '${meters.round()} м';
   }
 
+  Future<void> _sendVote(int vote) async {
+    if (_isVoting) return;
+    final id = int.tryParse((widget.offer['id'] ?? '').toString());
+    if (id == null) return;
+    setState(() => _isVoting = true);
+    try {
+      final res = await _api.voteBenefit(id, vote);
+      if (!mounted) return;
+      setState(() {
+        _rating = int.tryParse((res['rating'] ?? '0').toString()) ?? _rating;
+        final v = res['vote'];
+        _userVote = v == null ? null : int.tryParse(v.toString());
+      });
+    } catch (_) {
+      // ignore errors
+    } finally {
+      if (mounted) setState(() => _isVoting = false);
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final o = widget.offer;
@@ -148,12 +178,7 @@ class _OfferDetailScreenState extends State<OfferDetailScreen> {
 
     final descHtml = (o['description'] ?? '').toString();
     final branches = (o['branches'] as List?)?.cast<Map<String, dynamic>>() ?? const <Map<String, dynamic>>[];
-
-    int likes = int.tryParse((o['likes'] ?? '0').toString()) ?? 0;
-    int dislikes = int.tryParse((o['dislikes'] ?? '0').toString()) ?? 0;
-    bool? userLiked;
-    final rating = likes - dislikes;
-    final ratingColor = rating > 0 ? Colors.green : (rating < 0 ? Colors.red : Colors.grey);
+    final ratingColor = _rating > 0 ? Colors.green : (_rating < 0 ? Colors.red : Colors.grey);
 
     final iconColor = _collapsed ? Colors.black87 : Colors.white;
     final overlayStyle = _collapsed ? SystemUiOverlayStyle.dark : SystemUiOverlayStyle.light;
@@ -256,6 +281,41 @@ class _OfferDetailScreenState extends State<OfferDetailScreen> {
               ),
             ),
 
+            // ==== Полоска с кнопками (рейтинг)
+            SliverToBoxAdapter(
+              child: Container(
+                color: Colors.white,
+                padding: const EdgeInsets.symmetric(horizontal: 16),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    IconButton(
+                      icon: Icon(
+                        _userVote == 1 ? Icons.thumb_up : Icons.thumb_up_outlined,
+                        color: _userVote == 1 ? Colors.green : Colors.grey,
+                      ),
+                      onPressed: _isVoting || _userVote == 1 ? null : () => _sendVote(1),
+                    ),
+                    Text(
+                      '$_rating',
+                      style: TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.w600,
+                        color: ratingColor,
+                      ),
+                    ),
+                    IconButton(
+                      icon: Icon(
+                        _userVote == -1 ? Icons.thumb_down : Icons.thumb_down_outlined,
+                        color: _userVote == -1 ? Colors.red : Colors.grey,
+                      ),
+                      onPressed: _isVoting || _userVote == -1 ? null : () => _sendVote(-1),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+
             // ==== Контент карточки (описание и т.п.)
             SliverToBoxAdapter(
               child: Padding(
@@ -263,58 +323,6 @@ class _OfferDetailScreenState extends State<OfferDetailScreen> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    // Рейтинг и лайки/дизлайки
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        IconButton(
-                          icon: Icon(
-                            userLiked == true ? Icons.thumb_up : Icons.thumb_up_outlined,
-                            color: userLiked == true ? Colors.green : Colors.grey,
-                          ),
-                          onPressed: () {
-                            setState(() {
-                              if (userLiked == true) {
-                                likes--;
-                                userLiked = null;
-                              } else {
-                                if (userLiked == false) dislikes--;
-                                likes++;
-                                userLiked = true;
-                              }
-                            });
-                          },
-                        ),
-                        Text(
-                          '$rating',
-                          style: TextStyle(
-                            fontSize: 16,
-                            fontWeight: FontWeight.w600,
-                            color: ratingColor,
-                          ),
-                        ),
-                        IconButton(
-                          icon: Icon(
-                            userLiked == false ? Icons.thumb_down : Icons.thumb_down_outlined,
-                            color: userLiked == false ? Colors.red : Colors.grey,
-                          ),
-                          onPressed: () {
-                            setState(() {
-                              if (userLiked == false) {
-                                dislikes--;
-                                userLiked = null;
-                              } else {
-                                if (userLiked == true) likes--;
-                                dislikes++;
-                                userLiked = false;
-                              }
-                            });
-                          },
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: 16),
-
                     // Описание — HTML (заголовок "Описание" убран, как было у вас)
                     if (descHtml.isNotEmpty)
                       Html(

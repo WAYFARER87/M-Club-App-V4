@@ -58,6 +58,15 @@ class ApiService {
     return res.data ?? [];
   }
 
+  /// Отправить голос за предложение
+  /// [id] - идентификатор предложения
+  /// [vote] - значение голоса: 1 (лайк) или -1 (дизлайк)
+  /// Возвращает карту с актуальными значениями рейтинга и голосом пользователя
+  Future<Map<String, dynamic>> voteBenefit(int id, int vote) async {
+    final res = await _dio.post('/benefits/vote', data: {'id': id, 'vote': vote});
+    return (res.data as Map?)?.cast<String, dynamic>() ?? <String, dynamic>{};
+  }
+
   /// Очистить токен (логаут)
   Future<void> logout() async {
     await _storage.delete(key: 'auth_token');
