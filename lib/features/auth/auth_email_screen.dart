@@ -257,8 +257,10 @@ class _AuthEmailScreenState extends State<AuthEmailScreen> {
         ),
       ),
     ),
+
     );
   }
+
 
 }
 
