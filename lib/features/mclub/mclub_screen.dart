@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
 import 'package:geolocator/geolocator.dart';
 import '../../core/services/api_service.dart';
 import 'offer_detail_screen.dart';
@@ -20,8 +21,12 @@ class _MClubScreenState extends State<MClubScreen> with SingleTickerProviderStat
 
   bool _isLoading = true;
   String? _error;
-
+  static double _savedTabScrollOffset = 0;
+  late final ScrollController _tabScrollController;
   TabController? _tabController;
+  double _tabScrollOffset = 0;
+  final List<GlobalKey> _tabKeys = [];
+  final GlobalKey _tabBarKey = GlobalKey();
 
   double? _curLat;
   double? _curLng;
@@ -33,12 +38,19 @@ class _MClubScreenState extends State<MClubScreen> with SingleTickerProviderStat
   @override
   void initState() {
     super.initState();
+    _tabScrollOffset = _savedTabScrollOffset;
+    _tabScrollController = ScrollController(initialScrollOffset: _tabScrollOffset)
+      ..addListener(() {
+        _tabScrollOffset = _tabScrollController.offset;
+      });
     _initLocation();
     _loadData();
   }
 
   @override
   void dispose() {
+    _savedTabScrollOffset = _tabScrollOffset;
+    _tabScrollController.dispose();
     _tabController?.dispose();
     super.dispose();
   }
@@ -78,19 +90,63 @@ class _MClubScreenState extends State<MClubScreen> with SingleTickerProviderStat
       final cats = await _api.fetchCategories();
       final offers = await _api.fetchBenefits();
 
-      _tabController?.dispose();
-      _tabController = TabController(length: cats.length + 1, vsync: this);
+      _setupTabController(cats.length + 1);
 
       setState(() {
         _categories = cats;
         _offers = offers;
         _selectedCategoryId = null;
+        _tabKeys
+          ..clear()
+          ..addAll(List.generate(cats.length + 1, (_) => GlobalKey()));
       });
+      WidgetsBinding.instance.addPostFrameCallback((_) => _centerSelectedTab());
     } catch (e) {
       setState(() => _error = 'Не удалось загрузить данные');
     } finally {
       setState(() => _isLoading = false);
     }
+  }
+
+  void _setupTabController(int length) {
+    _tabController?.dispose();
+    _tabController = TabController(length: length, vsync: this);
+    _tabController!.addListener(() {
+      if (_tabController!.indexIsChanging) return;
+      setState(() {
+        _selectedCategoryId = _tabController!.index == 0
+            ? null
+            : _categories[_tabController!.index - 1]['id'].toString();
+      });
+      _centerSelectedTab();
+    });
+  }
+
+  void _centerSelectedTab() {
+    if (!_tabScrollController.hasClients || _tabController == null) return;
+    final index = _tabController!.index;
+    if (index >= _tabKeys.length) return;
+    final tabContext = _tabKeys[index].currentContext;
+    final barContext = _tabBarKey.currentContext;
+    if (tabContext == null || barContext == null) return;
+    final tabBox = tabContext.findRenderObject() as RenderBox?;
+    final barBox = barContext.findRenderObject() as RenderBox?;
+    if (tabBox == null || barBox == null) return;
+    final barPos = barBox.localToGlobal(Offset.zero);
+    final tabPos = tabBox.localToGlobal(Offset.zero);
+    final relative = tabPos.dx - barPos.dx;
+    final target = _tabScrollController.offset +
+        relative -
+        (barBox.size.width - tabBox.size.width) / 2;
+    final clamped = target.clamp(
+      0.0,
+      _tabScrollController.position.maxScrollExtent,
+    );
+    _tabScrollController.animateTo(
+      clamped.toDouble(),
+      duration: const Duration(milliseconds: 300),
+      curve: Curves.easeInOut,
+    );
   }
 
   List<dynamic> get _filteredOffers {
@@ -203,7 +259,9 @@ class _MClubScreenState extends State<MClubScreen> with SingleTickerProviderStat
                     ),
                   ),
                   child: TabBar(
-                    controller: _tabController,
+                    key: _tabBarKey,
+                    controller: _tabScrollController,
+                    tabController: _tabController,
                     isScrollable: true,
                     labelColor: const Color(0xFF182857),
                     unselectedLabelColor: Colors.black54,
@@ -211,15 +269,15 @@ class _MClubScreenState extends State<MClubScreen> with SingleTickerProviderStat
                     indicator: const UnderlineTabIndicator(
                       borderSide: BorderSide(color: Color(0xFF182857)),
                     ),
-                    onTap: (i) {
-                      setState(() {
-                        _selectedCategoryId =
-                            i == 0 ? null : _categories[i - 1]['id'].toString();
-                      });
-                    },
                     tabs: [
-                      const Tab(text: 'Все'),
-                      ..._categories.map((c) => Tab(text: c['name'])).toList(),
+                      Tab(key: _tabKeys.isNotEmpty ? _tabKeys[0] : null, text: 'Все'),
+                      ...List.generate(
+                        _categories.length,
+                        (i) => Tab(
+                          key: _tabKeys.length > i + 1 ? _tabKeys[i + 1] : null,
+                          text: _categories[i]['name'],
+                        ),
+                      ),
                     ],
                   ),
                 ),
