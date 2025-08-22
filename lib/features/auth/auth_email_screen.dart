@@ -368,15 +368,22 @@ class _AuthCodeScreenState extends State<_AuthCodeScreen> {
 
   // Ячейка отображения
   Widget _buildBox(int index) {
-    const border = OutlineInputBorder(borderRadius: BorderRadius.zero);
     final ch = index < _code.length ? _code[index] : '';
     return Container(
       width: 48,
       height: 56,
       alignment: Alignment.center,
       decoration: BoxDecoration(
-        border: Border.all(color: _primary, width: 2),
-        borderRadius: BorderRadius.zero,
+        color: Colors.white.withOpacity(0.9),
+        border: Border.all(color: Colors.grey.shade300, width: 1),
+        borderRadius: BorderRadius.circular(8),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.05),
+            blurRadius: 2,
+            offset: const Offset(0, 1),
+          ),
+        ],
       ),
       child: Text(
         ch,
