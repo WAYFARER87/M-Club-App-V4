@@ -1,5 +1,6 @@
 import 'dart:ui' as ui;
 import 'package:dio/dio.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
 class ApiService {
@@ -27,6 +28,9 @@ class ApiService {
 
   late Dio _dio;
   final _storage = const FlutterSecureStorage();
+
+  @visibleForTesting
+  Dio get dio => _dio;
 
   /// Запрос кода по email
   Future<void> requestCode(String email) async {
@@ -63,8 +67,14 @@ class ApiService {
   /// [vote] - значение голоса: 1 (лайк) или -1 (дизлайк)
   /// Возвращает карту с актуальными значениями рейтинга и голосом пользователя
   Future<Map<String, dynamic>> voteBenefit(int id, int vote) async {
-    final res = await _dio.post('/benefits/vote', data: {'id': id, 'vote': vote});
-    return (res.data as Map?)?.cast<String, dynamic>() ?? <String, dynamic>{};
+    final formData = FormData.fromMap({'id': id, 'vote': vote});
+    final res = await _dio.post('/benefits/vote', data: formData);
+    final data =
+        res.data is Map && res.data['data'] is Map ? res.data['data'] : res.data;
+    return {
+      'rating': data['rating'],
+      'vote': data['vote'],
+    };
   }
 
   /// Очистить токен (логаут)
