@@ -19,7 +19,7 @@ class ApiService {
       onRequest: (options, handler) async {
         final token = await _storage.read(key: 'auth_token');
         if (token != null) {
-          options.headers['Authorization'] = 'Bearer $token';
+          options.headers['Authorization'] = '$token';
         }
         handler.next(options);
       },
