@@ -261,39 +261,50 @@ class _MClubScreenState extends State<MClubScreen> with TickerProviderStateMixin
             Material(
               color: Colors.white,
               child: Padding(
-                padding: const EdgeInsets.only(right: 4),
+                padding: const EdgeInsets.symmetric(horizontal: 4),
                 child: DecoratedBox(
                   decoration: BoxDecoration(
                     border: Border(
                       bottom: BorderSide(color: Theme.of(context).dividerColor),
                     ),
                   ),
-                  child: TabBar(
-                    key: _tabBarKey,
-                    controller: _tabController,
-                    isScrollable: true,
-                    labelColor: const Color(0xFF182857),
-                    unselectedLabelColor: Colors.black54,
-                    indicatorColor: Colors.transparent,
-                    indicator: const UnderlineTabIndicator(
-                      borderSide: BorderSide(color: Color(0xFF182857)),
-                    ),
-                    onTap: (i) {
-                      setState(() {
-                        _selectedCategoryId = i == 0
-                            ? null
-                            : _categories[i - 1]['id'].toString();
-                      });
-                      _centerSelectedTab();
-                    },
-                    tabs: [
-                      Tab(key: _tabKeys[0], text: 'Все'),
-                      ...List.generate(
-                        _categories.length,
-                        (i) => Tab(
-                          key: _tabKeys[i + 1],
-                          text: _categories[i]['name'],
+                  child: Row(
+                    children: [
+                      Expanded(
+                        child: TabBar(
+                          key: _tabBarKey,
+                          controller: _tabController,
+                          isScrollable: true,
+                          labelColor: const Color(0xFF182857),
+                          unselectedLabelColor: Colors.black54,
+                          indicatorColor: Colors.transparent,
+                          indicator: const UnderlineTabIndicator(
+                            borderSide: BorderSide(color: Color(0xFF182857)),
+                          ),
+                          onTap: (i) {
+                            setState(() {
+                              _selectedCategoryId = i == 0
+                                  ? null
+                                  : _categories[i - 1]['id'].toString();
+                            });
+                            _centerSelectedTab();
+                          },
+                          tabs: [
+                            Tab(key: _tabKeys[0], text: 'Все'),
+                            ...List.generate(
+                              _categories.length,
+                              (i) => Tab(
+                                key: _tabKeys[i + 1],
+                                text: _categories[i]['name'],
+                              ),
+                            ),
+                          ],
                         ),
+                      ),
+                      IconButton(
+                        icon: const Icon(Icons.tune),
+                        tooltip: 'Фильтр',
+                        onPressed: _openSortModal,
                       ),
                     ],
                   ),
@@ -408,15 +419,6 @@ class _MClubScreenState extends State<MClubScreen> with TickerProviderStateMixin
     }
 
     return Scaffold(
-      appBar: AppBar(
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.tune),
-            tooltip: 'Фильтр',
-            onPressed: _openSortModal,
-          ),
-        ],
-      ),
       body: body,
     );
   }
