@@ -446,6 +446,7 @@ class _OfferDetailScreenState extends State<OfferDetailScreen> {
           ],
         ),
       ),
-    );
-  }
+    ),
+  );
+}
 }
