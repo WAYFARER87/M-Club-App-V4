@@ -257,7 +257,11 @@ class _AuthEmailScreenState extends State<AuthEmailScreen> {
         ),
       ),
     ),
-  );
+
+    );
+  }
+
+
 }
 
 /// ===== Экран ввода кода: прозрачный TextField над ячейками (поддержка нативной вставки)
