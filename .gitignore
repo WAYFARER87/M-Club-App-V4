@@ -7,7 +7,6 @@ android/
 pubspec.lock
 ios/
 linux/
-test/
 web/
 windows/
 macos/
