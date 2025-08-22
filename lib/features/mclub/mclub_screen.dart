@@ -10,7 +10,7 @@ class MClubScreen extends StatefulWidget {
   State<MClubScreen> createState() => _MClubScreenState();
 }
 
-class _MClubScreenState extends State<MClubScreen> with SingleTickerProviderStateMixin {
+class _MClubScreenState extends State<MClubScreen> with TickerProviderStateMixin {
   final _api = ApiService();
 
   List<dynamic> _categories = [];
@@ -18,7 +18,7 @@ class _MClubScreenState extends State<MClubScreen> with SingleTickerProviderStat
   String? _selectedCategoryId;
   String _sortMode = 'alphabet'; // 'alphabet' | 'distance'
 
-  bool _isLoading = true;
+  bool _isLoading = false;
   String? _error;
 
   TabController? _tabController;
@@ -73,6 +73,7 @@ class _MClubScreenState extends State<MClubScreen> with SingleTickerProviderStat
   }
 
   Future<void> _loadData() async {
+    if (_isLoading) return;
     setState(() {
       _isLoading = true;
       _error = null;
