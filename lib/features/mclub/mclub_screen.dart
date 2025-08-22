@@ -169,22 +169,42 @@ class _MClubScreenState extends State<MClubScreen> with SingleTickerProviderStat
               child: Row(
                 children: [
                   Expanded(
-                    child: TabBar(
-                      controller: _tabController,
-                      isScrollable: true,
-                      labelColor: const Color(0xFF182857),
-                      unselectedLabelColor: Colors.black54,
-                      indicatorColor: const Color(0xFF182857),
-                      onTap: (i) {
-                        setState(() {
-                          _selectedCategoryId =
-                          i == 0 ? null : _categories[i - 1]['id'].toString();
-                        });
-                      },
-                      tabs: [
-                        const Tab(text: 'Все'),
-                        ..._categories.map((c) => Tab(text: c['name'])).toList(),
-                      ],
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 8),
+                      color: Theme.of(context).scaffoldBackgroundColor,
+                      child: TabBar(
+                        controller: _tabController,
+                        isScrollable: true,
+                        labelColor: const Color(0xFF182857),
+                        unselectedLabelColor: Colors.black54,
+                        indicator: BoxDecoration(
+                          borderRadius: BorderRadius.circular(16),
+                          color: Theme.of(context)
+                              .colorScheme
+                              .primary
+                              .withOpacity(0.15),
+                        ),
+                        indicatorPadding:
+                            const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                        labelPadding:
+                            const EdgeInsets.symmetric(horizontal: 12),
+                        labelStyle:
+                            const TextStyle(fontWeight: FontWeight.w600),
+                        unselectedLabelStyle:
+                            const TextStyle(fontWeight: FontWeight.w400),
+                        onTap: (i) {
+                          setState(() {
+                            _selectedCategoryId =
+                                i == 0 ? null : _categories[i - 1]['id'].toString();
+                          });
+                        },
+                        tabs: [
+                          const Tab(text: 'Все'),
+                          ..._categories
+                              .map((c) => Tab(text: c['name']))
+                              .toList(),
+                        ],
+                      ),
                     ),
                   ),
                   PopupMenuButton<String>(
