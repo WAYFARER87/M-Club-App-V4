@@ -22,6 +22,9 @@ class _MClubScreenState extends State<MClubScreen> with SingleTickerProviderStat
   String? _error;
 
   TabController? _tabController;
+  ScrollController? _tabScrollController;
+  final _tabBarKey = GlobalKey();
+  List<GlobalKey> _tabKeys = [];
 
   double? _curLat;
   double? _curLng;
@@ -39,6 +42,7 @@ class _MClubScreenState extends State<MClubScreen> with SingleTickerProviderStat
 
   @override
   void dispose() {
+    _tabController?.removeListener(_centerSelectedTab);
     _tabController?.dispose();
     super.dispose();
   }
@@ -78,13 +82,25 @@ class _MClubScreenState extends State<MClubScreen> with SingleTickerProviderStat
       final cats = await _api.fetchCategories();
       final offers = await _api.fetchBenefits();
 
+      _tabController?.removeListener(_centerSelectedTab);
       _tabController?.dispose();
       _tabController = TabController(length: cats.length + 1, vsync: this);
+      _tabController!.addListener(() {
+        if (!_tabController!.indexIsChanging) {
+          _centerSelectedTab();
+        }
+      });
+      _tabKeys = List.generate(cats.length + 1, (_) => GlobalKey());
 
       setState(() {
         _categories = cats;
         _offers = offers;
         _selectedCategoryId = null;
+      });
+
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        _tabScrollController =
+            Scrollable.of(_tabBarKey.currentContext!)?.widget.controller;
       });
     } catch (e) {
       setState(() => _error = 'Не удалось загрузить данные');
@@ -139,6 +155,29 @@ class _MClubScreenState extends State<MClubScreen> with SingleTickerProviderStat
     } else {
       return '${meters.toStringAsFixed(0)} м';
     }
+  }
+
+  void _centerSelectedTab() {
+    if (_tabController == null || _tabScrollController == null) return;
+    final index = _tabController!.index;
+    if (index < 0 || index >= _tabKeys.length) return;
+    final ctx = _tabKeys[index].currentContext;
+    if (ctx == null) return;
+    final box = ctx.findRenderObject() as RenderBox;
+    final tabWidth = box.size.width;
+    final position = box.localToGlobal(Offset.zero);
+    final screenWidth = MediaQuery.of(ctx).size.width;
+    final target = _tabScrollController!.offset +
+        position.dx +
+        tabWidth / 2 -
+        screenWidth / 2;
+    final min = _tabScrollController!.position.minScrollExtent;
+    final max = _tabScrollController!.position.maxScrollExtent;
+    _tabScrollController!.animateTo(
+      target.clamp(min, max),
+      duration: const Duration(milliseconds: 300),
+      curve: Curves.easeInOut,
+    );
   }
 
   void _openSortModal() {
@@ -203,6 +242,7 @@ class _MClubScreenState extends State<MClubScreen> with SingleTickerProviderStat
                     ),
                   ),
                   child: TabBar(
+                    key: _tabBarKey,
                     controller: _tabController,
                     isScrollable: true,
                     labelColor: const Color(0xFF182857),
@@ -216,10 +256,14 @@ class _MClubScreenState extends State<MClubScreen> with SingleTickerProviderStat
                         _selectedCategoryId =
                             i == 0 ? null : _categories[i - 1]['id'].toString();
                       });
+                      _centerSelectedTab();
                     },
                     tabs: [
-                      const Tab(text: 'Все'),
-                      ..._categories.map((c) => Tab(text: c['name'])).toList(),
+                      Tab(key: _tabKeys[0], text: 'Все'),
+                      ...List.generate(
+                        _categories.length,
+                        (i) => Tab(key: _tabKeys[i + 1], text: _categories[i]['name']),
+                      ),
                     ],
                   ),
                 ),
