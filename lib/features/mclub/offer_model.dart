@@ -109,7 +109,8 @@ class Offer {
       dateEnd: fromUnix(json['date_end']),
       photoUrl: (json['photo_url'] as String?)?.toString(),
       photosUrl: photos,
-      shareUrl: OfferLinks._emptyToNull(json['share_url']),
+      shareUrl:
+          OfferLinks._emptyToNull((json['links'] as Map<String, dynamic>?)?['share_url']),
       branches: branches,
       links: OfferLinks.fromJson(json['links'] as Map<String, dynamic>? ?? const {}),
       rating: int.tryParse((json['rating'] ?? '0').toString()) ?? 0,
