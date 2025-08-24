@@ -95,6 +95,10 @@ class Offer {
       }
     }
 
+    // ссылки
+    final linksJson = json['links'] as Map<String, dynamic>? ?? const {};
+    final links = OfferLinks.fromJson(linksJson);
+
     return Offer(
       id: json['id']?.toString() ?? '',
       categoryIds: catIds,
@@ -109,10 +113,9 @@ class Offer {
       dateEnd: fromUnix(json['date_end']),
       photoUrl: (json['photo_url'] as String?)?.toString(),
       photosUrl: photos,
-      shareUrl:
-          OfferLinks._emptyToNull((json['links'] as Map<String, dynamic>?)?['share_url']),
+      shareUrl: links.shareUrl,
       branches: branches,
-      links: OfferLinks.fromJson(json['links'] as Map<String, dynamic>? ?? const {}),
+      links: links,
       rating: int.tryParse((json['rating'] ?? '0').toString()) ?? 0,
       vote: json['vote'] == null ? null : int.tryParse(json['vote'].toString()),
     );
@@ -158,19 +161,90 @@ class Branch {
 class OfferLinks {
   final String? facebook;
   final String? instagram;
+  final String? vk;
+  final String? odnoclassniki;
+  final String? twitter;
+  final String? linkedin;
+  final String? youtube;
   final String? www;
+  final String? shareUrl;
+  final Map<String, String> others;
 
   OfferLinks({
     this.facebook,
     this.instagram,
+    this.vk,
+    this.odnoclassniki,
+    this.twitter,
+    this.linkedin,
+    this.youtube,
     this.www,
-  });
+    this.shareUrl,
+    Map<String, String>? others,
+  }) : others = others ?? const {};
 
   factory OfferLinks.fromJson(Map<String, dynamic> json) {
+    String? facebook;
+    String? instagram;
+    String? vk;
+    String? odnoclassniki;
+    String? twitter;
+    String? linkedin;
+    String? youtube;
+    String? www;
+    String? shareUrl;
+    final others = <String, String>{};
+
+    json.forEach((key, value) {
+      final v = _emptyToNull(value);
+      switch (key) {
+        case 'facebook':
+          facebook = v;
+          break;
+        case 'instagram':
+          instagram = v;
+          break;
+        case 'vk':
+          vk = v;
+          break;
+        case 'odnoclassniki':
+        case 'odnoklassniki':
+          odnoclassniki = v;
+          break;
+        case 'twitter':
+          twitter = v;
+          break;
+        case 'linkedin':
+          linkedin = v;
+          break;
+        case 'youtube':
+          youtube = v;
+          break;
+        case 'www':
+          www = v;
+          break;
+        case 'share_url':
+        case 'shareUrl':
+          shareUrl = v;
+          break;
+        default:
+          if (v != null) {
+            others[key.toString()] = v;
+          }
+      }
+    });
+
     return OfferLinks(
-      facebook: _emptyToNull(json['facebook']),
-      instagram: _emptyToNull(json['instagram']),
-      www: _emptyToNull(json['www']),
+      facebook: facebook,
+      instagram: instagram,
+      vk: vk,
+      odnoclassniki: odnoclassniki,
+      twitter: twitter,
+      linkedin: linkedin,
+      youtube: youtube,
+      www: www,
+      shareUrl: shareUrl,
+      others: others,
     );
   }
 
