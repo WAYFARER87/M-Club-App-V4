@@ -2,6 +2,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_html/flutter_html.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:url_launcher/url_launcher.dart';
@@ -161,6 +162,41 @@ class _OfferDetailScreenState extends State<OfferDetailScreen> {
     }
   }
 
+  List<Widget> _buildLinkIcons(OfferLinks links) {
+    final items = <Widget>[];
+
+    void add(String? url, String tooltip, String asset, Color color) {
+      if (url == null) return;
+      items.add(
+        IconButton(
+          onPressed: () => _openSite(url),
+          tooltip: tooltip,
+          icon: SvgPicture.asset(
+            asset,
+            width: 24,
+            height: 24,
+            color: color,
+          ),
+        ),
+      );
+    }
+
+    add(links.facebook, 'Facebook', 'assets/images/ic_facebook.svg', const Color(0xFF1877F2));
+    add(links.instagram, 'Instagram', 'assets/images/ic_instagram.svg', const Color(0xFFE4405F));
+    add(links.vk, 'VK', 'assets/images/ic_vk.svg', const Color(0xFF4C75A3));
+    add(links.odnoclassniki, 'Odnoklassniki', 'assets/images/ic_odnoklassniki.svg', const Color(0xFFF4731C));
+    add(links.twitter, 'Twitter', 'assets/images/ic_twitter.svg', const Color(0xFF1DA1F2));
+    add(links.linkedin, 'LinkedIn', 'assets/images/ic_linkedin.svg', const Color(0xFF0077B5));
+    add(links.youtube, 'YouTube', 'assets/images/ic_youtube.svg', const Color(0xFFFF0000));
+    add(links.www, 'Website', 'assets/images/ic_www.svg', Colors.black87);
+
+    links.others.forEach((name, url) {
+      add(url, name, 'assets/images/ic_www.svg', Colors.black87);
+    });
+
+    return items;
+  }
+
   @override
   Widget build(BuildContext context) {
     final o = widget.offer;
@@ -177,6 +213,7 @@ class _OfferDetailScreenState extends State<OfferDetailScreen> {
 
     final descHtml = o.descriptionHtml;
     final branches = o.branches;
+    final linkIcons = _buildLinkIcons(o.links);
     final ratingColor = _rating > 0 ? Colors.green : (_rating < 0 ? Colors.red : Colors.grey);
 
     final iconColor = _collapsed ? Colors.black87 : Colors.white;
@@ -348,6 +385,16 @@ class _OfferDetailScreenState extends State<OfferDetailScreen> {
                         onLinkTap: (url, _, __) {
                           if (url != null) _openSite(url);
                         },
+                      ),
+
+                    if (linkIcons.isNotEmpty)
+                      Padding(
+                        padding: const EdgeInsets.only(top: 16),
+                        child: Wrap(
+                          spacing: 12,
+                          runSpacing: 8,
+                          children: linkIcons,
+                        ),
                       ),
 
                     // Подзаголовок "Адреса"
