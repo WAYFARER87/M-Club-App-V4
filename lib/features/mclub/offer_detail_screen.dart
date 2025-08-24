@@ -88,10 +88,11 @@ class _OfferDetailScreenState extends State<OfferDetailScreen> {
   // ===== helpers
 
   void _shareOffer() {
+    final link = widget.offer.shareUrl;
+    if (link == null || link.trim().isEmpty) return;
     final title = widget.offer.title;
-    final link = widget.offer.links.shareUrl ?? '';
     final text = [title, link].where((e) => e.trim().isNotEmpty).join('\n');
-    if (text.isNotEmpty) Share.share(text);
+    Share.share(text);
   }
 
   Future<void> _openPhone(String phone) async {

@@ -18,6 +18,7 @@ class Offer {
   final String? photoUrl;           // миниатюра
   final List<String> photosUrl;     // галерея
 
+  final String? shareUrl;           // ссылка для шаринга
   final List<Branch> branches;
   final OfferLinks links;
   final int rating;                 // текущий рейтинг
@@ -37,6 +38,7 @@ class Offer {
     required this.dateEnd,
     required this.photoUrl,
     required this.photosUrl,
+    required this.shareUrl,
     required this.branches,
     required this.links,
     required this.rating,
@@ -107,6 +109,7 @@ class Offer {
       dateEnd: fromUnix(json['date_end']),
       photoUrl: (json['photo_url'] as String?)?.toString(),
       photosUrl: photos,
+      shareUrl: OfferLinks._emptyToNull(json['share_url']),
       branches: branches,
       links: OfferLinks.fromJson(json['links'] as Map<String, dynamic>? ?? const {}),
       rating: int.tryParse((json['rating'] ?? '0').toString()) ?? 0,
@@ -155,13 +158,11 @@ class OfferLinks {
   final String? facebook;
   final String? instagram;
   final String? www;
-  final String? shareUrl;
 
   OfferLinks({
     this.facebook,
     this.instagram,
     this.www,
-    this.shareUrl,
   });
 
   factory OfferLinks.fromJson(Map<String, dynamic> json) {
@@ -169,7 +170,6 @@ class OfferLinks {
       facebook: _emptyToNull(json['facebook']),
       instagram: _emptyToNull(json['instagram']),
       www: _emptyToNull(json['www']),
-      shareUrl: _emptyToNull(json['share_url']),
     );
   }
 
