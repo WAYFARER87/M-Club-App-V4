@@ -184,68 +184,65 @@ class OfferLinks {
   }) : others = others ?? const {};
 
   factory OfferLinks.fromJson(Map<String, dynamic> json) {
-    String? facebook;
-    String? instagram;
-    String? vk;
-    String? odnoclassniki;
-    String? twitter;
-    String? linkedin;
-    String? youtube;
-    String? www;
-    String? shareUrl;
+    String? read(String key) => _emptyToNull(json[key]);
+
     final others = <String, String>{};
 
+    // Collect unknown keys for future use.
     json.forEach((key, value) {
-      final v = _emptyToNull(value);
-      switch (key) {
-        case 'facebook':
-          facebook = v;
-          break;
-        case 'instagram':
-          instagram = v;
-          break;
-        case 'vk':
-          vk = v;
-          break;
-        case 'odnoclassniki':
-        case 'odnoklassniki':
-          odnoclassniki = v;
-          break;
-        case 'twitter':
-          twitter = v;
-          break;
-        case 'linkedin':
-          linkedin = v;
-          break;
-        case 'youtube':
-          youtube = v;
-          break;
-        case 'www':
-          www = v;
-          break;
-        case 'share_url':
-        case 'shareUrl':
-          shareUrl = v;
-          break;
-        default:
-          if (v != null) {
-            others[key.toString()] = v;
-          }
+      if (!{
+        'facebook',
+        'instagram',
+        'vk',
+        'odnoclassniki',
+        'odnoklassniki',
+        'twitter',
+        'linkedin',
+        'youtube',
+        'www',
+        'share_url',
+        'shareUrl',
+      }.contains(key)) {
+        final v = _emptyToNull(value);
+        if (v != null) others[key.toString()] = v;
       }
     });
 
     return OfferLinks(
-      facebook: facebook,
-      instagram: instagram,
-      vk: vk,
-      odnoclassniki: odnoclassniki,
-      twitter: twitter,
-      linkedin: linkedin,
-      youtube: youtube,
-      www: www,
-      shareUrl: shareUrl,
+      facebook: read('facebook'),
+      instagram: read('instagram'),
+      vk: read('vk'),
+      odnoclassniki: read('odnoclassniki') ?? read('odnoklassniki'),
+      twitter: read('twitter'),
+      linkedin: read('linkedin'),
+      youtube: read('youtube'),
+      www: read('www'),
+      shareUrl: read('share_url') ?? read('shareUrl'),
       others: others,
     );
+  }
+
+  Map<String, dynamic> toJson() {
+    final data = <String, dynamic>{};
+
+    void write(String key, String? value) {
+      final v = _emptyToNull(value);
+      if (v != null) data[key] = v;
+    }
+
+    write('facebook', facebook);
+    write('instagram', instagram);
+    write('vk', vk);
+    write('odnoclassniki', odnoclassniki);
+    write('twitter', twitter);
+    write('linkedin', linkedin);
+    write('youtube', youtube);
+    write('www', www);
+    write('share_url', shareUrl);
+
+    others.forEach((key, value) => write(key, value));
+
+    return data;
   }
 
   static String? _emptyToNull(dynamic v) {
