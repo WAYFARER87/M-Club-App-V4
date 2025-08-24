@@ -175,7 +175,7 @@ class _OfferDetailScreenState extends State<OfferDetailScreen> {
             asset,
             width: 24,
             height: 24,
-            color: color,
+            colorFilter: ColorFilter.mode(color, BlendMode.srcIn),
           ),
         ),
       );
