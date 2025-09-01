@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import '../mclub/mclub_screen.dart';
 import '../uae_unlocked/uae_screen.dart';
 import '../radio/radio_screen.dart';
@@ -50,11 +51,26 @@ class _HomeScreenState extends State<HomeScreen> {
         currentIndex: _index,
         onTap: (i) => setState(() => _index = i),
         items: const [
-          BottomNavigationBarItem(icon: Icon(Icons.local_offer), label: 'М-Клуб'),
-          BottomNavigationBarItem(icon: Icon(Icons.map), label: 'Рекомендации'),
-          BottomNavigationBarItem(icon: Icon(Icons.radio), label: 'Радио'),
-          BottomNavigationBarItem(icon: Icon(Icons.article), label: 'Новости'),
-          BottomNavigationBarItem(icon: Icon(Icons.person), label: 'Профиль'),
+          BottomNavigationBarItem(
+            icon: FaIcon(FontAwesomeIcons.tag),
+            label: 'М-Клуб',
+          ),
+          BottomNavigationBarItem(
+            icon: FaIcon(FontAwesomeIcons.map),
+            label: 'Рекомендации',
+          ),
+          BottomNavigationBarItem(
+            icon: FaIcon(FontAwesomeIcons.radio),
+            label: 'Радио',
+          ),
+          BottomNavigationBarItem(
+            icon: FaIcon(FontAwesomeIcons.newspaper),
+            label: 'Новости',
+          ),
+          BottomNavigationBarItem(
+            icon: FaIcon(FontAwesomeIcons.user),
+            label: 'Профиль',
+          ),
         ],
       ),
     );

@@ -5,7 +5,6 @@ import 'package:flutter/material.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
-import 'package:font_awesome_flutter/fa_icon_name_mapping.dart';
 
 import 'offer_detail_screen.dart';
 import 'offer_model.dart';
@@ -70,7 +69,7 @@ class _OffersMapScreenState extends State<OffersMapScreen> {
       BitmapDescriptor descriptor = BitmapDescriptor.defaultMarker;
       final iconName = cat.faIcon;
       if (iconName != null) {
-        final iconData = faIconNameMapping[iconName];
+        final iconData = _nameToIconData(iconName);
         if (iconData != null) {
           try {
             descriptor = await _bitmapDescriptorFromIconData(
@@ -112,6 +111,17 @@ class _OffersMapScreenState extends State<OffersMapScreen> {
         .toImage(textPainter.width.ceil(), textPainter.height.ceil());
     final bytes = await image.toByteData(format: ui.ImageByteFormat.png);
     return BitmapDescriptor.fromBytes(bytes!.buffer.asUint8List());
+  }
+
+  IconData _nameToIconData(String name) {
+    switch (name) {
+      case 'map':
+        return FontAwesomeIcons.map;
+      case 'tag':
+        return FontAwesomeIcons.tag;
+      default:
+        return FontAwesomeIcons.locationPin;
+    }
   }
 
   void _buildMarkers() {
