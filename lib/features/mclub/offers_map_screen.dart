@@ -1,10 +1,10 @@
 import 'dart:math';
-import 'dart:typed_data';
-import 'dart:ui' as ui;
 
 import 'package:flutter/material.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:geolocator/geolocator.dart';
+
+import 'marker_generator.dart';
 
 import 'offer_detail_screen.dart';
 import 'offer_model.dart';
@@ -66,53 +66,16 @@ class _OffersMapScreenState extends State<OffersMapScreen> {
   }
 
   Future<BitmapDescriptor> _bitmapDescriptorFromIcon(IconData icon,
-      {Color color = Colors.red, double size = markerSize}) async {
-    final recorder = ui.PictureRecorder();
-    final canvas = Canvas(recorder);
-
-    final double width = size;
-    final double height = size * 1.4;
-    final double radius = size / 2;
-    final double dpr = ui.window.devicePixelRatio;
-
-    canvas.scale(dpr);
-
-    final paint = Paint()
-      ..color = color
-      ..isAntiAlias = true;
-    final path = Path()
-      ..moveTo(width / 2, height)
-      ..quadraticBezierTo(width, height - size, width, radius)
-      ..arcTo(Rect.fromCircle(center: Offset(width / 2, radius), radius: radius),
-          0, pi, false)
-      ..quadraticBezierTo(0, height - size, width / 2, height)
-      ..close();
-    canvas.drawPath(path, paint);
-
-    final iconPainter = TextPainter(textDirection: TextDirection.ltr);
-    iconPainter.text = TextSpan(
-      text: String.fromCharCode(icon.codePoint),
-      style: TextStyle(
-        color: Colors.white,
-        fontSize: radius,
-        fontFamily: icon.fontFamily,
-        package: icon.fontPackage,
-      ),
+      {Color color = Colors.red, double size = markerSize}) {
+    final width = size;
+    final height = size * 1.4;
+    final widget = _MarkerWidget(
+      icon: icon,
+      color: color,
+      size: size,
     );
-    iconPainter.layout();
-    final iconOffset = Offset(
-        (width - iconPainter.width) / 2, radius - iconPainter.height / 2);
-    iconPainter.paint(canvas, iconOffset);
-
-    final image = await recorder.endRecording().toImage(
-          (width * dpr).toInt(),
-          (height * dpr).toInt(),
-        );
-    final bytes = (await image.toByteData(format: ui.ImageByteFormat.png))!
-        .buffer
-        .asUint8List();
-    return BitmapDescriptor.fromBytes(
-      bytes,
+    return MarkerGenerator.fromWidget(
+      widget,
       size: Size(width, height),
     );
   }
@@ -427,4 +390,76 @@ class _OffersMapScreenState extends State<OffersMapScreen> {
       ),
     );
   }
+}
+
+class _MarkerWidget extends StatelessWidget {
+  final IconData icon;
+  final Color color;
+  final double size;
+
+  const _MarkerWidget({
+    required this.icon,
+    required this.color,
+    required this.size,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final width = size;
+    final height = size * 1.4;
+    final radius = size / 2;
+    final iconSize = radius;
+    return SizedBox(
+      width: width,
+      height: height,
+      child: Stack(
+        alignment: Alignment.topCenter,
+        children: [
+          CustomPaint(
+            size: Size(width, height),
+            painter: _MarkerPainter(color),
+          ),
+          Positioned(
+            top: radius - iconSize / 2,
+            child: Icon(
+              icon,
+              color: Colors.white,
+              size: iconSize,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _MarkerPainter extends CustomPainter {
+  final Color color;
+
+  _MarkerPainter(this.color);
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final width = size.width;
+    final height = size.height;
+    final radius = width / 2;
+    final paint = Paint()
+      ..color = color
+      ..isAntiAlias = true;
+    final path = Path()
+      ..moveTo(width / 2, height)
+      ..quadraticBezierTo(width, height - width, width, radius)
+      ..arcTo(
+        Rect.fromCircle(center: Offset(width / 2, radius), radius: radius),
+        0,
+        pi,
+        false,
+      )
+      ..quadraticBezierTo(0, height - width, width / 2, height)
+      ..close();
+    canvas.drawPath(path, paint);
+  }
+
+  @override
+  bool shouldRepaint(_MarkerPainter oldDelegate) => oldDelegate.color != color;
 }
