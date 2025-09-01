@@ -2,6 +2,7 @@ import 'dart:math';
 
 import 'package:flutter/material.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
+import 'package:geolocator/geolocator.dart';
 
 import 'offer_detail_screen.dart';
 import 'offer_model.dart';
@@ -11,12 +12,18 @@ class OffersMapScreen extends StatefulWidget {
   final List<dynamic> offers;
   final List<Category> categories;
   final String? selectedCategoryId;
+  final double? curLat;
+  final double? curLng;
+  final String sortMode; // 'alphabet' | 'distance'
 
   const OffersMapScreen({
     super.key,
     required this.offers,
     required this.categories,
     this.selectedCategoryId,
+    this.curLat,
+    this.curLng,
+    this.sortMode = 'alphabet',
   });
 
   @override
@@ -27,6 +34,7 @@ class _OffersMapScreenState extends State<OffersMapScreen> {
   final Set<Marker> _markers = {};
   GoogleMapController? _controller;
   String? _selectedCategoryId;
+  late String _sortMode;
 
   static const _fallbackLat = 25.1972;
   static const _fallbackLng = 55.2744;
@@ -35,11 +43,13 @@ class _OffersMapScreenState extends State<OffersMapScreen> {
   void initState() {
     super.initState();
     _selectedCategoryId = widget.selectedCategoryId;
-    _updateMarkers();
+    _sortMode = widget.sortMode;
+    _buildMarkers();
   }
 
-  void _updateMarkers() {
+  void _buildMarkers() {
     _markers.clear();
+    final offers = <Offer>[];
     for (final raw in widget.offers) {
       Offer? offer;
       if (raw is Offer) {
@@ -48,36 +58,67 @@ class _OffersMapScreenState extends State<OffersMapScreen> {
         offer = Offer.fromJson(raw);
       }
       if (offer == null) continue;
-      final offerNonNull = offer!;
       if (_selectedCategoryId != null &&
-          !offerNonNull.categoryIds.contains(_selectedCategoryId)) {
+          !offer.categoryIds.contains(_selectedCategoryId)) {
         continue;
       }
+      offers.add(offer);
+    }
 
-      for (var i = 0; i < offerNonNull.branches.length; i++) {
-        final br = offerNonNull.branches[i];
+    if (_sortMode == 'alphabet') {
+      offers.sort((a, b) =>
+          a.title.toLowerCase().compareTo(b.title.toLowerCase()));
+    } else if (_sortMode == 'distance' &&
+        widget.curLat != null &&
+        widget.curLng != null) {
+      offers.sort((a, b) {
+        final da = _nearestBranchDistanceMeters(a);
+        final db = _nearestBranchDistanceMeters(b);
+        return da.compareTo(db);
+      });
+    }
+
+    for (final offer in offers) {
+      for (var i = 0; i < offer.branches.length; i++) {
+        final br = offer.branches[i];
         final lat = br.lat;
         final lng = br.lng;
         final code = br.code;
         if (lat == null || lng == null) continue;
-        final rawBenefit = offerNonNull.benefitText.trim();
+        final rawBenefit = offer.benefitText.trim();
         const maxLen = 30;
         final snippet = rawBenefit.length > maxLen
             ? '${rawBenefit.substring(0, maxLen - 3)}...'
             : rawBenefit;
         _markers.add(
           Marker(
-            markerId: MarkerId('${offerNonNull.id}_${code ?? i}'),
+            markerId: MarkerId('${offer.id}_${code ?? i}'),
             position: LatLng(lat, lng),
             infoWindow: InfoWindow(
-              title: offerNonNull.title,
+              title: offer.title,
               snippet: snippet.isEmpty ? null : snippet,
             ),
-            onTap: () => _onMarkerTap(offerNonNull),
+            onTap: () => _onMarkerTap(offer),
           ),
         );
       }
     }
+  }
+
+  double _nearestBranchDistanceMeters(Offer offer) {
+    if (widget.curLat == null || widget.curLng == null) {
+      return double.infinity;
+    }
+    double best = double.infinity;
+    for (final br in offer.branches) {
+      final lat = br.lat;
+      final lng = br.lng;
+      if (lat == null || lng == null) continue;
+      final d = Geolocator.distanceBetween(
+          widget.curLat!, widget.curLng!, lat, lng);
+      if (d < best) best = d;
+    }
+    return best;
   }
 
   void _onMarkerTap(Offer offer) {
@@ -177,17 +218,69 @@ class _OffersMapScreenState extends State<OffersMapScreen> {
   void _onCategoryChanged(String? id) {
     setState(() {
       _selectedCategoryId = id;
-      _updateMarkers();
+      _buildMarkers();
     });
     if (_controller != null) {
       WidgetsBinding.instance.addPostFrameCallback((_) => _fitBounds());
     }
   }
 
+  void _openSortModal() {
+    showModalBottomSheet(
+      context: context,
+      builder: (context) {
+        return SafeArea(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              ListTile(
+                title: const Text('По алфавиту'),
+                onTap: () {
+                  setState(() {
+                    _sortMode = 'alphabet';
+                    _buildMarkers();
+                  });
+                  Navigator.pop(context);
+                  if (_controller != null) {
+                    WidgetsBinding.instance
+                        .addPostFrameCallback((_) => _fitBounds());
+                  }
+                },
+              ),
+              ListTile(
+                title: const Text('По расстоянию'),
+                onTap: () {
+                  setState(() {
+                    _sortMode = 'distance';
+                    _buildMarkers();
+                  });
+                  Navigator.pop(context);
+                  if (_controller != null) {
+                    WidgetsBinding.instance
+                        .addPostFrameCallback((_) => _fitBounds());
+                  }
+                },
+              ),
+            ],
+          ),
+        );
+      },
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Предложения на карте')),
+      appBar: AppBar(
+        title: const Text('Предложения на карте'),
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.tune),
+            tooltip: 'Сортировка',
+            onPressed: _openSortModal,
+          ),
+        ],
+      ),
       body: Column(
         children: [
           Padding(
