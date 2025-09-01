@@ -55,11 +55,16 @@ class _OffersMapScreenState extends State<OffersMapScreen> {
   }
 
   Future<void> _initCategoryIcons() async {
-    for (final cat in widget.categories) {
+    for (var i = 0; i < widget.categories.length; i++) {
+      final cat = widget.categories[i];
       final iconData = materialIconFromString(cat.mIcon);
       if (iconData != null) {
-        _categoryIcons[cat.id] =
-            await _bitmapDescriptorFromIcon(iconData, size: markerSize);
+        final color = Colors.primaries[i % Colors.primaries.length];
+        _categoryIcons[cat.id] = await _bitmapDescriptorFromIcon(
+          iconData,
+          color: color,
+          size: markerSize,
+        );
       }
     }
     if (mounted) setState(_buildMarkers);
