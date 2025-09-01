@@ -110,9 +110,12 @@ class _MClubScreenState extends State<MClubScreen> with TickerProviderStateMixin
       }
 
       WidgetsBinding.instance.addPostFrameCallback((_) {
-        _tabScrollController = Scrollable.of(
-          _tabBarKey.currentContext!,
-        )?.widget.controller;
+        if (_tabKeys.isNotEmpty) {
+          final state = Scrollable.maybeOf(_tabKeys.first.currentContext!);
+          _tabScrollController = state?.widget.controller;
+        } else {
+          _tabScrollController = null;
+        }
       });
     } catch (e, stack) {
       // Log the exception so debugging information is available in the console
@@ -185,7 +188,9 @@ class _MClubScreenState extends State<MClubScreen> with TickerProviderStateMixin
   }
 
   void _centerSelectedTab() {
-    if (_tabController == null || _tabScrollController == null) return;
+    if (_tabController == null) return;
+    final scrollController = _tabScrollController;
+    if (scrollController == null) return;
     final index = _tabController!.index;
     if (index < 0 || index >= _tabKeys.length) return;
     final ctx = _tabKeys[index].currentContext;
@@ -195,13 +200,13 @@ class _MClubScreenState extends State<MClubScreen> with TickerProviderStateMixin
     final position = box.localToGlobal(Offset.zero);
     final screenWidth = MediaQuery.of(ctx).size.width;
     final target =
-        _tabScrollController!.offset +
+        scrollController.offset +
         position.dx +
         tabWidth / 2 -
         screenWidth / 2;
-    final min = _tabScrollController!.position.minScrollExtent;
-    final max = _tabScrollController!.position.maxScrollExtent;
-    _tabScrollController!.animateTo(
+    final min = scrollController.position.minScrollExtent;
+    final max = scrollController.position.maxScrollExtent;
+    scrollController.animateTo(
       target.clamp(min, max),
       duration: const Duration(milliseconds: 300),
       curve: Curves.easeInOut,
