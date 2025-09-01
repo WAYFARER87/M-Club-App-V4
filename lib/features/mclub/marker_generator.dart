@@ -20,7 +20,9 @@ class MarkerGenerator {
         child: repaintBoundary,
       ),
       configuration: ViewConfiguration(
-        size: size,
+        logicalConstraints: BoxConstraints.tight(size),
+        physicalConstraints:
+            BoxConstraints.tight(size * uiView.devicePixelRatio),
         devicePixelRatio: uiView.devicePixelRatio,
       ),
     );
@@ -51,7 +53,6 @@ class MarkerGenerator {
         await image.toByteData(format: ui.ImageByteFormat.png);
     return BitmapDescriptor.fromBytes(
       bytes!.buffer.asUint8List(),
-      size: size,
     );
   }
 }
