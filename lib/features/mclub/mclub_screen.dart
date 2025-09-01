@@ -3,6 +3,7 @@ import 'package:geolocator/geolocator.dart';
 import '../../core/services/api_service.dart';
 import 'offer_detail_screen.dart';
 import 'offer_model.dart';
+import 'offers_map_screen.dart';
 
 class MClubScreen extends StatefulWidget {
   const MClubScreen({super.key});
@@ -236,6 +237,31 @@ class _MClubScreenState extends State<MClubScreen> with TickerProviderStateMixin
     );
   }
 
+  void _openMap() {
+    final offers = <Map<String, dynamic>>[];
+    for (final raw in _filteredOffers) {
+      if (raw is Map<String, dynamic>) {
+        final branchesRaw = raw['branches'] as List<dynamic>? ?? [];
+        final branches = branchesRaw.where((br) {
+          final lat = double.tryParse((br['lattitude'] ?? '').toString());
+          final lng = double.tryParse((br['longitude'] ?? '').toString());
+          return lat != null && lng != null;
+        }).toList();
+        if (branches.isEmpty) continue;
+        final copy = Map<String, dynamic>.from(raw);
+        copy['branches'] = branches;
+        offers.add(copy);
+      }
+    }
+
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (_) => OffersMapScreen(offers: offers),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     Widget body;
@@ -424,6 +450,14 @@ class _MClubScreenState extends State<MClubScreen> with TickerProviderStateMixin
 
     return Scaffold(
       body: body,
+      floatingActionButton: _filteredOffers.isEmpty
+          ? null
+          : FloatingActionButton.extended(
+              onPressed: _openMap,
+              icon: const Icon(Icons.map),
+              label: const Text('Предложения на карте'),
+            ),
+      floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
     );
   }
 }
