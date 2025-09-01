@@ -66,21 +66,39 @@ class _OffersMapScreenState extends State<OffersMapScreen> {
       {Color color = Colors.red, double size = 64}) async {
     final recorder = ui.PictureRecorder();
     final canvas = Canvas(recorder);
-    final painter = TextPainter(textDirection: TextDirection.ltr);
-    painter.text = TextSpan(
+
+    final double width = size;
+    final double height = size * 1.4;
+    final double radius = size / 2;
+
+    final paint = Paint()..color = color;
+    final path = Path()
+      ..moveTo(width / 2, height)
+      ..quadraticBezierTo(width, height - size, width, radius)
+      ..arcTo(Rect.fromCircle(center: Offset(width / 2, radius), radius: radius),
+          0, pi, false)
+      ..quadraticBezierTo(0, height - size, width / 2, height)
+      ..close();
+    canvas.drawPath(path, paint);
+
+    final iconPainter = TextPainter(textDirection: TextDirection.ltr);
+    iconPainter.text = TextSpan(
       text: String.fromCharCode(icon.codePoint),
       style: TextStyle(
-        color: color,
-        fontSize: size,
+        color: Colors.white,
+        fontSize: radius,
         fontFamily: icon.fontFamily,
         package: icon.fontPackage,
       ),
     );
-    painter.layout();
-    painter.paint(canvas, Offset.zero);
+    iconPainter.layout();
+    final iconOffset = Offset(
+        (width - iconPainter.width) / 2, radius - iconPainter.height / 2);
+    iconPainter.paint(canvas, iconOffset);
+
     final image = await recorder
         .endRecording()
-        .toImage(painter.width.ceil(), painter.height.ceil());
+        .toImage(width.toInt(), height.toInt());
     final bytes = await image.toByteData(format: ui.ImageByteFormat.png);
     return BitmapDescriptor.fromBytes(bytes!.buffer.asUint8List());
   }
