@@ -4,6 +4,7 @@ import '../../core/services/api_service.dart';
 import 'offer_detail_screen.dart';
 import 'offer_model.dart';
 import 'offers_map_screen.dart';
+import 'category_model.dart';
 
 class MClubScreen extends StatefulWidget {
   const MClubScreen({super.key});
@@ -239,7 +240,7 @@ class _MClubScreenState extends State<MClubScreen> with TickerProviderStateMixin
 
   void _openMap() {
     final offers = <Map<String, dynamic>>[];
-    for (final raw in _filteredOffers) {
+    for (final raw in _offers) {
       if (raw is Map<String, dynamic>) {
         final branchesRaw = raw['branches'] as List<dynamic>? ?? [];
         final branches = branchesRaw.where((br) {
@@ -254,10 +255,23 @@ class _MClubScreenState extends State<MClubScreen> with TickerProviderStateMixin
       }
     }
 
+    final categories = <Category>[];
+    for (final c in _categories) {
+      if (c is Category) {
+        categories.add(c);
+      } else if (c is Map<String, dynamic>) {
+        categories.add(Category.fromJson(c));
+      }
+    }
+
     Navigator.push(
       context,
       MaterialPageRoute(
-        builder: (_) => OffersMapScreen(offers: offers),
+        builder: (_) => OffersMapScreen(
+          offers: offers,
+          categories: categories,
+          selectedCategoryId: _selectedCategoryId,
+        ),
       ),
     );
   }

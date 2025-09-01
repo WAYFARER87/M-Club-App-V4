@@ -5,11 +5,19 @@ import 'package:google_maps_flutter/google_maps_flutter.dart';
 
 import 'offer_detail_screen.dart';
 import 'offer_model.dart';
+import 'category_model.dart';
 
 class OffersMapScreen extends StatefulWidget {
   final List<dynamic> offers;
+  final List<Category> categories;
+  final String? selectedCategoryId;
 
-  const OffersMapScreen({super.key, required this.offers});
+  const OffersMapScreen({
+    super.key,
+    required this.offers,
+    required this.categories,
+    this.selectedCategoryId,
+  });
 
   @override
   State<OffersMapScreen> createState() => _OffersMapScreenState();
@@ -18,6 +26,7 @@ class OffersMapScreen extends StatefulWidget {
 class _OffersMapScreenState extends State<OffersMapScreen> {
   final Set<Marker> _markers = {};
   GoogleMapController? _controller;
+  String? _selectedCategoryId;
 
   static const _fallbackLat = 25.1972;
   static const _fallbackLng = 55.2744;
@@ -25,10 +34,12 @@ class _OffersMapScreenState extends State<OffersMapScreen> {
   @override
   void initState() {
     super.initState();
-    _buildMarkers();
+    _selectedCategoryId = widget.selectedCategoryId;
+    _updateMarkers();
   }
 
-  void _buildMarkers() {
+  void _updateMarkers() {
+    _markers.clear();
     for (final raw in widget.offers) {
       Offer? offer;
       if (raw is Offer) {
@@ -38,6 +49,10 @@ class _OffersMapScreenState extends State<OffersMapScreen> {
       }
       if (offer == null) continue;
       final offerNonNull = offer!;
+      if (_selectedCategoryId != null &&
+          !offerNonNull.categoryIds.contains(_selectedCategoryId)) {
+        continue;
+      }
 
       for (var i = 0; i < offerNonNull.branches.length; i++) {
         final br = offerNonNull.branches[i];
@@ -159,17 +174,53 @@ class _OffersMapScreenState extends State<OffersMapScreen> {
     _controller!.animateCamera(CameraUpdate.newLatLngBounds(bounds, 50));
   }
 
+  void _onCategoryChanged(String? id) {
+    setState(() {
+      _selectedCategoryId = id;
+      _updateMarkers();
+    });
+    if (_controller != null) {
+      WidgetsBinding.instance.addPostFrameCallback((_) => _fitBounds());
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(title: const Text('Предложения на карте')),
-      body: GoogleMap(
-        initialCameraPosition: _initialCamera,
-        markers: _markers,
-        onMapCreated: (c) {
-          _controller = c;
-          _fitBounds();
-        },
+      body: Column(
+        children: [
+          Padding(
+            padding: const EdgeInsets.all(8),
+            child: DropdownButton<String?>(
+              isExpanded: true,
+              value: _selectedCategoryId,
+              items: [
+                const DropdownMenuItem<String?>(
+                  value: null,
+                  child: Text('Все категории'),
+                ),
+                ...widget.categories.map(
+                  (c) => DropdownMenuItem<String?>(
+                    value: c.id,
+                    child: Text(c.name),
+                  ),
+                ),
+              ],
+              onChanged: _onCategoryChanged,
+            ),
+          ),
+          Expanded(
+            child: GoogleMap(
+              initialCameraPosition: _initialCamera,
+              markers: _markers,
+              onMapCreated: (c) {
+                _controller = c;
+                _fitBounds();
+              },
+            ),
+          ),
+        ],
       ),
     );
   }
