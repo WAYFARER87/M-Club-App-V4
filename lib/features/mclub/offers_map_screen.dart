@@ -98,17 +98,14 @@ class _OffersMapScreenState extends State<OffersMapScreen> {
                 mainAxisSize: MainAxisSize.min,
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  if (offer.benefitText.isNotEmpty) ...[
-                    Text(
-                      offer.benefitText,
-                      style: const TextStyle(
-                        fontSize: 20,
-                        fontWeight: FontWeight.bold,
-                        color: Colors.red,
-                      ),
+                  Text(
+                    offer.title,
+                    style: const TextStyle(
+                      fontSize: 20,
+                      fontWeight: FontWeight.bold,
                     ),
-                    const SizedBox(height: 8),
-                  ],
+                  ),
+                  const SizedBox(height: 8),
                   Text(offer.descriptionShort),
                   const SizedBox(height: 16),
                   Align(
