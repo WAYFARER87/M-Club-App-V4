@@ -3,6 +3,7 @@ import 'package:geolocator/geolocator.dart';
 import '../../core/services/api_service.dart';
 import 'offer_detail_screen.dart';
 import 'offer_model.dart';
+import 'offers_map_screen.dart';
 
 class MClubScreen extends StatefulWidget {
   const MClubScreen({super.key});
@@ -236,6 +237,22 @@ class _MClubScreenState extends State<MClubScreen> with TickerProviderStateMixin
     );
   }
 
+  void _openMap() {
+    final offers = _filteredOffers
+        .map((o) => Offer.fromJson(o as Map<String, dynamic>))
+        .toList();
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (_) => OffersMapScreen(
+          offers: offers,
+          userLat: _curLat ?? _fallbackLat,
+          userLng: _curLng ?? _fallbackLng,
+        ),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     Widget body;
@@ -301,6 +318,11 @@ class _MClubScreenState extends State<MClubScreen> with TickerProviderStateMixin
                             ),
                           ],
                         ),
+                      ),
+                      IconButton(
+                        icon: const Icon(Icons.map),
+                        tooltip: 'Карта',
+                        onPressed: _openMap,
                       ),
                       IconButton(
                         icon: const Icon(Icons.tune),
