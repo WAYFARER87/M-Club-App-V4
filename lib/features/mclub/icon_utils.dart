@@ -24,6 +24,8 @@ IconData? materialIconFromString(String name) {
       return Icons.spa;
     case 'hotel':
       return Icons.hotel;
+    case 'local_hospital':
+      return Icons.local_hospital;
     default:
       return null;
   }
