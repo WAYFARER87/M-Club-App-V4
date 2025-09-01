@@ -62,27 +62,63 @@ class _OffersMapScreenState extends State<OffersMapScreen> {
       context: context,
       builder: (ctx) => Padding(
         padding: const EdgeInsets.all(16),
-        child: Column(
+        child: Row(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(offer.title, style: Theme.of(ctx).textTheme.titleMedium),
-            const SizedBox(height: 8),
-            Text(offer.descriptionShort),
-            const SizedBox(height: 16),
-            Align(
-              alignment: Alignment.centerRight,
-              child: ElevatedButton(
-                onPressed: () {
-                  Navigator.pop(ctx);
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (_) => OfferDetailScreen(offer: offer),
+            Padding(
+              padding: const EdgeInsets.only(right: 16),
+              child: ClipRRect(
+                borderRadius: BorderRadius.circular(8),
+                child: offer.photoUrl != null && offer.photoUrl!.isNotEmpty
+                    ? Image.network(
+                        offer.photoUrl!,
+                        width: 80,
+                        height: 80,
+                        fit: BoxFit.cover,
+                      )
+                    : Container(
+                        width: 80,
+                        height: 80,
+                        color: Colors.grey[300],
+                        child: const Icon(Icons.image_not_supported),
+                      ),
+              ),
+            ),
+            Expanded(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  if (offer.benefitText.isNotEmpty) ...[
+                    Text(
+                      offer.benefitText,
+                      style: const TextStyle(
+                        fontSize: 20,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.red,
+                      ),
                     ),
-                  );
-                },
-                child: const Text('Подробнее'),
+                    const SizedBox(height: 8),
+                  ],
+                  Text(offer.descriptionShort),
+                  const SizedBox(height: 16),
+                  Align(
+                    alignment: Alignment.centerRight,
+                    child: ElevatedButton(
+                      onPressed: () {
+                        Navigator.pop(ctx);
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (_) => OfferDetailScreen(offer: offer),
+                          ),
+                        );
+                      },
+                      child: const Text('Подробнее'),
+                    ),
+                  ),
+                ],
               ),
             ),
           ],
