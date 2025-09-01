@@ -271,6 +271,9 @@ class _MClubScreenState extends State<MClubScreen> with TickerProviderStateMixin
           offers: offers,
           categories: categories,
           selectedCategoryId: _selectedCategoryId,
+          curLat: _curLat,
+          curLng: _curLng,
+          sortMode: _sortMode,
         ),
       ),
     );
