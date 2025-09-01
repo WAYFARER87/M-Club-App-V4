@@ -37,19 +37,23 @@ class _OffersMapScreenState extends State<OffersMapScreen> {
         offer = Offer.fromJson(raw);
       }
       if (offer == null) continue;
+      final offerNonNull = offer!;
 
-      for (var i = 0; i < offer.branches.length; i++) {
-        final br = offer.branches[i];
+      for (var i = 0; i < offerNonNull.branches.length; i++) {
+        final br = offerNonNull.branches[i];
         final lat = br.lat;
         final lng = br.lng;
         final code = br.code;
         if (lat == null || lng == null) continue;
         _markers.add(
           Marker(
-            markerId: MarkerId('${offer.id}_${code ?? i}'),
+            markerId: MarkerId('${offerNonNull.id}_${code ?? i}'),
             position: LatLng(lat, lng),
-            infoWindow: InfoWindow(title: offer.title),
-            onTap: () => _onMarkerTap(offer),
+            infoWindow: InfoWindow(
+              title: offerNonNull.title,
+              snippet: offerNonNull.benefitText,
+            ),
+            onTap: () => _onMarkerTap(offerNonNull),
           ),
         );
       }
@@ -65,8 +69,35 @@ class _OffersMapScreenState extends State<OffersMapScreen> {
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
+            if (offer.photoUrl != null)
+              ClipRRect(
+                borderRadius: BorderRadius.circular(8),
+                child: Image.network(
+                  offer.photoUrl!,
+                  height: 150,
+                  width: double.infinity,
+                  fit: BoxFit.cover,
+                ),
+              ),
+            if (offer.photoUrl != null) const SizedBox(height: 12),
             Text(offer.title, style: Theme.of(ctx).textTheme.titleMedium),
             const SizedBox(height: 8),
+            if (offer.benefitText.isNotEmpty)
+              Container(
+                padding: const EdgeInsets.symmetric(vertical: 4, horizontal: 8),
+                decoration: BoxDecoration(
+                  color: Colors.redAccent,
+                  borderRadius: BorderRadius.circular(4),
+                ),
+                child: Text(
+                  offer.benefitText,
+                  style: const TextStyle(
+                    color: Colors.white,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ),
+            if (offer.benefitText.isNotEmpty) const SizedBox(height: 8),
             Text(offer.descriptionShort),
             const SizedBox(height: 16),
             Align(
