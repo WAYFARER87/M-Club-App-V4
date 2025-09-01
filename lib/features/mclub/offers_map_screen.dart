@@ -37,19 +37,20 @@ class _OffersMapScreenState extends State<OffersMapScreen> {
         offer = Offer.fromJson(raw);
       }
       if (offer == null) continue;
+      final offerNonNull = offer!;
 
-      for (var i = 0; i < offer.branches.length; i++) {
-        final br = offer.branches[i];
+      for (var i = 0; i < offerNonNull.branches.length; i++) {
+        final br = offerNonNull.branches[i];
         final lat = br.lat;
         final lng = br.lng;
         final code = br.code;
         if (lat == null || lng == null) continue;
         _markers.add(
           Marker(
-            markerId: MarkerId('${offer.id}_${code ?? i}'),
+            markerId: MarkerId('${offerNonNull.id}_${code ?? i}'),
             position: LatLng(lat, lng),
-            infoWindow: InfoWindow(title: offer.title),
-            onTap: () => _onMarkerTap(offer),
+            infoWindow: InfoWindow(title: offerNonNull.title),
+            onTap: () => _onMarkerTap(offerNonNull),
           ),
         );
       }
