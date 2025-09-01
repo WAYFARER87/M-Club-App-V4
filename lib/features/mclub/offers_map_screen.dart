@@ -66,21 +66,31 @@ class _OffersMapScreenState extends State<OffersMapScreen> {
       {Color color = Colors.red, double size = 64}) async {
     final recorder = ui.PictureRecorder();
     final canvas = Canvas(recorder);
+
+    final radius = size / 2;
+    final paint = Paint()..color = color;
+    canvas.drawCircle(Offset(radius, radius), radius, paint);
+
     final painter = TextPainter(textDirection: TextDirection.ltr);
     painter.text = TextSpan(
       text: String.fromCharCode(icon.codePoint),
       style: TextStyle(
-        color: color,
-        fontSize: size,
+        color: Colors.white,
+        fontSize: size * 0.6,
         fontFamily: icon.fontFamily,
         package: icon.fontPackage,
       ),
     );
     painter.layout();
-    painter.paint(canvas, Offset.zero);
+    final iconOffset = Offset(
+      radius - painter.width / 2,
+      radius - painter.height / 2,
+    );
+    painter.paint(canvas, iconOffset);
+
     final image = await recorder
         .endRecording()
-        .toImage(painter.width.ceil(), painter.height.ceil());
+        .toImage(size.toInt(), size.toInt());
     final bytes = await image.toByteData(format: ui.ImageByteFormat.png);
     return BitmapDescriptor.fromBytes(bytes!.buffer.asUint8List());
   }
