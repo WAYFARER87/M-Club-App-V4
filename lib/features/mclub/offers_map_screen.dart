@@ -36,6 +36,9 @@ class _OffersMapScreenState extends State<OffersMapScreen> {
   String? _selectedCategoryId;
   late String _sortMode;
 
+  final Map<String, BitmapDescriptor> _categoryIcons = {};
+  final Map<String, Color> _categoryColors = {};
+
   static const _fallbackLat = 25.1972;
   static const _fallbackLng = 55.2744;
 
@@ -44,7 +47,34 @@ class _OffersMapScreenState extends State<OffersMapScreen> {
     super.initState();
     _selectedCategoryId = widget.selectedCategoryId;
     _sortMode = widget.sortMode;
+    _initCategoryIcons();
     _buildMarkers();
+  }
+
+  void _initCategoryIcons() {
+    const hues = [
+      BitmapDescriptor.hueRed,
+      BitmapDescriptor.hueBlue,
+      BitmapDescriptor.hueGreen,
+      BitmapDescriptor.hueOrange,
+      BitmapDescriptor.hueViolet,
+      BitmapDescriptor.hueYellow,
+    ];
+    const colors = [
+      Colors.red,
+      Colors.blue,
+      Colors.green,
+      Colors.orange,
+      Colors.purple,
+      Colors.yellow,
+    ];
+    for (var i = 0; i < widget.categories.length; i++) {
+      final cat = widget.categories[i];
+      final hue = hues[i % hues.length];
+      _categoryIcons[cat.id] =
+          BitmapDescriptor.defaultMarkerWithHue(hue);
+      _categoryColors[cat.id] = colors[i % colors.length];
+    }
   }
 
   void _buildMarkers() {
@@ -90,6 +120,12 @@ class _OffersMapScreenState extends State<OffersMapScreen> {
         final snippet = rawBenefit.length > maxLen
             ? '${rawBenefit.substring(0, maxLen - 3)}...'
             : rawBenefit;
+        final catId = offer.categoryIds.isNotEmpty
+            ? offer.categoryIds.first
+            : null;
+        final icon = catId != null && _categoryIcons.containsKey(catId)
+            ? _categoryIcons[catId]!
+            : BitmapDescriptor.defaultMarker;
         _markers.add(
           Marker(
             markerId: MarkerId('${offer.id}_${code ?? i}'),
@@ -99,6 +135,7 @@ class _OffersMapScreenState extends State<OffersMapScreen> {
               snippet: snippet.isEmpty ? null : snippet,
             ),
             onTap: () => _onMarkerTap(offer),
+            icon: icon,
           ),
         );
       }
@@ -268,12 +305,35 @@ class _OffersMapScreenState extends State<OffersMapScreen> {
     );
   }
 
+  void _showLegend() {
+    showModalBottomSheet(
+      context: context,
+      builder: (context) => SafeArea(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: widget.categories.map((c) {
+            final color = _categoryColors[c.id] ?? Colors.grey;
+            return ListTile(
+              leading: Icon(Icons.location_pin, color: color),
+              title: Text(c.name),
+            );
+          }).toList(),
+        ),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Предложения на карте'),
         actions: [
+          IconButton(
+            icon: const Icon(Icons.info_outline),
+            tooltip: 'Легенда',
+            onPressed: _showLegend,
+          ),
           IconButton(
             icon: const Icon(Icons.tune),
             tooltip: 'Сортировка',
