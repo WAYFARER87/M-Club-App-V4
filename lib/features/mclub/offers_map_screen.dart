@@ -3,6 +3,7 @@ import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 
+import 'offer_detail_screen.dart';
 import 'offer_model.dart';
 
 class OffersMapScreen extends StatefulWidget {
@@ -28,46 +29,66 @@ class _OffersMapScreenState extends State<OffersMapScreen> {
   }
 
   void _buildMarkers() {
-    for (final rawOffer in widget.offers) {
-      String title;
-      String offerId;
-      List<dynamic> branches;
-      if (rawOffer is Offer) {
-        title = rawOffer.title;
-        offerId = rawOffer.id;
-        branches = rawOffer.branches;
-      } else if (rawOffer is Map<String, dynamic>) {
-        title = (rawOffer['title'] ?? '').toString();
-        offerId = (rawOffer['id'] ?? '').toString();
-        branches = rawOffer['branches'] as List<dynamic>? ?? const [];
-      } else {
-        continue;
+    for (final raw in widget.offers) {
+      Offer? offer;
+      if (raw is Offer) {
+        offer = raw;
+      } else if (raw is Map<String, dynamic>) {
+        offer = Offer.fromJson(raw);
       }
+      if (offer == null) continue;
+      final Offer mappedOffer = offer;
 
-      for (var index = 0; index < branches.length; index++) {
-        final br = branches[index];
-        double? lat;
-        double? lng;
-        String? code;
-        if (br is Branch) {
-          lat = br.lat;
-          lng = br.lng;
-          code = br.code;
-        } else if (br is Map<String, dynamic>) {
-          lat = double.tryParse((br['lattitude'] ?? '').toString());
-          lng = double.tryParse((br['longitude'] ?? '').toString());
-          code = br['code']?.toString();
-        }
+      for (var i = 0; i < mappedOffer.branches.length; i++) {
+        final br = mappedOffer.branches[i];
+        final lat = br.lat;
+        final lng = br.lng;
+        final code = br.code;
         if (lat == null || lng == null) continue;
         _markers.add(
           Marker(
-            markerId: MarkerId('${offerId}_${code ?? index}'),
+            markerId: MarkerId('${mappedOffer.id}_${code ?? i}'),
             position: LatLng(lat, lng),
-            infoWindow: InfoWindow(title: title),
+            infoWindow: InfoWindow(title: mappedOffer.title),
+            onTap: () => _onMarkerTap(mappedOffer),
           ),
         );
       }
     }
+  }
+
+  void _onMarkerTap(Offer offer) {
+    showModalBottomSheet(
+      context: context,
+      builder: (ctx) => Padding(
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(offer.title, style: Theme.of(ctx).textTheme.titleMedium),
+            const SizedBox(height: 8),
+            Text(offer.descriptionShort),
+            const SizedBox(height: 16),
+            Align(
+              alignment: Alignment.centerRight,
+              child: ElevatedButton(
+                onPressed: () {
+                  Navigator.pop(ctx);
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (_) => OfferDetailScreen(offer: offer),
+                    ),
+                  );
+                },
+                child: const Text('Подробнее'),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
   }
 
   CameraPosition get _initialCamera {
