@@ -75,6 +75,8 @@ class _OffersMapScreenState extends State<OffersMapScreen> {
     final double radius = size / 2;
     final double dpr = ui.window.devicePixelRatio;
 
+    canvas.scale(dpr);
+
     final paint = Paint()
       ..color = color
       ..isAntiAlias = true;
@@ -106,11 +108,12 @@ class _OffersMapScreenState extends State<OffersMapScreen> {
           (width * dpr).toInt(),
           (height * dpr).toInt(),
         );
-    final bytes = await image.toByteData(format: ui.ImageByteFormat.png);
+    final bytes = (await image.toByteData(format: ui.ImageByteFormat.png))!
+        .buffer
+        .asUint8List();
     return BitmapDescriptor.fromBytes(
-      bytes!.buffer.asUint8List(),
+      bytes,
       size: Size(width, height),
-      pixelRatio: dpr,
     );
   }
 
