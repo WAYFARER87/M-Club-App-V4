@@ -73,8 +73,11 @@ class _OffersMapScreenState extends State<OffersMapScreen> {
     final double width = size;
     final double height = size * 1.4;
     final double radius = size / 2;
+    final double dpr = ui.window.devicePixelRatio;
 
-    final paint = Paint()..color = color;
+    final paint = Paint()
+      ..color = color
+      ..isAntiAlias = true;
     final path = Path()
       ..moveTo(width / 2, height)
       ..quadraticBezierTo(width, height - size, width, radius)
@@ -99,11 +102,16 @@ class _OffersMapScreenState extends State<OffersMapScreen> {
         (width - iconPainter.width) / 2, radius - iconPainter.height / 2);
     iconPainter.paint(canvas, iconOffset);
 
-    final image = await recorder
-        .endRecording()
-        .toImage(width.toInt(), height.toInt());
+    final image = await recorder.endRecording().toImage(
+          (width * dpr).toInt(),
+          (height * dpr).toInt(),
+        );
     final bytes = await image.toByteData(format: ui.ImageByteFormat.png);
-    return BitmapDescriptor.fromBytes(bytes!.buffer.asUint8List());
+    return BitmapDescriptor.fromBytes(
+      bytes!.buffer.asUint8List(),
+      size: Size(width, height),
+      pixelRatio: dpr,
+    );
   }
 
   void _buildMarkers() {
