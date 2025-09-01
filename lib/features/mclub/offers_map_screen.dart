@@ -45,11 +45,19 @@ class _OffersMapScreenState extends State<OffersMapScreen> {
         final lng = br.lng;
         final code = br.code;
         if (lat == null || lng == null) continue;
+        final rawBenefit = offerNonNull.benefitText.trim();
+        const maxLen = 30;
+        final snippet = rawBenefit.length > maxLen
+            ? '${rawBenefit.substring(0, maxLen - 3)}...'
+            : rawBenefit;
         _markers.add(
           Marker(
             markerId: MarkerId('${offerNonNull.id}_${code ?? i}'),
             position: LatLng(lat, lng),
-            infoWindow: InfoWindow(title: offerNonNull.title),
+            infoWindow: InfoWindow(
+              title: offerNonNull.title,
+              snippet: snippet.isEmpty ? null : snippet,
+            ),
             onTap: () => _onMarkerTap(offerNonNull),
           ),
         );
