@@ -3,8 +3,10 @@ import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 
+import 'offer_model.dart';
+
 class OffersMapScreen extends StatefulWidget {
-  final List<Map<String, dynamic>> offers;
+  final List<dynamic> offers;
 
   const OffersMapScreen({super.key, required this.offers});
 
@@ -27,12 +29,29 @@ class _OffersMapScreenState extends State<OffersMapScreen> {
 
   void _buildMarkers() {
     var id = 0;
-    for (final offer in widget.offers) {
-      final title = (offer['title'] ?? '').toString();
-      final branches = offer['branches'] as List<dynamic>? ?? [];
+    for (final rawOffer in widget.offers) {
+      String title;
+      Iterable<dynamic> branches;
+      if (rawOffer is Offer) {
+        title = rawOffer.title;
+        branches = rawOffer.branches;
+      } else if (rawOffer is Map<String, dynamic>) {
+        title = (rawOffer['title'] ?? '').toString();
+        branches = rawOffer['branches'] as List<dynamic>? ?? const [];
+      } else {
+        continue;
+      }
+
       for (final br in branches) {
-        final lat = double.tryParse((br['lattitude'] ?? '').toString());
-        final lng = double.tryParse((br['longitude'] ?? '').toString());
+        double? lat;
+        double? lng;
+        if (br is Branch) {
+          lat = br.lat;
+          lng = br.lng;
+        } else if (br is Map<String, dynamic>) {
+          lat = double.tryParse((br['lattitude'] ?? '').toString());
+          lng = double.tryParse((br['longitude'] ?? '').toString());
+        }
         if (lat == null || lng == null) continue;
         _markers.add(
           Marker(
