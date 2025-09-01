@@ -1,4 +1,6 @@
 import 'dart:math';
+import 'dart:typed_data';
+import 'dart:ui' as ui;
 
 import 'package:flutter/material.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
@@ -7,6 +9,7 @@ import 'package:geolocator/geolocator.dart';
 import 'offer_detail_screen.dart';
 import 'offer_model.dart';
 import 'category_model.dart';
+import 'icon_utils.dart';
 
 class OffersMapScreen extends StatefulWidget {
   final List<dynamic> offers;
@@ -37,7 +40,6 @@ class _OffersMapScreenState extends State<OffersMapScreen> {
   late String _sortMode;
 
   final Map<String, BitmapDescriptor> _categoryIcons = {};
-  final Map<String, Color> _categoryColors = {};
 
   static const _fallbackLat = 25.1972;
   static const _fallbackLng = 55.2744;
@@ -48,33 +50,39 @@ class _OffersMapScreenState extends State<OffersMapScreen> {
     _selectedCategoryId = widget.selectedCategoryId;
     _sortMode = widget.sortMode;
     _initCategoryIcons();
-    _buildMarkers();
   }
 
-  void _initCategoryIcons() {
-    const hues = [
-      BitmapDescriptor.hueRed,
-      BitmapDescriptor.hueBlue,
-      BitmapDescriptor.hueGreen,
-      BitmapDescriptor.hueOrange,
-      BitmapDescriptor.hueViolet,
-      BitmapDescriptor.hueYellow,
-    ];
-    const colors = [
-      Colors.red,
-      Colors.blue,
-      Colors.green,
-      Colors.orange,
-      Colors.purple,
-      Colors.yellow,
-    ];
-    for (var i = 0; i < widget.categories.length; i++) {
-      final cat = widget.categories[i];
-      final hue = hues[i % hues.length];
-      _categoryIcons[cat.id] =
-          BitmapDescriptor.defaultMarkerWithHue(hue);
-      _categoryColors[cat.id] = colors[i % colors.length];
+  Future<void> _initCategoryIcons() async {
+    for (final cat in widget.categories) {
+      final iconData = materialIconFromString(cat.mIcon);
+      if (iconData != null) {
+        _categoryIcons[cat.id] = await _bitmapDescriptorFromIcon(iconData);
+      }
     }
+    if (mounted) setState(_buildMarkers);
+  }
+
+  Future<BitmapDescriptor> _bitmapDescriptorFromIcon(IconData icon,
+      {Color color = Colors.red, double size = 64}) async {
+    final recorder = ui.PictureRecorder();
+    final canvas = Canvas(recorder);
+    final painter = TextPainter(textDirection: TextDirection.ltr);
+    painter.text = TextSpan(
+      text: String.fromCharCode(icon.codePoint),
+      style: TextStyle(
+        color: color,
+        fontSize: size,
+        fontFamily: icon.fontFamily,
+        package: icon.fontPackage,
+      ),
+    );
+    painter.layout();
+    painter.paint(canvas, Offset.zero);
+    final image = await recorder
+        .endRecording()
+        .toImage(painter.width.ceil(), painter.height.ceil());
+    final bytes = await image.toByteData(format: ui.ImageByteFormat.png);
+    return BitmapDescriptor.fromBytes(bytes!.buffer.asUint8List());
   }
 
   void _buildMarkers() {
@@ -120,10 +128,9 @@ class _OffersMapScreenState extends State<OffersMapScreen> {
         final snippet = rawBenefit.length > maxLen
             ? '${rawBenefit.substring(0, maxLen - 3)}...'
             : rawBenefit;
-        final catId = offer.categoryIds.isNotEmpty
-            ? offer.categoryIds.first
-            : null;
-        final icon = catId != null && _categoryIcons.containsKey(catId)
+        final catId =
+            offer.categoryIds.isNotEmpty ? offer.categoryIds.first : null;
+        final icon = catId != null && _categoryIcons[catId] != null
             ? _categoryIcons[catId]!
             : BitmapDescriptor.defaultMarker;
         _markers.add(
@@ -312,9 +319,11 @@ class _OffersMapScreenState extends State<OffersMapScreen> {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: widget.categories.map((c) {
-            final color = _categoryColors[c.id] ?? Colors.grey;
+            final iconData = materialIconFromString(c.mIcon);
             return ListTile(
-              leading: Icon(Icons.location_pin, color: color),
+              leading: iconData != null
+                  ? Icon(iconData)
+                  : const Icon(Icons.category),
               title: Text(c.name),
             );
           }).toList(),
