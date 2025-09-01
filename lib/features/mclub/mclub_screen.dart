@@ -238,7 +238,7 @@ class _MClubScreenState extends State<MClubScreen> with TickerProviderStateMixin
     );
   }
 
-  void _openMap() {
+  Future<void> _openMap() async {
     final offers = <Map<String, dynamic>>[];
     for (final raw in _offers) {
       if (raw is Map<String, dynamic>) {
@@ -264,7 +264,7 @@ class _MClubScreenState extends State<MClubScreen> with TickerProviderStateMixin
       }
     }
 
-    Navigator.push(
+    final result = await Navigator.push<Map<String, dynamic>>(
       context,
       MaterialPageRoute(
         builder: (_) => OffersMapScreen(
@@ -277,6 +277,13 @@ class _MClubScreenState extends State<MClubScreen> with TickerProviderStateMixin
         ),
       ),
     );
+
+    if (result != null) {
+      setState(() {
+        _sortMode = result['sortMode'] ?? _sortMode;
+        _selectedCategoryId = result['selectedCategoryId'] as String?;
+      });
+    }
   }
 
   @override

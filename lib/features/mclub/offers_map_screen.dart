@@ -325,55 +325,64 @@ class _OffersMapScreenState extends State<OffersMapScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('Предложения на карте'),
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.info_outline),
-            tooltip: 'Легенда',
-            onPressed: _showLegend,
-          ),
-          IconButton(
-            icon: const Icon(Icons.tune),
-            tooltip: 'Сортировка',
-            onPressed: _openSortModal,
-          ),
-        ],
-      ),
-      body: Column(
-        children: [
-          Padding(
-            padding: const EdgeInsets.all(8),
-            child: DropdownButton<String?>(
-              isExpanded: true,
-              value: _selectedCategoryId,
-              items: [
-                const DropdownMenuItem<String?>(
-                  value: null,
-                  child: Text('Все категории'),
-                ),
-                ...widget.categories.map(
-                  (c) => DropdownMenuItem<String?>(
-                    value: c.id,
-                    child: Text(c.name),
+    return WillPopScope(
+      onWillPop: () async {
+        Navigator.pop(context, {
+          'sortMode': _sortMode,
+          'selectedCategoryId': _selectedCategoryId,
+        });
+        return false;
+      },
+      child: Scaffold(
+        appBar: AppBar(
+          title: const Text('Предложения на карте'),
+          actions: [
+            IconButton(
+              icon: const Icon(Icons.info_outline),
+              tooltip: 'Легенда',
+              onPressed: _showLegend,
+            ),
+            IconButton(
+              icon: const Icon(Icons.tune),
+              tooltip: 'Сортировка',
+              onPressed: _openSortModal,
+            ),
+          ],
+        ),
+        body: Column(
+          children: [
+            Padding(
+              padding: const EdgeInsets.all(8),
+              child: DropdownButton<String?>(
+                isExpanded: true,
+                value: _selectedCategoryId,
+                items: [
+                  const DropdownMenuItem<String?>(
+                    value: null,
+                    child: Text('Все категории'),
                   ),
-                ),
-              ],
-              onChanged: _onCategoryChanged,
+                  ...widget.categories.map(
+                    (c) => DropdownMenuItem<String?>(
+                      value: c.id,
+                      child: Text(c.name),
+                    ),
+                  ),
+                ],
+                onChanged: _onCategoryChanged,
+              ),
             ),
-          ),
-          Expanded(
-            child: GoogleMap(
-              initialCameraPosition: _initialCamera,
-              markers: _markers,
-              onMapCreated: (c) {
-                _controller = c;
-                _fitBounds();
-              },
+            Expanded(
+              child: GoogleMap(
+                initialCameraPosition: _initialCamera,
+                markers: _markers,
+                onMapCreated: (c) {
+                  _controller = c;
+                  _fitBounds();
+                },
+              ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }
