@@ -1,8 +1,11 @@
 import 'dart:math';
+import 'dart:ui' as ui;
 
 import 'package:flutter/material.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:geolocator/geolocator.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:font_awesome_flutter/fa_icon_name_mapping.dart';
 
 import 'offer_detail_screen.dart';
 import 'offer_model.dart';
@@ -47,19 +50,13 @@ class _OffersMapScreenState extends State<OffersMapScreen> {
     super.initState();
     _selectedCategoryId = widget.selectedCategoryId;
     _sortMode = widget.sortMode;
-    _initCategoryIcons();
-    _buildMarkers();
+    _initCategoryIcons().then((_) {
+      _buildMarkers();
+      setState(() {});
+    });
   }
 
-  void _initCategoryIcons() {
-    const hues = [
-      BitmapDescriptor.hueRed,
-      BitmapDescriptor.hueBlue,
-      BitmapDescriptor.hueGreen,
-      BitmapDescriptor.hueOrange,
-      BitmapDescriptor.hueViolet,
-      BitmapDescriptor.hueYellow,
-    ];
+  Future<void> _initCategoryIcons() async {
     const colors = [
       Colors.red,
       Colors.blue,
@@ -70,11 +67,51 @@ class _OffersMapScreenState extends State<OffersMapScreen> {
     ];
     for (var i = 0; i < widget.categories.length; i++) {
       final cat = widget.categories[i];
-      final hue = hues[i % hues.length];
-      _categoryIcons[cat.id] =
-          BitmapDescriptor.defaultMarkerWithHue(hue);
+      BitmapDescriptor descriptor = BitmapDescriptor.defaultMarker;
+      final iconName = cat.faIcon;
+      if (iconName != null) {
+        final iconData = faIconNameMapping[iconName];
+        if (iconData != null) {
+          try {
+            descriptor = await _bitmapDescriptorFromIconData(
+              iconData,
+              color: colors[i % colors.length],
+            );
+          } catch (_) {
+            descriptor = BitmapDescriptor.defaultMarker;
+          }
+        }
+      }
+      _categoryIcons[cat.id] = descriptor;
       _categoryColors[cat.id] = colors[i % colors.length];
     }
+  }
+
+  Future<BitmapDescriptor> _bitmapDescriptorFromIconData(
+    IconData iconData, {
+    Color color = Colors.red,
+    double size = 80,
+  }) async {
+    final pictureRecorder = ui.PictureRecorder();
+    final canvas = Canvas(pictureRecorder);
+    final textPainter = TextPainter(textDirection: TextDirection.ltr);
+    final textSpan = TextSpan(
+      text: String.fromCharCode(iconData.codePoint),
+      style: TextStyle(
+        fontSize: size,
+        fontFamily: iconData.fontFamily,
+        package: iconData.fontPackage,
+        color: color,
+      ),
+    );
+    textPainter.text = textSpan;
+    textPainter.layout();
+    textPainter.paint(canvas, Offset.zero);
+    final image = await pictureRecorder
+        .endRecording()
+        .toImage(textPainter.width.ceil(), textPainter.height.ceil());
+    final bytes = await image.toByteData(format: ui.ImageByteFormat.png);
+    return BitmapDescriptor.fromBytes(bytes!.buffer.asUint8List());
   }
 
   void _buildMarkers() {
