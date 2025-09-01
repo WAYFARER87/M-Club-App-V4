@@ -41,6 +41,8 @@ class _OffersMapScreenState extends State<OffersMapScreen> {
 
   final Map<String, BitmapDescriptor> _categoryIcons = {};
 
+  static const double markerSize = 96;
+
   static const _fallbackLat = 25.1972;
   static const _fallbackLng = 55.2744;
 
@@ -56,14 +58,15 @@ class _OffersMapScreenState extends State<OffersMapScreen> {
     for (final cat in widget.categories) {
       final iconData = materialIconFromString(cat.mIcon);
       if (iconData != null) {
-        _categoryIcons[cat.id] = await _bitmapDescriptorFromIcon(iconData);
+        _categoryIcons[cat.id] =
+            await _bitmapDescriptorFromIcon(iconData, size: markerSize);
       }
     }
     if (mounted) setState(_buildMarkers);
   }
 
   Future<BitmapDescriptor> _bitmapDescriptorFromIcon(IconData icon,
-      {Color color = Colors.red, double size = 64}) async {
+      {Color color = Colors.red, double size = markerSize}) async {
     final recorder = ui.PictureRecorder();
     final canvas = Canvas(recorder);
 
