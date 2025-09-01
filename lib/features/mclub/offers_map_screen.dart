@@ -28,34 +28,40 @@ class _OffersMapScreenState extends State<OffersMapScreen> {
   }
 
   void _buildMarkers() {
-    var id = 0;
     for (final rawOffer in widget.offers) {
       String title;
-      Iterable<dynamic> branches;
+      String offerId;
+      List<dynamic> branches;
       if (rawOffer is Offer) {
         title = rawOffer.title;
+        offerId = rawOffer.id;
         branches = rawOffer.branches;
       } else if (rawOffer is Map<String, dynamic>) {
         title = (rawOffer['title'] ?? '').toString();
+        offerId = (rawOffer['id'] ?? '').toString();
         branches = rawOffer['branches'] as List<dynamic>? ?? const [];
       } else {
         continue;
       }
 
-      for (final br in branches) {
+      for (var index = 0; index < branches.length; index++) {
+        final br = branches[index];
         double? lat;
         double? lng;
+        String? code;
         if (br is Branch) {
           lat = br.lat;
           lng = br.lng;
+          code = br.code;
         } else if (br is Map<String, dynamic>) {
           lat = double.tryParse((br['lattitude'] ?? '').toString());
           lng = double.tryParse((br['longitude'] ?? '').toString());
+          code = br['code']?.toString();
         }
         if (lat == null || lng == null) continue;
         _markers.add(
           Marker(
-            markerId: MarkerId('m${id++}'),
+            markerId: MarkerId('${offerId}_${code ?? index}'),
             position: LatLng(lat, lng),
             infoWindow: InfoWindow(title: title),
           ),
