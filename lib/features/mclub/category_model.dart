@@ -9,7 +9,7 @@ class Category {
     return Category(
       id: json['id']?.toString() ?? '',
       name: json['name']?.toString() ?? '',
-      faIcon: json['faIcon']?.toString(),
+      faIcon: json['fa_icon']?.toString(),
     );
   }
 }
