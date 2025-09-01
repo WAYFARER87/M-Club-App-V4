@@ -11,17 +11,17 @@ class MarkerGenerator {
     required Size size,
   }) async {
     WidgetsFlutterBinding.ensureInitialized();
-
     final repaintBoundary = RenderRepaintBoundary();
+    final uiView = WidgetsBinding.instance.platformDispatcher.implicitView!;
     final renderView = RenderView(
-      window: WidgetsBinding.instance.window,
+      view: uiView,
       child: RenderPositionedBox(
         alignment: Alignment.center,
         child: repaintBoundary,
       ),
       configuration: ViewConfiguration(
         size: size,
-        devicePixelRatio: WidgetsBinding.instance.window.devicePixelRatio,
+        devicePixelRatio: uiView.devicePixelRatio,
       ),
     );
 
@@ -45,7 +45,7 @@ class MarkerGenerator {
     pipelineOwner.flushPaint();
 
     final ui.Image image = await repaintBoundary.toImage(
-      pixelRatio: WidgetsBinding.instance.window.devicePixelRatio,
+      pixelRatio: uiView.devicePixelRatio,
     );
     final ByteData? bytes =
         await image.toByteData(format: ui.ImageByteFormat.png);
