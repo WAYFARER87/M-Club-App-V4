@@ -5,7 +5,7 @@
 .vscode/
 android/
 pubspec.lock
-ios/
+# ios/ directory is tracked to configure platform permissions
 linux/
 web/
 windows/
