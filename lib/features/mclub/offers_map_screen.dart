@@ -56,7 +56,8 @@ class _OffersMapScreenState extends State<OffersMapScreen> {
     for (final cat in widget.categories) {
       final iconData = materialIconFromString(cat.mIcon);
       if (iconData != null) {
-        _categoryIcons[cat.id] = await _bitmapDescriptorFromIcon(iconData);
+        _categoryIcons[cat.id] =
+            await _bitmapDescriptorFromIcon(iconData, size: 96);
       }
     }
     if (mounted) setState(_buildMarkers);
