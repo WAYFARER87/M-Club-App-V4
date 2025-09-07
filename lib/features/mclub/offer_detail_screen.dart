@@ -33,6 +33,7 @@ class _OfferDetailScreenState extends State<OfferDetailScreen> {
   int _rating = 0;
   int? _userVote; // -1 дизлайк, 1 лайк, null — не голосовал
   bool _isVoting = false;
+  bool _isFavorite = false;
 
   @override
   void initState() {
@@ -41,6 +42,7 @@ class _OfferDetailScreenState extends State<OfferDetailScreen> {
     _initLocation();
     _rating = widget.offer.rating;
     _userVote = widget.offer.vote;
+    _isFavorite = widget.offer.isFavorite;
   }
 
   @override
@@ -94,6 +96,19 @@ class _OfferDetailScreenState extends State<OfferDetailScreen> {
     final title = widget.offer.title;
     final text = [title, link].where((e) => e.trim().isNotEmpty).join('\n');
     Share.share(text);
+  }
+
+  Future<void> _toggleFavorite() async {
+    final id = int.tryParse(widget.offer.id);
+    if (id == null) return;
+    try {
+      final fav = await _api.toggleFavorite(id);
+      if (!mounted) return;
+      setState(() => _isFavorite = fav);
+      Navigator.of(context).pop(fav);
+    } catch (_) {
+      // ignore errors
+    }
   }
 
   Future<void> _openPhone(String phone) async {
@@ -243,6 +258,14 @@ class _OfferDetailScreenState extends State<OfferDetailScreen> {
                 tooltip: 'Назад',
               ),
               actions: [
+                IconButton(
+                  icon: Icon(
+                    _isFavorite ? Icons.favorite : Icons.favorite_border,
+                    color: iconColor,
+                  ),
+                  onPressed: _toggleFavorite,
+                  tooltip: 'Избранное',
+                ),
                 IconButton(
                   icon: Icon(Icons.share, color: iconColor),
                   onPressed: _shareOffer,
