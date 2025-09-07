@@ -84,8 +84,14 @@ class ApiService {
     try {
       final formData = FormData.fromMap({'id': id});
       final res = await _dio.post('/benefits/favorites', data: formData);
-      if (res.data is Map && res.data['is_favorite'] is bool) {
-        return res.data['is_favorite'] as bool;
+      if (res.data is Map) {
+        final data = res.data as Map;
+        if (data['favorites'] is bool) {
+          return data['favorites'] as bool;
+        }
+        if (data['is_favorite'] is bool) {
+          return data['is_favorite'] as bool;
+        }
       }
       return false;
     } catch (e) {
