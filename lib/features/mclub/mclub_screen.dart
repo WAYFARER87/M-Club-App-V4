@@ -433,7 +433,7 @@ class _MClubScreenState extends State<MClubScreen> with TickerProviderStateMixin
                                       right: 8,
                                       child: Icon(
                                         Icons.favorite,
-                                        color: Colors.red,
+                                        color: Colors.pink,
                                       ),
                                     ),
                                 ],
