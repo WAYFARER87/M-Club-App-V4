@@ -77,6 +77,25 @@ class ApiService {
     };
   }
 
+  /// Изменить состояние избранного для предложения
+  /// [id] - идентификатор предложения
+  /// Возвращает текущий признак избранного
+  Future<bool> toggleFavorite(int id) async {
+    try {
+      final formData = FormData.fromMap({'id': id});
+      final res = await _dio.post('/benefits/favorites', data: formData);
+      if (res.data is Map && res.data['is_favorite'] is bool) {
+        return res.data['is_favorite'] as bool;
+      }
+      return false;
+    } catch (e) {
+      if (kDebugMode) {
+        print('toggleFavorite error: $e');
+      }
+      rethrow;
+    }
+  }
+
   /// Очистить токен (логаут)
   Future<void> logout() async {
     await _storage.delete(key: 'auth_token');
