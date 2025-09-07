@@ -272,7 +272,7 @@ class _OfferDetailScreenState extends State<OfferDetailScreen> {
                 IconButton(
                   icon: Icon(
                     _isFavorite ? Icons.favorite : Icons.favorite_border,
-                    color: _isFavorite ? Colors.red : iconColor,
+                    color: _isFavorite ? Colors.pink : iconColor,
                   ),
                   onPressed: _toggleFavorite,
                   tooltip: 'Избранное',
