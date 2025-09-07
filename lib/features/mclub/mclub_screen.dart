@@ -186,42 +186,6 @@ class _MClubScreenState extends State<MClubScreen> with TickerProviderStateMixin
     }
   }
 
-  Future<void> _toggleFavoriteOffer(Map<String, dynamic> offer) async {
-    final id = int.tryParse((offer['id'] ?? '').toString());
-    if (id == null) return;
-    final prevFav = parseBool(offer['is_favorite']);
-    setState(() {
-      offer['is_favorite'] = !prevFav;
-    });
-    try {
-      final fav = await _api.toggleFavorite(id);
-      if (!mounted) return;
-      if (fav == null) {
-        setState(() {
-          offer['is_favorite'] = prevFav;
-        });
-        return;
-      }
-      if (fav != offer['is_favorite']) {
-        setState(() {
-          offer['is_favorite'] = fav;
-        });
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Не удалось изменить избранное')),
-        );
-      }
-    } catch (_) {
-      if (mounted) {
-        setState(() {
-          offer['is_favorite'] = prevFav;
-        });
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Не удалось изменить избранное')),
-        );
-      }
-    }
-  }
-
   void _centerSelectedTab() {
     if (_tabController == null || _tabScrollController == null) return;
     final index = _tabController!.index;
@@ -476,9 +440,18 @@ class _MClubScreenState extends State<MClubScreen> with TickerProviderStateMixin
                                             ? Colors.pink
                                             : Colors.white,
                                       ),
-                                      onPressed: () =>
-                                          _toggleFavoriteOffer(
-                                              offer as Map<String, dynamic>),
+                                      onPressed: () async {
+                                        final id = int.tryParse(
+                                            (offer['id'] ?? '').toString());
+                                        if (id == null) return;
+                                        setState(() => offer['is_favorite'] =
+                                            !parseBool(offer['is_favorite']));
+                                        try {
+                                          await _api.toggleFavorite(id);
+                                        } catch (_) {
+                                          // ignore errors
+                                        }
+                                      },
                                     ),
                                   ),
                                 ],

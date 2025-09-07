@@ -101,30 +101,13 @@ class _OfferDetailScreenState extends State<OfferDetailScreen> {
   Future<void> _toggleFavorite() async {
     final id = int.tryParse(widget.offer.id);
     if (id == null) return;
-    final prevFav = _isFavorite;
     if (mounted) {
       setState(() => _isFavorite = !_isFavorite);
     }
     try {
-      final fav = await _api.toggleFavorite(id);
-      if (!mounted) return;
-      if (fav == null) {
-        setState(() => _isFavorite = prevFav);
-        return;
-      }
-      if (fav != _isFavorite) {
-        setState(() => _isFavorite = fav);
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Не удалось изменить избранное')),
-        );
-      }
+      await _api.toggleFavorite(id);
     } catch (_) {
-      if (mounted) {
-        setState(() => _isFavorite = prevFav);
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Не удалось изменить избранное')),
-        );
-      }
+      // ignore errors
     }
   }
 
