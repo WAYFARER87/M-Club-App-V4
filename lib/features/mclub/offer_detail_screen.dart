@@ -237,7 +237,7 @@ class _OfferDetailScreenState extends State<OfferDetailScreen> {
 
     return WillPopScope(
       onWillPop: () async {
-        Navigator.of(context).pop(_userVote);
+        Navigator.of(context).pop(_isFavorite);
         return false;
       },
       child: AnnotatedRegion<SystemUiOverlayStyle>(
@@ -254,7 +254,7 @@ class _OfferDetailScreenState extends State<OfferDetailScreen> {
               expandedHeight: _expandedHeight,
               leading: IconButton(
                 icon: Icon(Icons.arrow_back, color: iconColor),
-                onPressed: () => Navigator.of(context).pop(_userVote),
+                onPressed: () => Navigator.of(context).pop(_isFavorite),
                 tooltip: 'Назад',
               ),
               actions: [

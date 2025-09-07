@@ -222,14 +222,48 @@ class _OffersMapScreenState extends State<OffersMapScreen> {
                   Align(
                     alignment: Alignment.centerRight,
                     child: ElevatedButton(
-                      onPressed: () {
+                      onPressed: () async {
                         Navigator.pop(ctx);
-                        Navigator.push(
+                        final fav = await Navigator.push<bool?>(
                           context,
                           MaterialPageRoute(
                             builder: (_) => OfferDetailScreen(offer: offer),
                           ),
                         );
+                        if (!mounted) return;
+                        if (fav is bool && fav != offer.isFavorite) {
+                          setState(() {
+                            for (var i = 0; i < widget.offers.length; i++) {
+                              final raw = widget.offers[i];
+                              if (raw is Map<String, dynamic> && raw['id']?.toString() == offer.id) {
+                                raw['is_favorite'] = fav;
+                              } else if (raw is Offer && raw.id == offer.id) {
+                                widget.offers[i] = Offer(
+                                  id: raw.id,
+                                  categoryIds: raw.categoryIds,
+                                  categoryNames: raw.categoryNames,
+                                  title: raw.title,
+                                  titleShort: raw.titleShort,
+                                  descriptionShort: raw.descriptionShort,
+                                  descriptionHtml: raw.descriptionHtml,
+                                  benefitText: raw.benefitText,
+                                  benefitPercent: raw.benefitPercent,
+                                  dateStart: raw.dateStart,
+                                  dateEnd: raw.dateEnd,
+                                  photoUrl: raw.photoUrl,
+                                  photosUrl: raw.photosUrl,
+                                  shareUrl: raw.shareUrl,
+                                  branches: raw.branches,
+                                  links: raw.links,
+                                  rating: raw.rating,
+                                  vote: raw.vote,
+                                  isFavorite: fav,
+                                );
+                              }
+                            }
+                            _buildMarkers();
+                          });
+                        }
                       },
                       child: const Text('Подробнее'),
                     ),
