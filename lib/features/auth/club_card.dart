@@ -9,16 +9,23 @@ class ClubCard extends StatelessWidget {
   const ClubCard({super.key, required this.cardNum, required this.expireDate});
 
   String _formatExpiry(String date) {
-    final parts = date.split('/');
-    if (parts.length >= 2) {
-      final month = parts[0].padLeft(2, '0');
-      var year = parts[1];
-      if (year.length == 4) {
-        year = year.substring(2);
-      }
+    try {
+      final parsed = DateTime.parse(date);
+      final month = parsed.month.toString().padLeft(2, '0');
+      final year = (parsed.year % 100).toString().padLeft(2, '0');
       return '$month/$year';
+    } catch (_) {
+      final parts = date.split('/');
+      if (parts.length >= 2) {
+        final month = parts[0].padLeft(2, '0');
+        var year = parts[1];
+        if (year.length == 4) {
+          year = year.substring(2);
+        }
+        return '$month/$year';
+      }
+      return date;
     }
-    return date;
   }
 
   @override
