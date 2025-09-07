@@ -3,6 +3,7 @@ import 'package:dio/dio.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:m_club/core/utils/parse_bool.dart';
+import 'package:m_club/features/auth/user_profile.dart';
 
 class ApiService {
   static final ApiService _instance = ApiService._internal();
@@ -49,6 +50,54 @@ class ApiService {
       return true;
     }
     return false;
+  }
+
+  /// Получить профиль пользователя
+  Future<UserProfile> fetchProfile() async {
+    final res = await _dio.get('/user/profile');
+    final data =
+        res.data is Map && res.data['data'] is Map ? res.data['data'] : res.data;
+    return UserProfile.fromJson(
+        Map<String, dynamic>.from(data ?? <String, dynamic>{}));
+  }
+
+  /// Обновить профиль пользователя
+  /// Возвращает обновлённый профиль, если сервер его прислал
+  Future<UserProfile?> updateProfile({
+    String? name,
+    String? lastName,
+    String? phone,
+  }) async {
+    final payload = <String, dynamic>{};
+    if (name != null) payload['name'] = name;
+    if (lastName != null) payload['lastname'] = lastName;
+    if (phone != null) payload['phone'] = phone;
+
+    try {
+      final res = await _dio.patch('/user/profile', data: payload);
+      final status = res.statusCode ?? 0;
+      if (status >= 200 && status < 300) {
+        final data = res.data is Map && res.data['data'] is Map
+            ? res.data['data']
+            : res.data;
+        if (data is Map) {
+          return UserProfile.fromJson(
+              Map<String, dynamic>.from(data));
+        }
+        return null;
+      }
+      throw DioException(
+        requestOptions: res.requestOptions,
+        response: res,
+        error: 'Error code: $status',
+        type: DioExceptionType.badResponse,
+      );
+    } on DioException catch (e) {
+      if (kDebugMode) {
+        print('updateProfile error: $e');
+      }
+      rethrow;
+    }
   }
 
   /// Получить список категорий
