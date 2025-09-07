@@ -4,7 +4,6 @@
 .idea/
 .vscode/
 android/
-pubspec.lock
 ios/
 linux/
 web/
