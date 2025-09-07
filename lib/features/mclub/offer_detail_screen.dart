@@ -107,8 +107,13 @@ class _OfferDetailScreenState extends State<OfferDetailScreen> {
     }
     try {
       final fav = await _api.toggleFavorite(id);
-      if (mounted && fav != _isFavorite) {
+      if (!mounted) return;
+      if (fav == null) {
         setState(() => _isFavorite = prevFav);
+        return;
+      }
+      if (fav != _isFavorite) {
+        setState(() => _isFavorite = fav);
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text('Не удалось изменить избранное')),
         );

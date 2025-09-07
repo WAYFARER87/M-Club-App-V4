@@ -79,21 +79,27 @@ class ApiService {
 
   /// Изменить состояние избранного для предложения
   /// [id] - идентификатор предложения
-  /// Возвращает текущий признак избранного
-  Future<bool> toggleFavorite(int id) async {
+  /// Возвращает текущий признак избранного. Если сервер не вернул
+  /// ожидаемого флага, возвращает `null`.
+  Future<bool?> toggleFavorite(int id) async {
     try {
       final formData = FormData.fromMap({'id': id});
       final res = await _dio.post('/benefits/favorites', data: formData);
-      if (res.data is Map) {
-        final data = res.data as Map;
-        if (data['favorites'] is bool) {
-          return data['favorites'] as bool;
+      final raw = res.data;
+      final data = raw is Map && raw['data'] is Map ? raw['data'] : raw;
+      if (data is Map) {
+        final value = data.containsKey('favorites')
+            ? data['favorites']
+            : data['is_favorite'];
+        if (value is bool) return value;
+        if (value is String) {
+          final v = value.toLowerCase();
+          if (v == 'true' || v == '1') return true;
+          if (v == 'false' || v == '0') return false;
         }
-        if (data['is_favorite'] is bool) {
-          return data['is_favorite'] as bool;
-        }
+        if (value is num) return value != 0;
       }
-      return false;
+      return null;
     } catch (e) {
       if (kDebugMode) {
         print('toggleFavorite error: $e');
