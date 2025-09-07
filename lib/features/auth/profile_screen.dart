@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import '../../core/services/api_service.dart';
 import 'user_profile.dart';
+import 'club_card.dart';
 
 class ProfileScreen extends StatefulWidget {
   const ProfileScreen({super.key});
@@ -151,17 +153,23 @@ class _ProfileScreenState extends State<ProfileScreen> {
   }
 
   Widget _buildCardTab() {
-    if (_profile == null) {
+    final profile = _profile;
+    if (profile == null) {
       return const SizedBox();
     }
+
     return Center(
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Text('Карта № ${_profile!.cardNum}'),
-          const SizedBox(height: 8),
-          Text('Действительна до: ${_profile!.expireDate}'),
-        ],
+      child: GestureDetector(
+        onTap: () {
+          Clipboard.setData(ClipboardData(text: profile.cardNum));
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('Номер карты скопирован')),
+          );
+        },
+        child: ClubCard(
+          cardNum: profile.cardNum,
+          expireDate: profile.expireDate,
+        ),
       ),
     );
   }
@@ -215,4 +223,3 @@ class _ProfileScreenState extends State<ProfileScreen> {
     );
   }
 }
-

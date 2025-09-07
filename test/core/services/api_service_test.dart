@@ -4,9 +4,10 @@ import 'package:m_club/core/services/api_service.dart';
 import 'package:m_club/features/auth/user_profile.dart';
 
 void main() {
+  TestWidgetsFlutterBinding.ensureInitialized();
   test('voteBenefit returns actual rating and vote', () async {
     final service = ApiService();
-
+    service.dio.interceptors.clear();
     service.dio.interceptors.add(
       InterceptorsWrapper(
         onRequest: (options, handler) {
@@ -31,7 +32,7 @@ void main() {
 
   test('fetchProfile parses response into UserProfile', () async {
     final service = ApiService();
-
+    service.dio.interceptors.clear();
     service.dio.interceptors.add(
       InterceptorsWrapper(
         onRequest: (options, handler) {
@@ -67,9 +68,10 @@ void main() {
     service.dio.interceptors.clear();
   });
 
-  test('updateProfile sends only provided fields and returns profile', () async {
+  test('updateProfile sends only provided fields and returns profile',
+      () async {
     final service = ApiService();
-
+    service.dio.interceptors.clear();
     service.dio.interceptors.add(
       InterceptorsWrapper(
         onRequest: (options, handler) {
@@ -108,7 +110,7 @@ void main() {
 
   test('updateProfile throws DioException on error status', () async {
     final service = ApiService();
-
+    service.dio.interceptors.clear();
     service.dio.interceptors.add(
       InterceptorsWrapper(
         onRequest: (options, handler) {
