@@ -194,9 +194,16 @@ class _MClubScreenState extends State<MClubScreen> with TickerProviderStateMixin
     });
     try {
       final fav = await _api.toggleFavorite(id);
-      if (fav != offer['is_favorite'] && mounted) {
+      if (!mounted) return;
+      if (fav == null) {
         setState(() {
           offer['is_favorite'] = prevFav;
+        });
+        return;
+      }
+      if (fav != offer['is_favorite']) {
+        setState(() {
+          offer['is_favorite'] = fav;
         });
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text('Не удалось изменить избранное')),
