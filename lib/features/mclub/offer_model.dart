@@ -23,6 +23,7 @@ class Offer {
   final OfferLinks links;
   final int rating;                 // текущий рейтинг
   final int? vote;                  // голос пользователя
+  final bool isFavorite;
 
   Offer({
     required this.id,
@@ -43,6 +44,7 @@ class Offer {
     required this.links,
     required this.rating,
     required this.vote,
+    required this.isFavorite,
   });
 
   factory Offer.fromJson(Map<String, dynamic> json) {
@@ -118,6 +120,7 @@ class Offer {
       links: links,
       rating: int.tryParse((json['rating'] ?? '0').toString()) ?? 0,
       vote: json['vote'] == null ? null : int.tryParse(json['vote'].toString()),
+      isFavorite: json['is_favorite'] == true,
     );
   }
 }
