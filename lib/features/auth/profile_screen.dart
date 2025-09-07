@@ -1,9 +1,218 @@
 import 'package:flutter/material.dart';
+import '../../core/services/api_service.dart';
+import 'user_profile.dart';
 
-class ProfileScreen extends StatelessWidget {
+class ProfileScreen extends StatefulWidget {
   const ProfileScreen({super.key});
+
+  @override
+  State<ProfileScreen> createState() => _ProfileScreenState();
+}
+
+class _ProfileScreenState extends State<ProfileScreen> {
+  final _api = ApiService();
+  final _formKey = GlobalKey<FormState>();
+  final _nameCtrl = TextEditingController();
+  final _lastNameCtrl = TextEditingController();
+  final _phoneCtrl = TextEditingController();
+  final _emailCtrl = TextEditingController();
+
+  bool _isLoading = false;
+  bool _isSaving = false;
+  String? _error;
+  UserProfile? _profile;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadProfile();
+  }
+
+  @override
+  void dispose() {
+    _nameCtrl.dispose();
+    _lastNameCtrl.dispose();
+    _phoneCtrl.dispose();
+    _emailCtrl.dispose();
+    super.dispose();
+  }
+
+  Future<void> _loadProfile() async {
+    setState(() {
+      _isLoading = true;
+      _error = null;
+    });
+
+    try {
+      final profile = await _api.fetchProfile();
+      if (!mounted) return;
+      setState(() {
+        _profile = profile;
+        _nameCtrl.text = profile.name;
+        _lastNameCtrl.text = profile.lastname;
+        _phoneCtrl.text = profile.phone;
+        _emailCtrl.text = profile.email;
+      });
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Не удалось загрузить профиль: $e')),
+        );
+        setState(() => _error = 'Не удалось загрузить профиль');
+      }
+    } finally {
+      if (mounted) {
+        setState(() {
+          _isLoading = false;
+        });
+      }
+    }
+  }
+
+  Future<void> _saveProfile() async {
+    if (!_formKey.currentState!.validate()) return;
+    setState(() => _isSaving = true);
+    try {
+      final upd = await _api.updateProfile(
+        name: _nameCtrl.text.trim(),
+        lastName: _lastNameCtrl.text.trim(),
+      );
+      if (upd != null) {
+        setState(() {
+          _profile = upd;
+          _phoneCtrl.text = upd.phone;
+          _emailCtrl.text = upd.email;
+        });
+      }
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Профиль обновлён')),
+        );
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Ошибка сохранения: $e')),
+        );
+      }
+    } finally {
+      if (mounted) {
+        setState(() => _isSaving = false);
+      }
+    }
+  }
+
+  Widget _buildProfileTab() {
+    return Padding(
+      padding: const EdgeInsets.all(16),
+      child: Form(
+        key: _formKey,
+        child: ListView(
+          children: [
+            TextFormField(
+              controller: _nameCtrl,
+              decoration: const InputDecoration(labelText: 'Имя'),
+              validator: (v) => (v ?? '').trim().isEmpty ? 'Введите имя' : null,
+            ),
+            const SizedBox(height: 12),
+            TextFormField(
+              controller: _lastNameCtrl,
+              decoration: const InputDecoration(labelText: 'Фамилия'),
+              validator: (v) =>
+                  (v ?? '').trim().isEmpty ? 'Введите фамилию' : null,
+            ),
+            const SizedBox(height: 12),
+            TextFormField(
+              controller: _phoneCtrl,
+              decoration: const InputDecoration(labelText: 'Телефон'),
+              readOnly: true,
+            ),
+            const SizedBox(height: 12),
+            TextFormField(
+              controller: _emailCtrl,
+              decoration: const InputDecoration(labelText: 'Email'),
+              readOnly: true,
+            ),
+            const SizedBox(height: 24),
+            ElevatedButton(
+              onPressed: _isSaving ? null : _saveProfile,
+              child: _isSaving
+                  ? const SizedBox(
+                      height: 16,
+                      width: 16,
+                      child: CircularProgressIndicator(strokeWidth: 2),
+                    )
+                  : const Text('Сохранить'),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildCardTab() {
+    if (_profile == null) {
+      return const SizedBox();
+    }
+    return Center(
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Text('Карта № ${_profile!.cardNum}'),
+          const SizedBox(height: 8),
+          Text('Действительна до: ${_profile!.expireDate}'),
+        ],
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
-    return const Center(child: Text('Личный кабинет (профиль)'));
+    if (_isLoading) {
+      return const Center(child: CircularProgressIndicator());
+    }
+    if (_error != null) {
+      return Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Text(_error!, style: const TextStyle(color: Colors.red)),
+            const SizedBox(height: 8),
+            ElevatedButton(
+              onPressed: _loadProfile,
+              child: const Text('Повторить'),
+            ),
+          ],
+        ),
+      );
+    }
+
+    return DefaultTabController(
+      length: 2,
+      child: Column(
+        children: [
+          Material(
+            color: Colors.white,
+            child: const TabBar(
+              labelColor: Color(0xFF182857),
+              unselectedLabelColor: Colors.black54,
+              tabs: [
+                Tab(text: 'Профиль'),
+                Tab(text: 'Клубная карта'),
+              ],
+            ),
+          ),
+          Expanded(
+            child: TabBarView(
+              children: [
+                _buildProfileTab(),
+                _buildCardTab(),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
   }
 }
+
