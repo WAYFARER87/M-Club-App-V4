@@ -2,6 +2,7 @@ import 'dart:ui' as ui;
 import 'package:dio/dio.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+import 'package:m_club/core/utils/parse_bool.dart';
 
 class ApiService {
   static final ApiService _instance = ApiService._internal();
@@ -91,13 +92,10 @@ class ApiService {
         final value = data.containsKey('favorites')
             ? data['favorites']
             : data['is_favorite'];
-        if (value is bool) return value;
-        if (value is String) {
-          final v = value.toLowerCase();
-          if (v == 'true' || v == '1') return true;
-          if (v == 'false' || v == '0') return false;
+        if (value == null) return null;
+        if (value is bool || value is String || value is num) {
+          return parseBool(value);
         }
-        if (value is num) return value != 0;
       }
       return null;
     } catch (e) {

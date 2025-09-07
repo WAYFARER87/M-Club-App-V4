@@ -1,3 +1,5 @@
+import 'package:m_club/core/utils/parse_bool.dart';
+
 class Offer {
   final String id;
   final List<String> categoryIds;   // из category[].id
@@ -120,7 +122,7 @@ class Offer {
       links: links,
       rating: int.tryParse((json['rating'] ?? '0').toString()) ?? 0,
       vote: json['vote'] == null ? null : int.tryParse(json['vote'].toString()),
-      isFavorite: json['is_favorite'] == true,
+      isFavorite: parseBool(json['is_favorite']),
     );
   }
 }
