@@ -10,6 +10,7 @@ class UserProfile {
   final String email;
   final String login;
   final bool isVerifiedPhone;
+  final bool isVerifiedEmail;
   final bool isUaeResident;
   final String lang;
 
@@ -23,6 +24,7 @@ class UserProfile {
     required this.email,
     required this.login,
     required this.isVerifiedPhone,
+    required this.isVerifiedEmail,
     required this.isUaeResident,
     required this.lang,
   });
@@ -38,6 +40,7 @@ class UserProfile {
       email: json['email']?.toString() ?? '',
       login: json['login']?.toString() ?? '',
       isVerifiedPhone: parseBool(json['is_verified_phone']),
+      isVerifiedEmail: parseBool(json['is_verified_email']),
       isUaeResident: parseBool(json['is_uae_resident']),
       lang: json['lang']?.toString() ?? '',
     );
@@ -54,6 +57,7 @@ class UserProfile {
       'email': email,
       'login': login,
       'is_verified_phone': isVerifiedPhone,
+      'is_verified_email': isVerifiedEmail,
       'is_uae_resident': isUaeResident,
       'lang': lang,
     };
