@@ -105,7 +105,6 @@ class _OfferDetailScreenState extends State<OfferDetailScreen> {
       final fav = await _api.toggleFavorite(id);
       if (!mounted) return;
       setState(() => _isFavorite = fav);
-      Navigator.of(context).pop(fav);
     } catch (_) {
       // ignore errors
     }
