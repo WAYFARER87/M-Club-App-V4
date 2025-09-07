@@ -21,6 +21,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
   bool _isLoading = false;
   bool _isSaving = false;
+  bool _isEditing = false;
   String? _error;
   UserProfile? _profile;
 
@@ -84,6 +85,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
           _profile = upd;
           _phoneCtrl.text = upd.phone;
           _emailCtrl.text = upd.email;
+          _isEditing = false;
         });
       }
       if (mounted) {
@@ -104,7 +106,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
     }
   }
 
-  Widget _buildProfileTab() {
+  Widget _buildEditForm() {
     return Padding(
       padding: const EdgeInsets.all(16),
       child: Form(
@@ -136,20 +138,80 @@ class _ProfileScreenState extends State<ProfileScreen> {
               readOnly: true,
             ),
             const SizedBox(height: 24),
-            ElevatedButton(
-              onPressed: _isSaving ? null : _saveProfile,
-              child: _isSaving
-                  ? const SizedBox(
-                      height: 16,
-                      width: 16,
-                      child: CircularProgressIndicator(strokeWidth: 2),
-                    )
-                  : const Text('Сохранить'),
+            Row(
+              children: [
+                Expanded(
+                  child: ElevatedButton(
+                    onPressed: _isSaving ? null : _saveProfile,
+                    child: _isSaving
+                        ? const SizedBox(
+                            height: 16,
+                            width: 16,
+                            child: CircularProgressIndicator(strokeWidth: 2),
+                          )
+                        : const Text('Сохранить'),
+                  ),
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: OutlinedButton(
+                    onPressed: _isSaving
+                        ? null
+                        : () => setState(() => _isEditing = false),
+                    child: const Text('Отмена'),
+                  ),
+                ),
+              ],
             ),
           ],
         ),
       ),
     );
+  }
+
+  Widget _buildViewProfile() {
+    final profile = _profile;
+    if (profile == null) return const SizedBox();
+
+    Widget buildTile(String label, String value, {bool? verified}) {
+      return ListTile(
+        contentPadding: EdgeInsets.zero,
+        title: Text(label),
+        subtitle: Text(value),
+        trailing: verified == null
+            ? null
+            : Icon(
+                verified ? Icons.check_circle : Icons.error,
+                color: verified ? Colors.green : Colors.red,
+              ),
+      );
+    }
+
+    return Padding(
+      padding: const EdgeInsets.all(16),
+      child: ListView(
+        children: [
+          buildTile('Имя', profile.name),
+          const SizedBox(height: 12),
+          buildTile('Фамилия', profile.lastname),
+          const SizedBox(height: 12),
+          buildTile('Телефон', profile.phone,
+              verified: profile.isVerifiedPhone),
+          const SizedBox(height: 12),
+          buildTile('Email', profile.email,
+              verified: profile.isVerifiedEmail),
+          const SizedBox(height: 24),
+          ElevatedButton(
+            onPressed: () => setState(() => _isEditing = true),
+            child: const Text('Редактировать'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildProfileTab() {
+    return _isEditing ? _buildEditForm() : _buildViewProfile();
   }
 
   Widget _buildCardTab() {

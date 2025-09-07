@@ -51,6 +51,7 @@ void main() {
                 'email': 'john@example.com',
                 'login': 'john',
                 'is_verified_phone': 1,
+                'is_verified_email': 1,
                 'is_uae_resident': 0,
                 'lang': 'en',
               },
@@ -64,6 +65,7 @@ void main() {
     expect(profile, isA<UserProfile>());
     expect(profile.name, 'John');
     expect(profile.lastname, 'Doe');
+    expect(profile.isVerifiedEmail, true);
 
     service.dio.interceptors.clear();
   });
@@ -92,6 +94,7 @@ void main() {
                 'email': 'john@example.com',
                 'login': 'john',
                 'is_verified_phone': 1,
+                'is_verified_email': 0,
                 'is_uae_resident': 0,
                 'lang': 'en',
               },
