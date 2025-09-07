@@ -23,6 +23,7 @@ class _MClubScreenState extends State<MClubScreen> with TickerProviderStateMixin
   List<dynamic> _offers = [];
   String? _selectedCategoryId;
   String _sortMode = 'alphabet'; // 'alphabet' | 'distance'
+  bool _showFavoritesOnly = false;
 
   bool _isLoading = false;
   String? _error;
@@ -157,6 +158,11 @@ class _MClubScreenState extends State<MClubScreen> with TickerProviderStateMixin
       });
     }
 
+    if (_showFavoritesOnly) {
+      filtered =
+          filtered.where((o) => parseBool(o['is_favorite'])).toList();
+    }
+
     return filtered;
   }
 
@@ -232,6 +238,17 @@ class _MClubScreenState extends State<MClubScreen> with TickerProviderStateMixin
                   Navigator.pop(context);
                 },
               ),
+              ListTile(
+                title: const Text('Избранное'),
+                trailing: _showFavoritesOnly
+                    ? const Icon(Icons.check)
+                    : null,
+                onTap: () {
+                  setState(
+                      () => _showFavoritesOnly = !_showFavoritesOnly);
+                  Navigator.pop(context);
+                },
+              ),
             ],
           ),
         );
@@ -241,7 +258,8 @@ class _MClubScreenState extends State<MClubScreen> with TickerProviderStateMixin
 
   Future<void> _openMap() async {
     final offers = <Map<String, dynamic>>[];
-    for (final raw in _offers) {
+    final source = _showFavoritesOnly ? _filteredOffers : _offers;
+    for (final raw in source) {
       if (raw is Map<String, dynamic>) {
         final branchesRaw = raw['branches'] as List<dynamic>? ?? [];
         final branches = branchesRaw.where((br) {
