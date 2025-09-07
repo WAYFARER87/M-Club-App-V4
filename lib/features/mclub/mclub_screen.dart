@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:geolocator/geolocator.dart';
 import '../../core/services/api_service.dart';
+import 'package:m_club/core/utils/parse_bool.dart';
 import 'offer_detail_screen.dart';
 import 'offer_model.dart';
 import 'offers_map_screen.dart';
@@ -188,7 +189,7 @@ class _MClubScreenState extends State<MClubScreen> with TickerProviderStateMixin
   Future<void> _toggleFavoriteOffer(Map<String, dynamic> offer) async {
     final id = int.tryParse((offer['id'] ?? '').toString());
     if (id == null) return;
-    final prevFav = offer['is_favorite'] == true;
+    final prevFav = parseBool(offer['is_favorite']);
     setState(() {
       offer['is_favorite'] = !prevFav;
     });
@@ -411,7 +412,7 @@ class _MClubScreenState extends State<MClubScreen> with TickerProviderStateMixin
                         final title = (offer['title'] ?? '').toString();
                         final descr =
                             (offer['description_short'] ?? '').toString();
-                        final isFavorite = offer['is_favorite'] == true;
+                        final isFavorite = parseBool(offer['is_favorite']);
 
                         double? distance;
                         if (_sortMode == 'distance') {
