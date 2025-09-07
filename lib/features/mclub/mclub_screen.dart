@@ -375,6 +375,7 @@ class _MClubScreenState extends State<MClubScreen> with TickerProviderStateMixin
                         final title = (offer['title'] ?? '').toString();
                         final descr =
                             (offer['description_short'] ?? '').toString();
+                        final isFavorite = offer['is_favorite'] == true;
 
                         double? distance;
                         if (_sortMode == 'distance') {
@@ -384,9 +385,12 @@ class _MClubScreenState extends State<MClubScreen> with TickerProviderStateMixin
                           }
                         }
 
+                        final imageHeight =
+                            MediaQuery.of(context).size.width * 0.6;
+
                         return GestureDetector(
-                          onTap: () {
-                            Navigator.push(
+                          onTap: () async {
+                            final fav = await Navigator.push<bool?>(
                               context,
                               MaterialPageRoute(
                                 builder: (_) => OfferDetailScreen(
@@ -395,30 +399,45 @@ class _MClubScreenState extends State<MClubScreen> with TickerProviderStateMixin
                                 ),
                               ),
                             );
+                            if (fav is bool && fav != offer['is_favorite']) {
+                              setState(() {
+                                offer['is_favorite'] = fav;
+                              });
+                            }
                           },
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              if (photo.isNotEmpty)
-                                Image.network(
-                                  photo,
-                                  width: double.infinity,
-                                  height:
-                                      MediaQuery.of(context).size.width * 0.6,
-                                  fit: BoxFit.cover,
-                                  errorBuilder: (_, __, ___) => Container(
-                                    height:
-                                        MediaQuery.of(context).size.width * 0.6,
-                                    color: Colors.grey.shade200,
-                                  ),
-                                )
-                              else
-                                Container(
-                                  width: double.infinity,
-                                  height:
-                                      MediaQuery.of(context).size.width * 0.6,
-                                  color: Colors.grey.shade200,
-                                ),
+                              Stack(
+                                children: [
+                                  if (photo.isNotEmpty)
+                                    Image.network(
+                                      photo,
+                                      width: double.infinity,
+                                      height: imageHeight,
+                                      fit: BoxFit.cover,
+                                      errorBuilder: (_, __, ___) => Container(
+                                        height: imageHeight,
+                                        color: Colors.grey.shade200,
+                                      ),
+                                    )
+                                  else
+                                    Container(
+                                      width: double.infinity,
+                                      height: imageHeight,
+                                      color: Colors.grey.shade200,
+                                    ),
+                                  if (isFavorite)
+                                    const Positioned(
+                                      top: 8,
+                                      right: 8,
+                                      child: Icon(
+                                        Icons.favorite,
+                                        color: Colors.red,
+                                      ),
+                                    ),
+                                ],
+                              ),
                               Padding(
                                 padding: const EdgeInsets.all(12),
                                 child: Column(
