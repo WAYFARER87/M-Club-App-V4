@@ -185,6 +185,35 @@ class _MClubScreenState extends State<MClubScreen> with TickerProviderStateMixin
     }
   }
 
+  Future<void> _toggleFavoriteOffer(Map<String, dynamic> offer) async {
+    final id = int.tryParse((offer['id'] ?? '').toString());
+    if (id == null) return;
+    final prevFav = offer['is_favorite'] == true;
+    setState(() {
+      offer['is_favorite'] = !prevFav;
+    });
+    try {
+      final fav = await _api.toggleFavorite(id);
+      if (fav != offer['is_favorite'] && mounted) {
+        setState(() {
+          offer['is_favorite'] = prevFav;
+        });
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Не удалось изменить избранное')),
+        );
+      }
+    } catch (_) {
+      if (mounted) {
+        setState(() {
+          offer['is_favorite'] = prevFav;
+        });
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Не удалось изменить избранное')),
+        );
+      }
+    }
+  }
+
   void _centerSelectedTab() {
     if (_tabController == null || _tabScrollController == null) return;
     final index = _tabController!.index;
@@ -427,15 +456,23 @@ class _MClubScreenState extends State<MClubScreen> with TickerProviderStateMixin
                                       height: imageHeight,
                                       color: Colors.grey.shade200,
                                     ),
-                                  if (isFavorite)
-                                    const Positioned(
-                                      top: 8,
-                                      right: 8,
-                                      child: Icon(
-                                        Icons.favorite,
-                                        color: Colors.pink,
+                                  Positioned(
+                                    top: 8,
+                                    right: 8,
+                                    child: IconButton(
+                                      icon: Icon(
+                                        isFavorite
+                                            ? Icons.favorite
+                                            : Icons.favorite_border,
+                                        color: isFavorite
+                                            ? Colors.pink
+                                            : Colors.white,
                                       ),
+                                      onPressed: () =>
+                                          _toggleFavoriteOffer(
+                                              offer as Map<String, dynamic>),
                                     ),
+                                  ),
                                 ],
                               ),
                               Padding(
