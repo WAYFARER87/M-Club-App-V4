@@ -22,4 +22,18 @@ void main() {
     );
     expect(find.text('VALID THRU 08/25'), findsOneWidget);
   });
+
+  testWidgets('shows name when provided', (tester) async {
+    await tester.pumpWidget(
+      const MaterialApp(
+        home: ClubCard(
+          cardNum: '123',
+          expireDate: '2025-08-15',
+          firstName: 'Ivan',
+          lastName: 'Petrov',
+        ),
+      ),
+    );
+    expect(find.text('Ivan Petrov'), findsOneWidget);
+  });
 }
