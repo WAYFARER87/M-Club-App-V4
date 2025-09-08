@@ -250,39 +250,63 @@ class _ProfileScreenState extends State<ProfileScreen> {
         padding: const EdgeInsets.all(16),
         child: ProfileHeader(profile: profile),
       ),
-      Container(
-        decoration: BoxDecoration(
-          color: surface,
-          borderRadius: BorderRadius.circular(8),
-        ),
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            const Text('Личная информация'),
-            const Divider(),
-            buildTile('Имя', profile.name, Icons.person),
-            buildTile('Фамилия', profile.lastname, Icons.person),
-          ],
-        ),
+      Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16),
+            child: Text(
+              'Личная информация',
+              style: Theme.of(context).textTheme.titleSmall,
+            ),
+          ),
+          const SizedBox(height: 4),
+          Container(
+            decoration: BoxDecoration(
+              color: surface,
+              borderRadius: BorderRadius.circular(8),
+            ),
+            padding: const EdgeInsets.all(16),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                buildTile('Имя', profile.name, Icons.person),
+                buildTile('Фамилия', profile.lastname, Icons.person),
+              ],
+            ),
+          ),
+          const Divider(),
+        ],
       ),
-      Container(
-        decoration: BoxDecoration(
-          color: surface,
-          borderRadius: BorderRadius.circular(8),
-        ),
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            const Text('Контакты'),
-            const Divider(),
-            buildTile('Телефон', profile.phone, Icons.phone,
-                verified: profile.isVerifiedPhone),
-            buildTile('Email', profile.email, Icons.email,
-                verified: profile.isVerifiedEmail),
-          ],
-        ),
+      Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16),
+            child: Text(
+              'Контакты',
+              style: Theme.of(context).textTheme.titleSmall,
+            ),
+          ),
+          const SizedBox(height: 4),
+          Container(
+            decoration: BoxDecoration(
+              color: surface,
+              borderRadius: BorderRadius.circular(8),
+            ),
+            padding: const EdgeInsets.all(16),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                buildTile('Телефон', profile.phone, Icons.phone,
+                    verified: profile.isVerifiedPhone),
+                buildTile('Email', profile.email, Icons.email,
+                    verified: profile.isVerifiedEmail),
+              ],
+            ),
+          ),
+          const Divider(),
+        ],
       ),
       Container(
         decoration: BoxDecoration(
