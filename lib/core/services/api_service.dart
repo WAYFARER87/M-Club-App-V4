@@ -155,6 +155,18 @@ class ApiService {
     }
   }
 
+  /// Удалить профиль пользователя
+  Future<void> deleteProfile() async {
+    try {
+      await _dio.delete('/user/delete');
+    } catch (e) {
+      if (kDebugMode) {
+        print('deleteProfile error: $e');
+      }
+      rethrow;
+    }
+  }
+
   /// Очистить токен (логаут)
   Future<void> logout() async {
     await _storage.delete(key: 'auth_token');

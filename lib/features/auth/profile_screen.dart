@@ -23,6 +23,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
   bool _isLoading = false;
   bool _isSaving = false;
+  bool _isDeleting = false;
   bool _isEditing = false;
   String? _error;
   UserProfile? _profile;
@@ -119,6 +120,42 @@ class _ProfileScreenState extends State<ProfileScreen> {
     );
   }
 
+  Future<void> _deleteProfile() async {
+    final confirm = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: const Text('Удалить профиль'),
+        content:
+            const Text('Вы уверены, что хотите удалить профиль? Это действие нельзя отменить.'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(ctx).pop(false),
+            child: const Text('Отмена'),
+          ),
+          TextButton(
+            onPressed: () => Navigator.of(ctx).pop(true),
+            child: const Text('Удалить'),
+          ),
+        ],
+      ),
+    );
+
+    if (confirm != true) return;
+
+    setState(() => _isDeleting = true);
+    try {
+      await _api.deleteProfile();
+      await _logout();
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Ошибка удаления: $e')),
+        );
+        setState(() => _isDeleting = false);
+      }
+    }
+  }
+
   Widget _buildEditForm() {
     return Padding(
       padding: const EdgeInsets.all(16),
@@ -205,6 +242,18 @@ class _ProfileScreenState extends State<ProfileScreen> {
           ElevatedButton(
             onPressed: () => setState(() => _isEditing = true),
             child: const Text('Изменить профиль'),
+          ),
+          const SizedBox(height: 12),
+          ElevatedButton(
+            onPressed: _isDeleting ? null : _deleteProfile,
+            style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
+            child: _isDeleting
+                ? const SizedBox(
+                    height: 16,
+                    width: 16,
+                    child: CircularProgressIndicator(strokeWidth: 2),
+                  )
+                : const Text('Удалить профиль'),
           ),
           const SizedBox(height: 12),
           ElevatedButton(
