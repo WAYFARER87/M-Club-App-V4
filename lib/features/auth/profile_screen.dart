@@ -287,6 +287,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
         child: ClubCard(
           cardNum: profile.cardNum,
           expireDate: profile.expireDate,
+          firstName: profile.name,
+          lastName: profile.lastname,
         ),
       ),
     );
