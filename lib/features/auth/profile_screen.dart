@@ -138,30 +138,18 @@ class _ProfileScreenState extends State<ProfileScreen> {
               readOnly: true,
             ),
             const SizedBox(height: 24),
-            Row(
-              children: [
-                Expanded(
-                  child: ElevatedButton(
-                    onPressed: _isSaving ? null : _saveProfile,
-                    child: _isSaving
-                        ? const SizedBox(
-                            height: 16,
-                            width: 16,
-                            child: CircularProgressIndicator(strokeWidth: 2),
-                          )
-                        : const Text('Сохранить'),
-                  ),
-                ),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: OutlinedButton(
-                    onPressed: _isSaving
-                        ? null
-                        : () => setState(() => _isEditing = false),
-                    child: const Text('Отмена'),
-                  ),
-                ),
-              ],
+            SizedBox(
+              width: double.infinity,
+              child: ElevatedButton(
+                onPressed: _isSaving ? null : _saveProfile,
+                child: _isSaving
+                    ? const SizedBox(
+                        height: 16,
+                        width: 16,
+                        child: CircularProgressIndicator(strokeWidth: 2),
+                      )
+                    : const Text('Сохранить'),
+              ),
             ),
           ],
         ),
@@ -203,7 +191,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
           const SizedBox(height: 24),
           ElevatedButton(
             onPressed: () => setState(() => _isEditing = true),
-            child: const Text('Редактировать'),
+            child: const Text('Изменить профиль'),
           ),
         ],
       ),
