@@ -13,12 +13,15 @@ class MyApp extends StatelessWidget {
     final colorScheme = ColorScheme.fromSeed(
       seedColor: _primary,
       brightness: Brightness.light,
+    ).copyWith(
+      surfaceVariant: Colors.white,
     );
 
     final base = ThemeData(
       useMaterial3: true,
       colorScheme: colorScheme,
       scaffoldBackgroundColor: Colors.white,
+      cardColor: colorScheme.surfaceVariant,
     );
 
     return MaterialApp(
