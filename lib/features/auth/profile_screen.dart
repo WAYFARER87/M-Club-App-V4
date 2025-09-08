@@ -156,6 +156,19 @@ class _ProfileScreenState extends State<ProfileScreen> {
     }
   }
 
+  void _cancelEdit() {
+    setState(() {
+      _isEditing = false;
+      final p = _profile;
+      if (p != null) {
+        _nameCtrl.text = p.name;
+        _lastNameCtrl.text = p.lastname;
+        _phoneCtrl.text = p.phone;
+        _emailCtrl.text = p.email;
+      }
+    });
+  }
+
   Widget _buildEditForm() {
     return Padding(
       padding: const EdgeInsets.all(16),
@@ -327,7 +340,14 @@ class _ProfileScreenState extends State<ProfileScreen> {
   }
 
   Widget _buildProfileTab() {
-    return _isEditing ? _buildEditForm() : _buildViewProfile();
+    return AnimatedSwitcher(
+      duration: const Duration(milliseconds: 300),
+      transitionBuilder: (child, animation) =>
+          FadeTransition(opacity: animation, child: child),
+      child: _isEditing
+          ? KeyedSubtree(key: const ValueKey('edit'), child: _buildEditForm())
+          : KeyedSubtree(key: const ValueKey('view'), child: _buildViewProfile()),
+    );
   }
 
   Widget _buildCardTab() {
@@ -384,6 +404,22 @@ class _ProfileScreenState extends State<ProfileScreen> {
       child: Scaffold(
         appBar: AppBar(
           backgroundColor: Colors.white,
+          actions: _isEditing
+              ? [
+                  TextButton(
+                    onPressed: _isSaving ? null : _cancelEdit,
+                    style: TextButton.styleFrom(
+                        foregroundColor: const Color(0xFF182857)),
+                    child: const Text('Отмена'),
+                  ),
+                  TextButton(
+                    onPressed: _isSaving ? null : _saveProfile,
+                    style: TextButton.styleFrom(
+                        foregroundColor: const Color(0xFF182857)),
+                    child: const Text('Сохранить'),
+                  ),
+                ]
+              : null,
           bottom: const TabBar(
             labelColor: Color(0xFF182857),
             unselectedLabelColor: Colors.black54,
