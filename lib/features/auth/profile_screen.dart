@@ -242,15 +242,17 @@ class _ProfileScreenState extends State<ProfileScreen> {
     }
 
     final theme = Theme.of(context);
-    final surface = theme.colorScheme.surfaceVariant;
+    final surface = theme.cardColor;
     final items = [
-      Container(
-        decoration: BoxDecoration(
-          color: surface,
-          borderRadius: BorderRadius.circular(8),
+      Card(
+        color: surface,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+        elevation: 2,
+        margin: EdgeInsets.zero,
+        child: Padding(
+          padding: const EdgeInsets.all(16),
+          child: ProfileHeader(profile: profile),
         ),
-        padding: const EdgeInsets.all(16),
-        child: ProfileHeader(profile: profile),
       ),
       Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -263,18 +265,21 @@ class _ProfileScreenState extends State<ProfileScreen> {
             ),
           ),
           const SizedBox(height: 4),
-          Container(
-            decoration: BoxDecoration(
-              color: surface,
-              borderRadius: BorderRadius.circular(8),
-            ),
-            padding: const EdgeInsets.all(16),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                buildTile('Имя', profile.name, Icons.person),
-                buildTile('Фамилия', profile.lastname, Icons.person),
-              ],
+          Card(
+            color: surface,
+            shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(8)),
+            elevation: 2,
+            margin: EdgeInsets.zero,
+            child: Padding(
+              padding: const EdgeInsets.all(16),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  buildTile('Имя', profile.name, Icons.person),
+                  buildTile('Фамилия', profile.lastname, Icons.person),
+                ],
+              ),
             ),
           ),
           const Divider(),
@@ -291,75 +296,87 @@ class _ProfileScreenState extends State<ProfileScreen> {
             ),
           ),
           const SizedBox(height: 4),
-          Container(
-            decoration: BoxDecoration(
-              color: surface,
-              borderRadius: BorderRadius.circular(8),
-            ),
-            padding: const EdgeInsets.all(16),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                buildTile('Телефон', profile.phone, Icons.phone,
-                    verified: profile.isVerifiedPhone),
-                buildTile('Email', profile.email, Icons.email,
-                    verified: profile.isVerifiedEmail),
-              ],
+          Card(
+            color: surface,
+            shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(8)),
+            elevation: 2,
+            margin: EdgeInsets.zero,
+            child: Padding(
+              padding: const EdgeInsets.all(16),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  buildTile('Телефон', profile.phone, Icons.phone,
+                      verified: profile.isVerifiedPhone),
+                  buildTile('Email', profile.email, Icons.email,
+                      verified: profile.isVerifiedEmail),
+                ],
+              ),
             ),
           ),
           const Divider(),
         ],
       ),
-      Container(
-        decoration: BoxDecoration(
+        Card(
           color: surface,
-          borderRadius: BorderRadius.circular(8),
-        ),
-        padding: const EdgeInsets.all(8),
-        child: SizedBox(
-          width: double.infinity,
-          child: ElevatedButton(
-            onPressed: () => setState(() => _isEditing = true),
-            child: const Text('Изменить профиль'),
+          shape:
+              RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+          elevation: 2,
+          margin: EdgeInsets.zero,
+          child: Padding(
+            padding: const EdgeInsets.all(8),
+            child: SizedBox(
+              width: double.infinity,
+              child: ElevatedButton(
+                onPressed: () => setState(() => _isEditing = true),
+                child: const Text('Изменить профиль'),
+              ),
+            ),
           ),
         ),
-      ),
-      Container(
-        decoration: BoxDecoration(
+        Card(
           color: surface,
-          borderRadius: BorderRadius.circular(8),
-        ),
-        padding: const EdgeInsets.all(8),
-        child: SizedBox(
-          width: double.infinity,
-          child: ElevatedButton(
-            onPressed: _isDeleting ? null : _deleteProfile,
-            style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
-            child: _isDeleting
-                ? const SizedBox(
-                    height: 16,
-                    width: 16,
-                    child: CircularProgressIndicator(strokeWidth: 2),
-                  )
-                : const Text('Удалить профиль'),
+          shape:
+              RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+          elevation: 2,
+          margin: EdgeInsets.zero,
+          child: Padding(
+            padding: const EdgeInsets.all(8),
+            child: SizedBox(
+              width: double.infinity,
+              child: ElevatedButton(
+                onPressed: _isDeleting ? null : _deleteProfile,
+                style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
+                child: _isDeleting
+                    ? const SizedBox(
+                        height: 16,
+                        width: 16,
+                        child: CircularProgressIndicator(strokeWidth: 2),
+                      )
+                    : const Text('Удалить профиль'),
+              ),
+            ),
           ),
         ),
-      ),
-      Container(
-        decoration: BoxDecoration(
+        Card(
           color: surface,
-          borderRadius: BorderRadius.circular(8),
-        ),
-        padding: const EdgeInsets.all(8),
-        child: SizedBox(
-          width: double.infinity,
-          child: ElevatedButton(
-            onPressed: _logout,
-            style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
-            child: const Text('Выйти'),
+          shape:
+              RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+          elevation: 2,
+          margin: EdgeInsets.zero,
+          child: Padding(
+            padding: const EdgeInsets.all(8),
+            child: SizedBox(
+              width: double.infinity,
+              child: ElevatedButton(
+                onPressed: _logout,
+                style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
+                child: const Text('Выйти'),
+              ),
+            ),
           ),
         ),
-      ),
     ];
 
     return ListTileTheme(
