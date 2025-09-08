@@ -242,17 +242,15 @@ class _ProfileScreenState extends State<ProfileScreen> {
     }
 
     final theme = Theme.of(context);
-    final surface = theme.cardColor;
     final items = [
-      Card(
-        color: surface,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-        elevation: 2,
-        margin: EdgeInsets.zero,
-        child: Padding(
-          padding: const EdgeInsets.all(16),
-          child: ProfileHeader(profile: profile),
-        ),
+      Column(
+        children: [
+          Padding(
+            padding: const EdgeInsets.all(16),
+            child: ProfileHeader(profile: profile),
+          ),
+          const Divider(),
+        ],
       ),
       Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -261,25 +259,18 @@ class _ProfileScreenState extends State<ProfileScreen> {
             padding: const EdgeInsets.symmetric(horizontal: 16),
             child: Text(
               'Личная информация',
-              style: Theme.of(context).textTheme.titleSmall,
+              style: theme.textTheme.titleSmall,
             ),
           ),
           const SizedBox(height: 4),
-          Card(
-            color: surface,
-            shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(8)),
-            elevation: 2,
-            margin: EdgeInsets.zero,
-            child: Padding(
-              padding: const EdgeInsets.all(16),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  buildTile('Имя', profile.name, Icons.person),
-                  buildTile('Фамилия', profile.lastname, Icons.person),
-                ],
-              ),
+          Padding(
+            padding: const EdgeInsets.all(16),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                buildTile('Имя', profile.name, Icons.person),
+                buildTile('Фамилия', profile.lastname, Icons.person),
+              ],
             ),
           ),
           const Divider(),
@@ -292,27 +283,20 @@ class _ProfileScreenState extends State<ProfileScreen> {
             padding: const EdgeInsets.symmetric(horizontal: 16),
             child: Text(
               'Контакты',
-              style: Theme.of(context).textTheme.titleSmall,
+              style: theme.textTheme.titleSmall,
             ),
           ),
           const SizedBox(height: 4),
-          Card(
-            color: surface,
-            shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(8)),
-            elevation: 2,
-            margin: EdgeInsets.zero,
-            child: Padding(
-              padding: const EdgeInsets.all(16),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  buildTile('Телефон', profile.phone, Icons.phone,
-                      verified: profile.isVerifiedPhone),
-                  buildTile('Email', profile.email, Icons.email,
-                      verified: profile.isVerifiedEmail),
-                ],
-              ),
+          Padding(
+            padding: const EdgeInsets.all(16),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                buildTile('Телефон', profile.phone, Icons.phone,
+                    verified: profile.isVerifiedPhone),
+                buildTile('Email', profile.email, Icons.email,
+                    verified: profile.isVerifiedEmail),
+              ],
             ),
           ),
           const Divider(),
