@@ -1,10 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../../core/services/api_service.dart';
 import 'auth_email_screen.dart';
 import 'user_profile.dart';
-import 'club_card.dart';
 
 class ProfileScreen extends StatefulWidget {
   const ProfileScreen({super.key});
@@ -125,8 +123,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
       context: context,
       builder: (ctx) => AlertDialog(
         title: const Text('Удалить профиль'),
-        content:
-            const Text('Вы уверены, что хотите удалить профиль? Это действие нельзя отменить.'),
+        content: const Text(
+            'Вы уверены, что хотите удалить профиль? Это действие нельзя отменить.'),
         actions: [
           TextButton(
             onPressed: () => Navigator.of(ctx).pop(false),
@@ -220,12 +218,12 @@ class _ProfileScreenState extends State<ProfileScreen> {
     );
   }
 
-
   Widget _buildViewProfile() {
     final profile = _profile;
     if (profile == null) return const SizedBox();
 
-    Widget buildTile(String label, String value, IconData icon, {bool? verified}) {
+    Widget buildTile(String label, String value, IconData icon,
+        {bool? verified}) {
       return ListTile(
         leading: Icon(icon),
         contentPadding: EdgeInsets.zero,
@@ -267,8 +265,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
           const SizedBox(height: 4),
           Card(
             color: surface,
-            shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(8)),
+            shape:
+                RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
             elevation: 2,
             margin: EdgeInsets.zero,
             child: Padding(
@@ -298,8 +296,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
           const SizedBox(height: 4),
           Card(
             color: surface,
-            shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(8)),
+            shape:
+                RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
             elevation: 2,
             margin: EdgeInsets.zero,
             child: Padding(
@@ -371,7 +369,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
     );
   }
 
-
   Widget _buildProfileTab() {
     return AnimatedSwitcher(
       duration: const Duration(milliseconds: 300),
@@ -379,31 +376,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
           FadeTransition(opacity: animation, child: child),
       child: _isEditing
           ? KeyedSubtree(key: const ValueKey('edit'), child: _buildEditForm())
-          : KeyedSubtree(key: const ValueKey('view'), child: _buildViewProfile()),
-    );
-  }
-
-  Widget _buildCardTab() {
-    final profile = _profile;
-    if (profile == null) {
-      return const SizedBox();
-    }
-
-    return Center(
-      child: GestureDetector(
-        onTap: () {
-          Clipboard.setData(ClipboardData(text: profile.cardNum));
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('Номер карты скопирован')),
-          );
-        },
-        child: ClubCard(
-          cardNum: profile.cardNum,
-          expireDate: profile.expireDate,
-          firstName: profile.name,
-          lastName: profile.lastname,
-        ),
-      ),
+          : KeyedSubtree(
+              key: const ValueKey('view'), child: _buildViewProfile()),
     );
   }
 
@@ -433,7 +407,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
     }
 
     return DefaultTabController(
-      length: 2,
+      length: 1,
       child: Scaffold(
         appBar: AppBar(
           backgroundColor: Colors.white,
@@ -458,14 +432,12 @@ class _ProfileScreenState extends State<ProfileScreen> {
             unselectedLabelColor: Colors.black54,
             tabs: [
               Tab(text: 'Профиль'),
-              Tab(text: 'Клубная карта'),
             ],
           ),
         ),
         body: TabBarView(
           children: [
             _buildProfileTab(),
-            _buildCardTab(),
           ],
         ),
       ),
@@ -487,8 +459,9 @@ class ProfileHeader extends StatelessWidget {
         children: [
           CircleAvatar(
             radius: 40,
-            backgroundImage:
-                profile.avatarUrl.isNotEmpty ? NetworkImage(profile.avatarUrl) : null,
+            backgroundImage: profile.avatarUrl.isNotEmpty
+                ? NetworkImage(profile.avatarUrl)
+                : null,
             child: profile.avatarUrl.isEmpty
                 ? const Icon(Icons.person, size: 40)
                 : null,
