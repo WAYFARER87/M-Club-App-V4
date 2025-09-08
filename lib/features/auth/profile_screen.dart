@@ -211,8 +211,10 @@ class _ProfileScreenState extends State<ProfileScreen> {
     final profile = _profile;
     if (profile == null) return const SizedBox();
 
-    Widget buildTile(String label, String value, {bool? verified}) {
+    Widget buildTile(String label, String value, IconData icon,
+        {bool? verified}) {
       return ListTile(
+        leading: Icon(icon),
         contentPadding: EdgeInsets.zero,
         title: Text(label),
         subtitle: Text(value),
@@ -225,46 +227,102 @@ class _ProfileScreenState extends State<ProfileScreen> {
       );
     }
 
-    return Padding(
-      padding: const EdgeInsets.all(16),
-      child: ListView(
-        children: [
-          ProfileHeader(profile: profile),
-          const SizedBox(height: 24),
-          buildTile('Имя', profile.name),
-          const SizedBox(height: 12),
-          buildTile('Фамилия', profile.lastname),
-          const SizedBox(height: 12),
-          buildTile('Телефон', profile.phone,
-              verified: profile.isVerifiedPhone),
-          const SizedBox(height: 12),
-          buildTile('Email', profile.email,
-              verified: profile.isVerifiedEmail),
-          const SizedBox(height: 24),
-          ElevatedButton(
-            onPressed: () => setState(() => _isEditing = true),
-            child: const Text('Изменить профиль'),
-          ),
-          const SizedBox(height: 12),
-          ElevatedButton(
-            onPressed: _isDeleting ? null : _deleteProfile,
-            style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
-            child: _isDeleting
-                ? const SizedBox(
-                    height: 16,
-                    width: 16,
-                    child: CircularProgressIndicator(strokeWidth: 2),
-                  )
-                : const Text('Удалить профиль'),
-          ),
-          const SizedBox(height: 12),
-          ElevatedButton(
-            onPressed: _logout,
-            style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
-            child: const Text('Выйти'),
-          ),
-        ],
+    final items = [
+      Card(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+        child: Padding(
+          padding: const EdgeInsets.all(16),
+          child: ProfileHeader(profile: profile),
+        ),
       ),
+      Card(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+        child: Padding(
+          padding: const EdgeInsets.all(16),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const Text('Личная информация'),
+              const Divider(),
+              buildTile('Имя', profile.name, Icons.person),
+              buildTile('Фамилия', profile.lastname, Icons.person),
+            ],
+          ),
+        ),
+      ),
+      Card(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+        child: Padding(
+          padding: const EdgeInsets.all(16),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const Text('Контакты'),
+              const Divider(),
+              buildTile('Телефон', profile.phone, Icons.phone,
+                  verified: profile.isVerifiedPhone),
+              buildTile('Email', profile.email, Icons.email,
+                  verified: profile.isVerifiedEmail),
+            ],
+          ),
+        ),
+      ),
+      Card(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+        child: Padding(
+          padding: const EdgeInsets.all(8),
+          child: SizedBox(
+            width: double.infinity,
+            child: ElevatedButton(
+              onPressed: () => setState(() => _isEditing = true),
+              child: const Text('Изменить профиль'),
+            ),
+          ),
+        ),
+      ),
+      Card(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+        child: Padding(
+          padding: const EdgeInsets.all(8),
+          child: SizedBox(
+            width: double.infinity,
+            child: ElevatedButton(
+              onPressed: _isDeleting ? null : _deleteProfile,
+              style:
+                  ElevatedButton.styleFrom(backgroundColor: Colors.red),
+              child: _isDeleting
+                  ? const SizedBox(
+                      height: 16,
+                      width: 16,
+                      child: CircularProgressIndicator(strokeWidth: 2),
+                    )
+                  : const Text('Удалить профиль'),
+            ),
+          ),
+        ),
+      ),
+      Card(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+        child: Padding(
+          padding: const EdgeInsets.all(8),
+          child: SizedBox(
+            width: double.infinity,
+            child: ElevatedButton(
+              onPressed: _logout,
+              style:
+                  ElevatedButton.styleFrom(backgroundColor: Colors.red),
+              child: const Text('Выйти'),
+            ),
+          ),
+        ),
+      ),
+    ];
+
+    return ListView.separated(
+      padding: const EdgeInsets.all(16),
+      itemCount: items.length,
+      itemBuilder: (context, index) => items[index],
+      separatorBuilder: (context, index) => const SizedBox(height: 12),
     );
   }
 
