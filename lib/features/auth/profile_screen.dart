@@ -220,12 +220,12 @@ class _ProfileScreenState extends State<ProfileScreen> {
     );
   }
 
+
   Widget _buildViewProfile() {
     final profile = _profile;
     if (profile == null) return const SizedBox();
 
-    Widget buildTile(String label, String value, IconData icon,
-        {bool? verified}) {
+    Widget buildTile(String label, String value, IconData icon, {bool? verified}) {
       return ListTile(
         leading: Icon(icon),
         contentPadding: EdgeInsets.zero,
@@ -240,92 +240,97 @@ class _ProfileScreenState extends State<ProfileScreen> {
       );
     }
 
+    final surface = Theme.of(context).colorScheme.surfaceVariant;
     final items = [
-      Card(
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-        child: Padding(
-          padding: const EdgeInsets.all(16),
-          child: ProfileHeader(profile: profile),
+      Container(
+        decoration: BoxDecoration(
+          color: surface,
+          borderRadius: BorderRadius.circular(8),
+        ),
+        padding: const EdgeInsets.all(16),
+        child: ProfileHeader(profile: profile),
+      ),
+      Container(
+        decoration: BoxDecoration(
+          color: surface,
+          borderRadius: BorderRadius.circular(8),
+        ),
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const Text('Личная информация'),
+            const Divider(),
+            buildTile('Имя', profile.name, Icons.person),
+            buildTile('Фамилия', profile.lastname, Icons.person),
+          ],
         ),
       ),
-      Card(
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-        child: Padding(
-          padding: const EdgeInsets.all(16),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              const Text('Личная информация'),
-              const Divider(),
-              buildTile('Имя', profile.name, Icons.person),
-              buildTile('Фамилия', profile.lastname, Icons.person),
-            ],
+      Container(
+        decoration: BoxDecoration(
+          color: surface,
+          borderRadius: BorderRadius.circular(8),
+        ),
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const Text('Контакты'),
+            const Divider(),
+            buildTile('Телефон', profile.phone, Icons.phone,
+                verified: profile.isVerifiedPhone),
+            buildTile('Email', profile.email, Icons.email,
+                verified: profile.isVerifiedEmail),
+          ],
+        ),
+      ),
+      Container(
+        decoration: BoxDecoration(
+          color: surface,
+          borderRadius: BorderRadius.circular(8),
+        ),
+        padding: const EdgeInsets.all(8),
+        child: SizedBox(
+          width: double.infinity,
+          child: ElevatedButton(
+            onPressed: () => setState(() => _isEditing = true),
+            child: const Text('Изменить профиль'),
           ),
         ),
       ),
-      Card(
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-        child: Padding(
-          padding: const EdgeInsets.all(16),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              const Text('Контакты'),
-              const Divider(),
-              buildTile('Телефон', profile.phone, Icons.phone,
-                  verified: profile.isVerifiedPhone),
-              buildTile('Email', profile.email, Icons.email,
-                  verified: profile.isVerifiedEmail),
-            ],
+      Container(
+        decoration: BoxDecoration(
+          color: surface,
+          borderRadius: BorderRadius.circular(8),
+        ),
+        padding: const EdgeInsets.all(8),
+        child: SizedBox(
+          width: double.infinity,
+          child: ElevatedButton(
+            onPressed: _isDeleting ? null : _deleteProfile,
+            style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
+            child: _isDeleting
+                ? const SizedBox(
+                    height: 16,
+                    width: 16,
+                    child: CircularProgressIndicator(strokeWidth: 2),
+                  )
+                : const Text('Удалить профиль'),
           ),
         ),
       ),
-      Card(
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-        child: Padding(
-          padding: const EdgeInsets.all(8),
-          child: SizedBox(
-            width: double.infinity,
-            child: ElevatedButton(
-              onPressed: () => setState(() => _isEditing = true),
-              child: const Text('Изменить профиль'),
-            ),
-          ),
+      Container(
+        decoration: BoxDecoration(
+          color: surface,
+          borderRadius: BorderRadius.circular(8),
         ),
-      ),
-      Card(
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-        child: Padding(
-          padding: const EdgeInsets.all(8),
-          child: SizedBox(
-            width: double.infinity,
-            child: ElevatedButton(
-              onPressed: _isDeleting ? null : _deleteProfile,
-              style:
-                  ElevatedButton.styleFrom(backgroundColor: Colors.red),
-              child: _isDeleting
-                  ? const SizedBox(
-                      height: 16,
-                      width: 16,
-                      child: CircularProgressIndicator(strokeWidth: 2),
-                    )
-                  : const Text('Удалить профиль'),
-            ),
-          ),
-        ),
-      ),
-      Card(
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-        child: Padding(
-          padding: const EdgeInsets.all(8),
-          child: SizedBox(
-            width: double.infinity,
-            child: ElevatedButton(
-              onPressed: _logout,
-              style:
-                  ElevatedButton.styleFrom(backgroundColor: Colors.red),
-              child: const Text('Выйти'),
-            ),
+        padding: const EdgeInsets.all(8),
+        child: SizedBox(
+          width: double.infinity,
+          child: ElevatedButton(
+            onPressed: _logout,
+            style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
+            child: const Text('Выйти'),
           ),
         ),
       ),
@@ -335,9 +340,10 @@ class _ProfileScreenState extends State<ProfileScreen> {
       padding: const EdgeInsets.all(16),
       itemCount: items.length,
       itemBuilder: (context, index) => items[index],
-      separatorBuilder: (context, index) => const SizedBox(height: 12),
+      separatorBuilder: (context, index) => const SizedBox(height: 8),
     );
   }
+
 
   Widget _buildProfileTab() {
     return AnimatedSwitcher(
