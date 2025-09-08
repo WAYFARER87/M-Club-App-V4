@@ -297,48 +297,48 @@ class _ProfileScreenState extends State<ProfileScreen> {
   @override
   Widget build(BuildContext context) {
     if (_isLoading) {
-      return const Center(child: CircularProgressIndicator());
+      return const Scaffold(
+        body: Center(child: CircularProgressIndicator()),
+      );
     }
     if (_error != null) {
-      return Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Text(_error!, style: const TextStyle(color: Colors.red)),
-            const SizedBox(height: 8),
-            ElevatedButton(
-              onPressed: _loadProfile,
-              child: const Text('Повторить'),
-            ),
-          ],
+      return Scaffold(
+        body: Center(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Text(_error!, style: const TextStyle(color: Colors.red)),
+              const SizedBox(height: 8),
+              ElevatedButton(
+                onPressed: _loadProfile,
+                child: const Text('Повторить'),
+              ),
+            ],
+          ),
         ),
       );
     }
 
     return DefaultTabController(
       length: 2,
-      child: Column(
-        children: [
-          Material(
-            color: Colors.white,
-            child: const TabBar(
-              labelColor: Color(0xFF182857),
-              unselectedLabelColor: Colors.black54,
-              tabs: [
-                Tab(text: 'Профиль'),
-                Tab(text: 'Клубная карта'),
-              ],
-            ),
+      child: Scaffold(
+        appBar: AppBar(
+          backgroundColor: Colors.white,
+          bottom: const TabBar(
+            labelColor: Color(0xFF182857),
+            unselectedLabelColor: Colors.black54,
+            tabs: [
+              Tab(text: 'Профиль'),
+              Tab(text: 'Клубная карта'),
+            ],
           ),
-          Expanded(
-            child: TabBarView(
-              children: [
-                _buildProfileTab(),
-                _buildCardTab(),
-              ],
-            ),
-          ),
-        ],
+        ),
+        body: TabBarView(
+          children: [
+            _buildProfileTab(),
+            _buildCardTab(),
+          ],
+        ),
       ),
     );
   }
