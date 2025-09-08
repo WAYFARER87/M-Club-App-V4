@@ -14,14 +14,19 @@ class MyApp extends StatelessWidget {
       seedColor: _primary,
       brightness: Brightness.light,
     ).copyWith(
-      surfaceVariant: Colors.white,
+      primary: const Color(0xFFF5F5F5),
+      onPrimary: Colors.black,
+      surface: const Color(0xFFFAFAFA),
+      surfaceVariant: const Color(0xFFF0F0F0),
+      background: Colors.white,
     );
 
     final base = ThemeData(
       useMaterial3: true,
       colorScheme: colorScheme,
-      scaffoldBackgroundColor: Colors.white,
-      cardColor: colorScheme.surfaceVariant,
+      scaffoldBackgroundColor: colorScheme.background,
+      cardColor: Colors.transparent,
+      canvasColor: Colors.transparent,
     );
 
     return MaterialApp(
@@ -53,12 +58,24 @@ class MyApp extends StatelessWidget {
           ),
         ),
         textTheme: base.textTheme.copyWith(
-          titleLarge: base.textTheme.titleLarge?.copyWith(fontWeight: FontWeight.w400),
-          titleMedium: base.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w400),
-          titleSmall: base.textTheme.titleSmall?.copyWith(fontWeight: FontWeight.w400),
-          bodyLarge: base.textTheme.bodyLarge?.copyWith(fontWeight: FontWeight.w300),
-          bodyMedium: base.textTheme.bodyMedium?.copyWith(fontWeight: FontWeight.w300),
-          bodySmall: base.textTheme.bodySmall?.copyWith(fontWeight: FontWeight.w300),
+          titleLarge: base.textTheme.titleLarge?.copyWith(
+            fontWeight: FontWeight.w400,
+          ),
+          titleMedium: base.textTheme.titleMedium?.copyWith(
+            fontWeight: FontWeight.w400,
+          ),
+          titleSmall: base.textTheme.titleSmall?.copyWith(
+            fontWeight: FontWeight.w400,
+          ),
+          bodyLarge: base.textTheme.bodyLarge?.copyWith(
+            fontWeight: FontWeight.w300,
+          ),
+          bodyMedium: base.textTheme.bodyMedium?.copyWith(
+            fontWeight: FontWeight.w300,
+          ),
+          bodySmall: base.textTheme.bodySmall?.copyWith(
+            fontWeight: FontWeight.w300,
+          ),
         ),
       ),
       home: const AuthGate(child: HomeScreen()),
