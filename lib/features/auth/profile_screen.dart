@@ -229,6 +229,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
       padding: const EdgeInsets.all(16),
       child: ListView(
         children: [
+          ProfileHeader(profile: profile),
+          const SizedBox(height: 24),
           buildTile('Имя', profile.name),
           const SizedBox(height: 12),
           buildTile('Фамилия', profile.lastname),
@@ -339,6 +341,40 @@ class _ProfileScreenState extends State<ProfileScreen> {
             _buildCardTab(),
           ],
         ),
+      ),
+    );
+  }
+}
+
+class ProfileHeader extends StatelessWidget {
+  const ProfileHeader({super.key, required this.profile});
+
+  final UserProfile profile;
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 24),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          CircleAvatar(
+            radius: 40,
+            backgroundImage:
+                profile.avatarUrl.isNotEmpty ? NetworkImage(profile.avatarUrl) : null,
+            child: profile.avatarUrl.isEmpty
+                ? const Icon(Icons.person, size: 40)
+                : null,
+          ),
+          const SizedBox(height: 12),
+          Text(
+            '${profile.name} ${profile.lastname}',
+            style: const TextStyle(
+              fontSize: 18,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+        ],
       ),
     );
   }

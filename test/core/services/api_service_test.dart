@@ -54,6 +54,7 @@ void main() {
                 'is_verified_email': 1,
                 'is_uae_resident': 0,
                 'lang': 'en',
+                'avatar_url': 'https://example.com/avatar.png',
               },
             ),
           );
@@ -66,6 +67,7 @@ void main() {
     expect(profile.name, 'John');
     expect(profile.lastname, 'Doe');
     expect(profile.isVerifiedEmail, true);
+    expect(profile.avatarUrl, 'https://example.com/avatar.png');
 
     service.dio.interceptors.clear();
   });
@@ -97,6 +99,7 @@ void main() {
                 'is_verified_email': 0,
                 'is_uae_resident': 0,
                 'lang': 'en',
+                'avatar_url': 'https://example.com/avatar.png',
               },
             ),
           );

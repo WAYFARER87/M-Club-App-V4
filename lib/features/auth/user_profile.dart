@@ -9,6 +9,7 @@ class UserProfile {
   final String phone;
   final String email;
   final String login;
+  final String avatarUrl;
   final bool isVerifiedPhone;
   final bool isVerifiedEmail;
   final bool isUaeResident;
@@ -23,6 +24,7 @@ class UserProfile {
     required this.phone,
     required this.email,
     required this.login,
+    required this.avatarUrl,
     required this.isVerifiedPhone,
     required this.isVerifiedEmail,
     required this.isUaeResident,
@@ -39,6 +41,8 @@ class UserProfile {
       phone: json['phone']?.toString() ?? '',
       email: json['email']?.toString() ?? '',
       login: json['login']?.toString() ?? '',
+      avatarUrl:
+          json['avatar_url']?.toString() ?? json['avatar']?.toString() ?? '',
       isVerifiedPhone: parseBool(json['is_verified_phone']),
       isVerifiedEmail: parseBool(json['is_verified_email']),
       isUaeResident: parseBool(json['is_uae_resident']),
@@ -56,6 +60,7 @@ class UserProfile {
       'phone': phone,
       'email': email,
       'login': login,
+      'avatar_url': avatarUrl,
       'is_verified_phone': isVerifiedPhone,
       'is_verified_email': isVerifiedEmail,
       'is_uae_resident': isUaeResident,
