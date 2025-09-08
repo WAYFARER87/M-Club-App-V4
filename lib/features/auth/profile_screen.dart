@@ -318,65 +318,44 @@ class _ProfileScreenState extends State<ProfileScreen> {
           const Divider(),
         ],
       ),
-        Card(
-          color: surface,
-          shape:
-              RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-          elevation: 2,
-          margin: EdgeInsets.zero,
-          child: Padding(
-            padding: const EdgeInsets.all(8),
-            child: SizedBox(
-              width: double.infinity,
-              child: ElevatedButton(
-                onPressed: () => setState(() => _isEditing = true),
-                child: const Text('Изменить профиль'),
-              ),
-            ),
+      Padding(
+        padding: const EdgeInsets.symmetric(vertical: 4),
+        child: SizedBox(
+          width: double.infinity,
+          child: OutlinedButton(
+            onPressed: () => setState(() => _isEditing = true),
+            child: const Text('Изменить профиль'),
           ),
         ),
-        Card(
-          color: surface,
-          shape:
-              RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-          elevation: 2,
-          margin: EdgeInsets.zero,
-          child: Padding(
-            padding: const EdgeInsets.all(8),
-            child: SizedBox(
-              width: double.infinity,
-              child: ElevatedButton(
-                onPressed: _isDeleting ? null : _deleteProfile,
-                style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
-                child: _isDeleting
-                    ? const SizedBox(
-                        height: 16,
-                        width: 16,
-                        child: CircularProgressIndicator(strokeWidth: 2),
-                      )
-                    : const Text('Удалить профиль'),
-              ),
-            ),
+      ),
+      Padding(
+        padding: const EdgeInsets.symmetric(vertical: 4),
+        child: SizedBox(
+          width: double.infinity,
+          child: TextButton(
+            onPressed: _isDeleting ? null : _deleteProfile,
+            style: TextButton.styleFrom(foregroundColor: Colors.red),
+            child: _isDeleting
+                ? const SizedBox(
+                    height: 16,
+                    width: 16,
+                    child: CircularProgressIndicator(strokeWidth: 2),
+                  )
+                : const Text('Удалить профиль'),
           ),
         ),
-        Card(
-          color: surface,
-          shape:
-              RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-          elevation: 2,
-          margin: EdgeInsets.zero,
-          child: Padding(
-            padding: const EdgeInsets.all(8),
-            child: SizedBox(
-              width: double.infinity,
-              child: ElevatedButton(
-                onPressed: _logout,
-                style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
-                child: const Text('Выйти'),
-              ),
-            ),
+      ),
+      Padding(
+        padding: const EdgeInsets.symmetric(vertical: 4),
+        child: SizedBox(
+          width: double.infinity,
+          child: TextButton(
+            onPressed: _logout,
+            style: TextButton.styleFrom(foregroundColor: Colors.red),
+            child: const Text('Выйти'),
           ),
         ),
+      ),
     ];
 
     return ListTileTheme(
