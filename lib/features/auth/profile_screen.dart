@@ -237,10 +237,12 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 verified ? Icons.check_circle : Icons.error,
                 color: verified ? Colors.green : Colors.red,
               ),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
       );
     }
 
-    final surface = Theme.of(context).colorScheme.surfaceVariant;
+    final theme = Theme.of(context);
+    final surface = theme.colorScheme.surfaceVariant;
     final items = [
       Container(
         decoration: BoxDecoration(
@@ -360,11 +362,16 @@ class _ProfileScreenState extends State<ProfileScreen> {
       ),
     ];
 
-    return ListView.separated(
-      padding: const EdgeInsets.all(16),
-      itemCount: items.length,
-      itemBuilder: (context, index) => items[index],
-      separatorBuilder: (context, index) => const SizedBox(height: 8),
+    return ListTileTheme(
+      tileColor: Colors.transparent,
+      selectedColor: theme.colorScheme.primary,
+      iconColor: theme.iconTheme.color,
+      child: ListView.separated(
+        padding: const EdgeInsets.all(16),
+        itemCount: items.length,
+        itemBuilder: (context, index) => items[index],
+        separatorBuilder: (context, index) => const SizedBox(height: 8),
+      ),
     );
   }
 
