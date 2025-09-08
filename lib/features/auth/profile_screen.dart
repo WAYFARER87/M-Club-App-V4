@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import '../../core/services/api_service.dart';
+import 'auth_email_screen.dart';
 import 'user_profile.dart';
 import 'club_card.dart';
 
@@ -106,6 +108,17 @@ class _ProfileScreenState extends State<ProfileScreen> {
     }
   }
 
+  Future<void> _logout() async {
+    await _api.logout();
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.clear();
+    if (!mounted) return;
+    Navigator.of(context).pushAndRemoveUntil(
+      MaterialPageRoute(builder: (_) => const AuthEmailScreen()),
+      (route) => false,
+    );
+  }
+
   Widget _buildEditForm() {
     return Padding(
       padding: const EdgeInsets.all(16),
@@ -192,6 +205,12 @@ class _ProfileScreenState extends State<ProfileScreen> {
           ElevatedButton(
             onPressed: () => setState(() => _isEditing = true),
             child: const Text('Изменить профиль'),
+          ),
+          const SizedBox(height: 12),
+          ElevatedButton(
+            onPressed: _logout,
+            style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
+            child: const Text('Выйти'),
           ),
         ],
       ),
