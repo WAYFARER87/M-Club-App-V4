@@ -24,7 +24,7 @@ class Offer {
   final List<Branch> branches;
   final OfferLinks links;
   final int rating;                 // текущий рейтинг
-  final int? vote;                  // голос пользователя
+  final int vote;                   // голос пользователя
   final bool isFavorite;
 
   Offer({
@@ -45,7 +45,7 @@ class Offer {
     required this.branches,
     required this.links,
     required this.rating,
-    required this.vote,
+    this.vote = 0,
     required this.isFavorite,
   });
 
@@ -121,7 +121,9 @@ class Offer {
       branches: branches,
       links: links,
       rating: int.tryParse((json['rating'] ?? '0').toString()) ?? 0,
-      vote: json['vote'] == null ? null : int.tryParse(json['vote'].toString()),
+      vote: json['vote'] == null
+          ? 0
+          : int.tryParse(json['vote'].toString()) ?? 0,
       isFavorite: parseBool(json['is_favorite']),
     );
   }
