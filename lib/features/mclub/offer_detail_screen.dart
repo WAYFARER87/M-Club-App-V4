@@ -166,7 +166,10 @@ class _OfferDetailScreenState extends State<OfferDetailScreen> {
       final res = await _api.voteBenefit(id, vote);
       if (!mounted) return;
       setState(() {
-        _rating = int.tryParse((res['rating'] ?? '0').toString()) ?? _rating;
+        final newRating = int.tryParse(res['rating']?.toString() ?? '');
+        if (newRating != null) {
+          _rating = newRating;
+        }
         final v = res['vote'];
         _userVote = int.tryParse(v?.toString() ?? '') ?? 0;
       });
