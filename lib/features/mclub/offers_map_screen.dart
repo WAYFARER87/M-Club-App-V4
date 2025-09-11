@@ -224,19 +224,30 @@ class _OffersMapScreenState extends State<OffersMapScreen> {
                     child: ElevatedButton(
                       onPressed: () async {
                         Navigator.pop(ctx);
-                        final fav = await Navigator.push<bool?>(
+                        final result =
+                            await Navigator.push<Map<String, dynamic>?>(
                           context,
                           MaterialPageRoute(
                             builder: (_) => OfferDetailScreen(offer: offer),
                           ),
                         );
                         if (!mounted) return;
-                        if (fav is bool && fav != offer.isFavorite) {
+                        if (result != null) {
                           setState(() {
                             for (var i = 0; i < widget.offers.length; i++) {
                               final raw = widget.offers[i];
-                              if (raw is Map<String, dynamic> && raw['id']?.toString() == offer.id) {
-                                raw['is_favorite'] = fav;
+                              if (raw is Map<String, dynamic> &&
+                                  raw['id']?.toString() == offer.id) {
+                                if (result.containsKey('is_favorite')) {
+                                  raw['is_favorite'] =
+                                      result['is_favorite'];
+                                }
+                                if (result.containsKey('rating')) {
+                                  raw['rating'] = result['rating'];
+                                }
+                                if (result.containsKey('vote')) {
+                                  raw['vote'] = result['vote'];
+                                }
                               } else if (raw is Offer && raw.id == offer.id) {
                                 widget.offers[i] = Offer(
                                   id: raw.id,
@@ -255,9 +266,10 @@ class _OffersMapScreenState extends State<OffersMapScreen> {
                                   shareUrl: raw.shareUrl,
                                   branches: raw.branches,
                                   links: raw.links,
-                                  rating: raw.rating,
-                                  vote: raw.vote,
-                                  isFavorite: fav,
+                                  rating: result['rating'] ?? raw.rating,
+                                  vote: result['vote'] ?? raw.vote,
+                                  isFavorite:
+                                      result['is_favorite'] ?? raw.isFavorite,
                                 );
                               }
                             }
