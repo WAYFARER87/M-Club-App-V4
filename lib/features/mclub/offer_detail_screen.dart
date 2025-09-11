@@ -31,7 +31,7 @@ class _OfferDetailScreenState extends State<OfferDetailScreen> {
 
   final _api = ApiService();
   int _rating = 0;
-  int? _userVote; // -1 дизлайк, 1 лайк, null — не голосовал
+  int _userVote = 0; // -1 дизлайк, 1 лайк, 0 — не голосовал
   bool _isVoting = false;
   bool _isFavorite = false;
 
@@ -168,7 +168,7 @@ class _OfferDetailScreenState extends State<OfferDetailScreen> {
       setState(() {
         _rating = int.tryParse((res['rating'] ?? '0').toString()) ?? _rating;
         final v = res['vote'];
-        _userVote = v == null ? null : int.tryParse(v.toString());
+        _userVote = int.tryParse(v?.toString() ?? '') ?? 0;
       });
     } catch (_) {
       // ignore errors
