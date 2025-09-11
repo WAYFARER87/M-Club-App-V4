@@ -409,7 +409,8 @@ class _MClubScreenState extends State<MClubScreen> with TickerProviderStateMixin
 
                         return GestureDetector(
                           onTap: () async {
-                            final fav = await Navigator.push<bool?>(
+                            final result =
+                                await Navigator.push<Map<String, dynamic>?>(
                               context,
                               MaterialPageRoute(
                                 builder: (_) => OfferDetailScreen(
@@ -418,9 +419,18 @@ class _MClubScreenState extends State<MClubScreen> with TickerProviderStateMixin
                                 ),
                               ),
                             );
-                            if (fav is bool && fav != offer['is_favorite']) {
+                            if (result != null) {
                               setState(() {
-                                offer['is_favorite'] = fav;
+                                if (result.containsKey('is_favorite')) {
+                                  offer['is_favorite'] =
+                                      result['is_favorite'];
+                                }
+                                if (result.containsKey('rating')) {
+                                  offer['rating'] = result['rating'];
+                                }
+                                if (result.containsKey('vote')) {
+                                  offer['vote'] = result['vote'];
+                                }
                               });
                             }
                           },
