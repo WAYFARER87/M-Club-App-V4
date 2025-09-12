@@ -59,6 +59,6 @@ void main() {
     await tester.pumpWidget(MaterialApp(home: OfferDetailScreen(offer: offer)));
     await tester.pumpAndSettle();
 
-    expect(find.text('20.05.2024'), findsOneWidget);
+    expect(find.text('Действует до 20.05.2024'), findsOneWidget);
   });
 }
