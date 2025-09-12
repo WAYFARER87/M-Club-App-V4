@@ -8,6 +8,11 @@ class AuthGate extends StatefulWidget {
   final Widget child;
   const AuthGate({super.key, required this.child});
 
+  /// Позволяет потомкам получить состояние [AuthGate] и
+  /// инициировать повторную проверку токена.
+  static _AuthGateState? of(BuildContext context) =>
+      context.findAncestorStateOfType<_AuthGateState>();
+
   @override
   State<AuthGate> createState() => _AuthGateState();
 }
@@ -29,6 +34,12 @@ class _AuthGateState extends State<AuthGate> {
       _loggedIn = ok;
       _loading = false;
     });
+  }
+
+  /// Выполняет повторную проверку токена и обновляет состояние виджета.
+  Future<void> refreshAuthState() async {
+    setState(() => _loading = true);
+    await _check();
   }
 
   @override

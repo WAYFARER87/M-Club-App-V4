@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../../core/services/api_service.dart';
-import 'auth_email_screen.dart';
+import '../../core/widgets/auth_gate.dart';
 import 'user_profile.dart';
 import 'club_card.dart';
 
@@ -116,10 +116,10 @@ class _ProfileScreenState extends State<ProfileScreen> {
     final prefs = await SharedPreferences.getInstance();
     await prefs.clear();
     if (!mounted) return;
-    Navigator.of(context).pushAndRemoveUntil(
-      MaterialPageRoute(builder: (_) => const AuthEmailScreen()),
-      (route) => false,
-    );
+    // Обновляем состояние авторизации и возвращаемся к корневому экрану,
+    // где [AuthGate] покажет экран входа.
+    AuthGate.of(context)?.refreshAuthState();
+    Navigator.of(context).popUntil((route) => route.isFirst);
   }
 
   Future<void> _deleteProfile() async {
