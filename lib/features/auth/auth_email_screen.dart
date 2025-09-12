@@ -183,23 +183,6 @@ class _AuthEmailScreenState extends State<AuthEmailScreen> {
                 autofillHints: const [AutofillHints.email],
               ),
 
-              // "Пропустить" справа под полем
-              const SizedBox(height: 8),
-              Align(
-                alignment: Alignment.centerRight,
-                child: TextButton(
-                  onPressed: _loading ? null : _skip,
-                  style: TextButton.styleFrom(
-                    shape: const RoundedRectangleBorder(borderRadius: BorderRadius.zero),
-                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
-                  ),
-                  child: Text(
-                    t.skip,
-                    style: const TextStyle(decoration: TextDecoration.underline),
-                  ),
-                ),
-              ),
-
               // Кнопка "Далее"
               const SizedBox(height: 8),
               SizedBox(
