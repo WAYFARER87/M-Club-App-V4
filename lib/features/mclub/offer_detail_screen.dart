@@ -372,12 +372,12 @@ class _OfferDetailScreenState extends State<OfferDetailScreen> {
                     RatingWidget(
                       rating: _rating,
                       userVote: _userVote,
-                      onVoteUp: _isVoting || _userVote == 1
+                      onVoteUp: _isVoting
                           ? null
-                          : () => _sendVote(1),
-                      onVoteDown: _isVoting || _userVote == -1
+                          : () => _sendVote(_userVote == 1 ? 0 : 1),
+                      onVoteDown: _isVoting
                           ? null
-                          : () => _sendVote(-1),
+                          : () => _sendVote(_userVote == -1 ? 0 : -1),
                     ),
                     if (widget.offer.dateEnd != null) ...[
                       const Spacer(),
