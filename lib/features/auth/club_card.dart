@@ -46,7 +46,7 @@ class ClubCard extends StatelessWidget {
 
     return LayoutBuilder(
       builder: (context, constraints) {
-        final width = constraints.maxWidth * 0.8;
+        final width = constraints.maxWidth * 0.95;
         return Center(
           child: SizedBox(
             width: width,
