@@ -13,6 +13,7 @@ import '../../core/widgets/primary_button.dart';
 import 'offer_model.dart';
 import '../auth/club_card_screen.dart';
 import 'widgets/rating_widget.dart';
+import '../../core/utils/image_brightness.dart';
 
 class OfferDetailScreen extends StatefulWidget {
   final Offer offer;
@@ -39,6 +40,7 @@ class _OfferDetailScreenState extends State<OfferDetailScreen> {
   int _userVote = 0; // -1 дизлайк, 1 лайк, 0 — не голосовал
   bool _isVoting = false;
   bool _isFavorite = false;
+  bool? _isPhotoDark;
 
   @override
   void initState() {
@@ -48,6 +50,7 @@ class _OfferDetailScreenState extends State<OfferDetailScreen> {
     _rating = widget.offer.rating;
     _userVote = widget.offer.vote;
     _isFavorite = widget.offer.isFavorite;
+    _analyzePhoto();
   }
 
   @override
@@ -132,6 +135,13 @@ class _OfferDetailScreenState extends State<OfferDetailScreen> {
     final title = widget.offer.title;
     final text = [title, link].where((e) => e.trim().isNotEmpty).join('\n');
     Share.share(text);
+  }
+
+  Future<void> _analyzePhoto() async {
+    final url = widget.offer.photoUrl;
+    if (url == null || url.isEmpty) return;
+    final dark = await isImageDark(url);
+    if (mounted) setState(() => _isPhotoDark = dark);
   }
 
   Future<void> _toggleFavorite() async {
@@ -271,8 +281,13 @@ class _OfferDetailScreenState extends State<OfferDetailScreen> {
     final linkIcons = _buildLinkIcons(context, o.links);
     final sponsorEmail = o.sponsorEmail;
 
-    final iconColor = _collapsed ? Colors.black87 : Colors.white;
-    final overlayStyle = _collapsed ? SystemUiOverlayStyle.dark : SystemUiOverlayStyle.light;
+    final dark = _isPhotoDark ?? true;
+    final iconColor = _collapsed
+        ? Colors.black87
+        : (dark ? Colors.white : Colors.black87);
+    final overlayStyle = _collapsed
+        ? SystemUiOverlayStyle.dark
+        : (dark ? SystemUiOverlayStyle.light : SystemUiOverlayStyle.dark);
 
     return WillPopScope(
       onWillPop: () async {
