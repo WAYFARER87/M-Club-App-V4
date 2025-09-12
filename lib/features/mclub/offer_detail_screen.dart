@@ -452,41 +452,32 @@ class _OfferDetailScreenState extends State<OfferDetailScreen> {
                           break;
                         }
                       }
-
-                      if (!isNear) {
-                        if (mounted) {
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(
-                                content:
-                                    Text('Вы слишком далеко от партнёра')),
-                          );
-                        }
-                        return;
-                      }
-
                       final id = int.tryParse(widget.offer.id);
-                      if (id == null) return;
-                      try {
-                        await _api.checkinBenefit(id, curLat, curLng);
-                        if (!mounted) return;
-                        Navigator.of(context).push(
-                          MaterialPageRoute(
-                            builder: (_) => const ClubCardScreen(),
-                          ),
-                        );
-                      } on DioException catch (e) {
-                        if (mounted) {
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            SnackBar(content: Text('Ошибка сети: $e')),
-                          );
-                        }
-                      } catch (e) {
-                        if (mounted) {
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            SnackBar(content: Text('Ошибка: $e')),
-                          );
+
+                      if (isNear && id != null) {
+                        try {
+                          await _api.checkinBenefit(id, curLat, curLng);
+                        } on DioException catch (e) {
+                          if (mounted) {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(content: Text('Ошибка сети: $e')),
+                            );
+                          }
+                        } catch (e) {
+                          if (mounted) {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(content: Text('Ошибка: $e')),
+                            );
+                          }
                         }
                       }
+
+                      if (!mounted) return;
+                      Navigator.of(context).push(
+                        MaterialPageRoute(
+                          builder: (_) => const ClubCardScreen(),
+                        ),
+                      );
                     },
                   ),
                 ),
