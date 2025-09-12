@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import '../mclub/mclub_screen.dart';
-import '../uae_unlocked/uae_screen.dart';
+import '../uae_unlocked/uae_unlocked_screen.dart';
 import '../radio/radio_screen.dart';
 import '../news/news_screen.dart';
 import '../auth/profile_screen.dart';
