@@ -521,10 +521,10 @@ packages:
     dependency: "direct main"
     description:
       name: palette_generator
-      sha256: "6a44587e4c4e4ca670f89840615bdd7ca3de708805ccee0e2519cda9bb42dc98"
+      sha256: "4420f7ccc3f0a4a906144e73f8b6267cd940b64f57a7262e95cb8cec3a8ae0ed"
       url: "https://pub.dev"
     source: hosted
-    version: "0.3.3"
+    version: "0.3.3+7"
   path:
     dependency: transitive
     description:
