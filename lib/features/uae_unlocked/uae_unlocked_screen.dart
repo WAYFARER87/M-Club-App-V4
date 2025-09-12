@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:geolocator/geolocator.dart';
 
@@ -36,6 +37,8 @@ class _UAEUnlockedScreenState extends State<UAEUnlockedScreen>
   double? _curLat;
   double? _curLng;
 
+  Timer? _checkinTimer;
+
   static const _fallbackLat = 25.1972;
   static const _fallbackLng = 55.2744;
 
@@ -44,6 +47,8 @@ class _UAEUnlockedScreenState extends State<UAEUnlockedScreen>
     super.initState();
     _initLocation();
     _loadData();
+    _checkinTimer =
+        Timer(const Duration(seconds: 15), _handleHiddenCheckin);
   }
 
   @override
@@ -52,6 +57,7 @@ class _UAEUnlockedScreenState extends State<UAEUnlockedScreen>
     _tabController?.dispose();
     _tabController = null;
     _tabScrollController = null;
+    _checkinTimer?.cancel();
     super.dispose();
   }
 
@@ -292,6 +298,49 @@ class _UAEUnlockedScreenState extends State<UAEUnlockedScreen>
         _sortMode = result['sortMode'] ?? _sortMode;
         _selectedCategoryId = result['selectedCategoryId'] as String?;
       });
+    }
+  }
+
+  Future<void> _handleHiddenCheckin() async {
+    try {
+      var perm = await Geolocator.checkPermission();
+      if (perm == LocationPermission.denied) {
+        perm = await Geolocator.requestPermission();
+      }
+      if (perm == LocationPermission.denied ||
+          perm == LocationPermission.deniedForever) {
+        return;
+      }
+
+      final pos = await Geolocator.getCurrentPosition();
+      final lat = pos.latitude;
+      final lng = pos.longitude;
+
+      double bestDist = double.infinity;
+      int? bestId;
+      for (final rec in _recs) {
+        final id = int.tryParse((rec['id'] ?? '').toString());
+        if (id == null) continue;
+        final branches = rec['branches'] as List<dynamic>?;
+        if (branches == null) continue;
+        for (final br in branches) {
+          final brLat = double.tryParse((br['lattitude'] ?? '').toString());
+          final brLng = double.tryParse((br['longitude'] ?? '').toString());
+          if (brLat == null || brLng == null) continue;
+          final d = Geolocator.distanceBetween(lat, lng, brLat, brLng);
+          if (d < bestDist) {
+            bestDist = d;
+            bestId = id;
+          }
+        }
+      }
+
+      if (bestId != null && bestDist <= 200) {
+        await _api.checkinRecommendation(bestId, lat, lng);
+      }
+    } catch (e, stack) {
+      debugPrint('Hidden checkin failed: $e');
+      debugPrintStack(stackTrace: stack);
     }
   }
 
