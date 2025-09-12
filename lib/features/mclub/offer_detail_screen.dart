@@ -95,6 +95,37 @@ class _OfferDetailScreenState extends State<OfferDetailScreen> {
 
   // ===== helpers
 
+  Future<Position?> _getPositionWithPermission() async {
+    try {
+      var perm = await Geolocator.checkPermission();
+      if (perm == LocationPermission.denied) {
+        perm = await Geolocator.requestPermission();
+      }
+      if (perm == LocationPermission.deniedForever ||
+          perm == LocationPermission.denied) {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+                content: Text('Необходимо включить геолокацию')),
+          );
+        }
+        return null;
+      }
+      return await Geolocator.getCurrentPosition(
+        desiredAccuracy: LocationAccuracy.high,
+      );
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+              content:
+                  Text('Не удалось определить местоположение: $e')),
+        );
+      }
+      return null;
+    }
+  }
+
   void _shareOffer() {
     final link = widget.offer.shareUrl;
     if (link == null || link.trim().isEmpty) return;
@@ -404,35 +435,10 @@ class _OfferDetailScreenState extends State<OfferDetailScreen> {
                     onPressed: () async {
                       double curLat;
                       double curLng;
-                      try {
-                        var perm = await Geolocator.checkPermission();
-                        if (perm == LocationPermission.denied) {
-                          perm = await Geolocator.requestPermission();
-                        }
-                        if (perm == LocationPermission.deniedForever ||
-                            perm == LocationPermission.denied) {
-                          if (mounted) {
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              const SnackBar(
-                                  content: Text('Геолокация недоступна')),
-                            );
-                          }
-                          return;
-                        }
-                        final pos = await Geolocator.getCurrentPosition(
-                            desiredAccuracy: LocationAccuracy.high);
-                        curLat = pos.latitude;
-                        curLng = pos.longitude;
-                      } catch (e) {
-                        if (mounted) {
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            SnackBar(
-                                content: Text(
-                                    'Не удалось определить местоположение: $e')),
-                          );
-                        }
-                        return;
-                      }
+                      final pos = await _getPositionWithPermission();
+                      if (pos == null) return;
+                      curLat = pos.latitude;
+                      curLng = pos.longitude;
 
                       var isNear = false;
                       for (final b in widget.offer.branches) {
