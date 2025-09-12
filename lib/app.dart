@@ -57,6 +57,11 @@ class MyApp extends StatelessWidget {
             ),
           ),
         ),
+        textButtonTheme: TextButtonThemeData(
+          style: TextButton.styleFrom(
+            foregroundColor: _primary,
+          ),
+        ),
         textTheme: base.textTheme.copyWith(
           titleLarge: base.textTheme.titleLarge?.copyWith(
             fontWeight: FontWeight.w400,

@@ -230,6 +230,9 @@ class _MClubScreenState extends State<MClubScreen>
           content: const Text('Рядом есть предложения. Показать их?'),
           actions: [
             TextButton(
+              style: TextButton.styleFrom(
+                foregroundColor: const Color(0xFF182857),
+              ),
               onPressed: () {
                 Navigator.pop(context);
                 Navigator.push(
@@ -242,6 +245,9 @@ class _MClubScreenState extends State<MClubScreen>
               child: const Text('Показать'),
             ),
             TextButton(
+              style: TextButton.styleFrom(
+                foregroundColor: const Color(0xFF182857),
+              ),
               onPressed: () => Navigator.pop(context),
               child: const Text('Отмена'),
             ),
