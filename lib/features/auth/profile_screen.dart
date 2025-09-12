@@ -432,16 +432,16 @@ class _ProfileScreenState extends State<ProfileScreen> {
           bottom: const TabBar(
             labelColor: Color(0xFF182857),
             unselectedLabelColor: Colors.black54,
-            tabs: [
-              Tab(text: 'Профиль'),
-              Tab(text: 'Клубная карта'),
-            ],
+              tabs: [
+                Tab(text: 'Клубная карта'),
+                Tab(text: 'Профиль'),
+              ],
           ),
         ),
         body: TabBarView(
           children: [
-            _buildProfileTab(),
             _buildCardTab(),
+            _buildProfileTab(),
           ],
         ),
       ),
