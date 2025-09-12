@@ -3,7 +3,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:m_club/features/mclub/offer_detail_screen.dart';
 import 'package:m_club/features/mclub/offer_model.dart';
 
-Offer _buildOffer({required int vote, required int rating}) {
+Offer _buildOffer({required int vote, required int rating, DateTime? dateEnd}) {
   return Offer(
     id: '1',
     categoryIds: const [],
@@ -15,7 +15,7 @@ Offer _buildOffer({required int vote, required int rating}) {
     benefitText: '',
     benefitPercent: null,
     dateStart: null,
-    dateEnd: null,
+    dateEnd: dateEnd,
     photoUrl: null,
     photosUrl: const [],
     shareUrl: null,
@@ -52,5 +52,13 @@ void main() {
     expect(upIcon.color, Colors.grey);
     expect(downIcon.color, Colors.red);
     expect(find.text('7'), findsOneWidget);
+  });
+
+  testWidgets('shows formatted end date', (tester) async {
+    final offer = _buildOffer(vote: 0, rating: 0, dateEnd: DateTime(2024, 5, 20));
+    await tester.pumpWidget(MaterialApp(home: OfferDetailScreen(offer: offer)));
+    await tester.pumpAndSettle();
+
+    expect(find.text('20.05.2024'), findsOneWidget);
   });
 }

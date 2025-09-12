@@ -6,6 +6,7 @@ import 'package:flutter_svg/flutter_svg.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:url_launcher/url_launcher.dart';
+import 'package:intl/intl.dart';
 import '../../core/services/api_service.dart';
 import 'offer_model.dart';
 
@@ -361,37 +362,49 @@ class _OfferDetailScreenState extends State<OfferDetailScreen> {
             SliverToBoxAdapter(
               child: Container(
                 color: Colors.white,
-                padding: const EdgeInsets.symmetric(horizontal: 16),
+                padding: const EdgeInsets.fromLTRB(16, 8, 16, 8),
                 child: Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
+                  mainAxisAlignment: MainAxisAlignment.start,
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    IconButton(
-                      icon: Icon(
-                        _userVote == 1 ? Icons.thumb_up : Icons.thumb_up_outlined,
-                        color: _userVote == 1 ? Colors.green : Colors.grey,
-                      ),
-                      onPressed: _isVoting || _userVote == 1 ? null : () => _sendVote(1),
+                    Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        IconButton(
+                          icon: Icon(
+                            _userVote == 1 ? Icons.thumb_up : Icons.thumb_up_outlined,
+                            color: _userVote == 1 ? Colors.green : Colors.grey,
+                          ),
+                          onPressed: _isVoting || _userVote == 1 ? null : () => _sendVote(1),
+                        ),
+                        Text(
+                          '$_rating',
+                          style: TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.w600,
+                            color: ratingColor,
+                          ),
+                        ),
+                        IconButton(
+                          icon: Icon(
+                            _userVote == -1 ? Icons.thumb_down : Icons.thumb_down_outlined,
+                            color: _userVote == -1 ? Colors.red : Colors.grey,
+                          ),
+                          onPressed: _isVoting || _userVote == -1 ? null : () => _sendVote(-1),
+                        ),
+                      ],
                     ),
-                    Text(
-                      '$_rating',
-                      style: TextStyle(
-                        fontSize: 16,
-                        fontWeight: FontWeight.w600,
-                        color: ratingColor,
+                    if (widget.offer.dateEnd != null) ...[
+                      const SizedBox(width: 16),
+                      Text(
+                        DateFormat('dd.MM.yyyy').format(widget.offer.dateEnd!),
+                        style: const TextStyle(fontSize: 16),
                       ),
-                    ),
-                    IconButton(
-                      icon: Icon(
-                        _userVote == -1 ? Icons.thumb_down : Icons.thumb_down_outlined,
-                        color: _userVote == -1 ? Colors.red : Colors.grey,
-                      ),
-                      onPressed: _isVoting || _userVote == -1 ? null : () => _sendVote(-1),
-                    ),
+                    ],
                   ],
                 ),
               ),
             ),
-
             // ==== Контент карточки (описание и т.п.)
             SliverToBoxAdapter(
               child: Padding(
