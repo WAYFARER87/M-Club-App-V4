@@ -61,4 +61,19 @@ void main() {
 
     expect(find.text('Действует до 20.05.2024'), findsOneWidget);
   });
+
+  testWidgets('lays out vote row horizontally', (tester) async {
+    final offer = _buildOffer(vote: 0, rating: 10);
+    await tester.pumpWidget(MaterialApp(home: OfferDetailScreen(offer: offer)));
+    await tester.pumpAndSettle();
+
+    final upPos = tester.getTopLeft(find.byIcon(Icons.thumb_up_outlined));
+    final ratingPos = tester.getTopLeft(find.text('10'));
+    final downPos = tester.getTopLeft(find.byIcon(Icons.thumb_down_outlined));
+
+    expect(upPos.dy, ratingPos.dy);
+    expect(ratingPos.dy, downPos.dy);
+    expect(upPos.dx < ratingPos.dx, true);
+    expect(ratingPos.dx < downPos.dx, true);
+  });
 }

@@ -365,37 +365,34 @@ class _OfferDetailScreenState extends State<OfferDetailScreen> {
                 padding: const EdgeInsets.fromLTRB(16, 8, 16, 8),
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.start,
-                  crossAxisAlignment: CrossAxisAlignment.start,
+                  crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
-                    Column(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        IconButton(
-                          icon: Icon(
-                            _userVote == 1 ? Icons.thumb_up : Icons.thumb_up_outlined,
-                            color: _userVote == 1 ? Colors.green : Colors.grey,
-                          ),
-                          onPressed: _isVoting || _userVote == 1 ? null : () => _sendVote(1),
-                        ),
-                        Text(
-                          '$_rating',
-                          style: TextStyle(
-                            fontSize: 16,
-                            fontWeight: FontWeight.w600,
-                            color: ratingColor,
-                          ),
-                        ),
-                        IconButton(
-                          icon: Icon(
-                            _userVote == -1 ? Icons.thumb_down : Icons.thumb_down_outlined,
-                            color: _userVote == -1 ? Colors.red : Colors.grey,
-                          ),
-                          onPressed: _isVoting || _userVote == -1 ? null : () => _sendVote(-1),
-                        ),
-                      ],
+                    IconButton(
+                      icon: Icon(
+                        _userVote == 1 ? Icons.thumb_up : Icons.thumb_up_outlined,
+                        color: _userVote == 1 ? Colors.green : Colors.grey,
+                      ),
+                      onPressed: _isVoting || _userVote == 1 ? null : () => _sendVote(1),
+                    ),
+                    const SizedBox(width: 8),
+                    Text(
+                      '$_rating',
+                      style: TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.w600,
+                        color: ratingColor,
+                      ),
+                    ),
+                    const SizedBox(width: 8),
+                    IconButton(
+                      icon: Icon(
+                        _userVote == -1 ? Icons.thumb_down : Icons.thumb_down_outlined,
+                        color: _userVote == -1 ? Colors.red : Colors.grey,
+                      ),
+                      onPressed: _isVoting || _userVote == -1 ? null : () => _sendVote(-1),
                     ),
                     if (widget.offer.dateEnd != null) ...[
-                      const SizedBox(width: 16),
+                      const Spacer(),
                       Text(
                         'Действует до ${DateFormat('dd.MM.yyyy').format(widget.offer.dateEnd!)}',
                         style: const TextStyle(fontSize: 16),
