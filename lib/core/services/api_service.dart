@@ -118,6 +118,12 @@ class ApiService {
     return res.data ?? [];
   }
 
+  /// Получить список категорий рекомендаций
+  Future<List<dynamic>> fetchRecommendationCategories() async {
+    final res = await _dio.get('/recommendation/categories');
+    return res.data ?? [];
+  }
+
   /// Отправить голос за предложение
   /// [id] - идентификатор предложения
   /// [vote] - значение голоса: 1 (лайк) или -1 (дизлайк)
