@@ -369,15 +369,17 @@ class _OfferDetailScreenState extends State<OfferDetailScreen> {
                 child: Row(
                   crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
-                    RatingWidget(
-                      rating: _rating,
-                      userVote: _userVote,
-                      onVoteUp: _isVoting || _userVote == 1
-                          ? null
-                          : () => _sendVote(1),
-                      onVoteDown: _isVoting || _userVote == -1
-                          ? null
-                          : () => _sendVote(-1),
+                    Flexible(
+                      child: RatingWidget(
+                        rating: _rating,
+                        userVote: _userVote,
+                        onVoteUp: _isVoting || _userVote == 1
+                            ? null
+                            : () => _sendVote(1),
+                        onVoteDown: _isVoting || _userVote == -1
+                            ? null
+                            : () => _sendVote(-1),
+                      ),
                     ),
                     if (widget.offer.dateEnd != null) ...[
                       const Spacer(),
