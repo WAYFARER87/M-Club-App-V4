@@ -365,60 +365,64 @@ class _OfferDetailScreenState extends State<OfferDetailScreen> {
                 color: Colors.white,
                 padding: const EdgeInsets.fromLTRB(16, 8, 16, 8),
                 child: Row(
-                  crossAxisAlignment: CrossAxisAlignment.center,
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
-                    Container(
-                      decoration: BoxDecoration(
-                        color: Colors.grey.shade100,
-                        border: Border.all(color: Colors.grey.shade300),
-                        borderRadius: BorderRadius.circular(8),
-                      ),
-                      child: Row(
-                        mainAxisSize: MainAxisSize.min,
-                        crossAxisAlignment: CrossAxisAlignment.center,
-                        children: [
-                          IconButton(
-                            icon: Icon(
-                              _userVote == 1
-                                  ? Icons.arrow_upward
-                                  : Icons.arrow_upward_outlined,
-                              color:
-                                  _userVote == 1 ? Colors.orange : Colors.grey,
+                    Padding(
+                      padding: const EdgeInsets.symmetric(vertical: 4),
+                      child: Container(
+                        decoration: BoxDecoration(
+                          color: Colors.grey.shade100,
+                          border: Border.all(color: Colors.grey.shade300),
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                        child: Column(
+                          mainAxisSize: MainAxisSize.min,
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            IconButton(
+                              icon: Icon(
+                                _userVote == 1
+                                    ? Icons.arrow_upward
+                                    : Icons.arrow_upward_outlined,
+                                color:
+                                    _userVote == 1 ? Colors.orange : Colors.grey,
+                              ),
+                              onPressed: _isVoting || _userVote == 1
+                                  ? null
+                                  : () => _sendVote(1),
                             ),
-                            onPressed: _isVoting || _userVote == 1
-                                ? null
-                                : () => _sendVote(1),
-                          ),
-                          const SizedBox(width: 8),
-                          Text(
-                            '$_rating',
-                            style: TextStyle(
-                              fontSize: 16,
-                              fontWeight: FontWeight.w600,
-                              color: ratingColor,
+                            Text(
+                              '$_rating',
+                              style: TextStyle(
+                                fontSize: 16,
+                                fontWeight: FontWeight.w600,
+                                color: ratingColor,
+                              ),
                             ),
-                          ),
-                          const SizedBox(width: 8),
-                          IconButton(
-                            icon: Icon(
-                              _userVote == -1
-                                  ? Icons.arrow_downward
-                                  : Icons.arrow_downward_outlined,
-                              color:
-                                  _userVote == -1 ? Colors.blue : Colors.grey,
+                            IconButton(
+                              icon: Icon(
+                                _userVote == -1
+                                    ? Icons.arrow_downward
+                                    : Icons.arrow_downward_outlined,
+                                color:
+                                    _userVote == -1 ? Colors.blue : Colors.grey,
+                              ),
+                              onPressed: _isVoting || _userVote == -1
+                                  ? null
+                                  : () => _sendVote(-1),
                             ),
-                            onPressed: _isVoting || _userVote == -1
-                                ? null
-                                : () => _sendVote(-1),
-                          ),
-                        ],
+                          ],
+                        ),
                       ),
                     ),
                     if (widget.offer.dateEnd != null) ...[
                       const Spacer(),
-                      Text(
-                        'Действует до ${DateFormat('dd.MM.yyyy').format(widget.offer.dateEnd!)}',
-                        style: const TextStyle(fontSize: 16),
+                      Padding(
+                        padding: const EdgeInsets.symmetric(vertical: 4),
+                        child: Text(
+                          DateFormat('dd.MM.yyyy').format(widget.offer.dateEnd!),
+                          style: const TextStyle(fontSize: 16),
+                        ),
                       ),
                     ],
                   ],

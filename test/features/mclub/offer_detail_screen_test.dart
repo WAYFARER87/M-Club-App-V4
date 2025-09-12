@@ -61,10 +61,10 @@ void main() {
     await tester.pumpWidget(MaterialApp(home: OfferDetailScreen(offer: offer)));
     await tester.pumpAndSettle();
 
-    expect(find.text('Действует до 20.05.2024'), findsOneWidget);
+    expect(find.text('20.05.2024'), findsOneWidget);
   });
 
-  testWidgets('lays out vote row horizontally', (tester) async {
+  testWidgets('lays out vote column vertically', (tester) async {
     final offer = _buildOffer(vote: 0, rating: 10);
     await tester.pumpWidget(MaterialApp(home: OfferDetailScreen(offer: offer)));
     await tester.pumpAndSettle();
@@ -75,9 +75,9 @@ void main() {
     final downPos =
         tester.getTopLeft(find.byIcon(Icons.arrow_downward_outlined));
 
-    expect(upPos.dy, closeTo(ratingPos.dy, 1));
-    expect(ratingPos.dy, closeTo(downPos.dy, 1));
-    expect(upPos.dx < ratingPos.dx, true);
-    expect(ratingPos.dx < downPos.dx, true);
+    expect(upPos.dx, closeTo(ratingPos.dx, 1));
+    expect(ratingPos.dx, closeTo(downPos.dx, 1));
+    expect(upPos.dy < ratingPos.dy, true);
+    expect(ratingPos.dy < downPos.dy, true);
   });
 }
