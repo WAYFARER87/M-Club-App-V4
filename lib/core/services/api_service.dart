@@ -184,6 +184,22 @@ class ApiService {
     }
   }
 
+  /// Отметиться в рекомендации
+  Future<void> checkinRecommendation(int id, double lat, double lng) async {
+    try {
+      final formData = FormData.fromMap({
+        'id': id,
+        'coordinates': jsonEncode({'lat': lat, 'lng': lng}),
+      });
+      await _dio.post('/recommendation/checkin', data: formData);
+    } on DioException catch (e) {
+      if (kDebugMode) {
+        print('checkinRecommendation error: $e');
+      }
+      rethrow;
+    }
+  }
+
   /// Удалить профиль пользователя
   Future<void> deleteProfile() async {
     try {

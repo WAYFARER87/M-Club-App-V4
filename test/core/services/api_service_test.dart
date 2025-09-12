@@ -58,6 +58,34 @@ void main() {
     service.dio.interceptors.clear();
   });
 
+  test('checkinRecommendation sends id and coordinates', () async {
+    final service = ApiService();
+    service.dio.interceptors.clear();
+    service.dio.interceptors.add(
+      InterceptorsWrapper(
+        onRequest: (options, handler) {
+          expect(options.method, 'POST');
+          expect(options.path, '/recommendation/checkin');
+          expect(options.data, isA<FormData>());
+          final form = options.data as FormData;
+          final fields = {for (final f in form.fields) f.key: f.value};
+          expect(fields['id'], '42');
+          expect(fields['coordinates'], '{"lat":1.0,"lng":2.0}');
+          handler.resolve(
+            Response(
+              requestOptions: options,
+              statusCode: 200,
+            ),
+          );
+        },
+      ),
+    );
+
+    await service.checkinRecommendation(42, 1.0, 2.0);
+
+    service.dio.interceptors.clear();
+  });
+
   test('fetchProfile parses response into UserProfile', () async {
     final service = ApiService();
     service.dio.interceptors.clear();
