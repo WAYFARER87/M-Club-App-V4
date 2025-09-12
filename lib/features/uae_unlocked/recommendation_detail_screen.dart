@@ -116,7 +116,7 @@ class _RecommendationDetailScreenState extends State<RecommendationDetailScreen>
       setState(() => _isFavorite = !_isFavorite);
     }
     try {
-      await _api.toggleFavorite(id);
+      await _api.toggleRecommendationFavorite(id);
     } catch (_) {
       // ignore errors
     }

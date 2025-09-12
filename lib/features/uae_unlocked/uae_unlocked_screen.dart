@@ -512,7 +512,7 @@ class _UAEUnlockedScreenState extends State<UAEUnlockedScreen>
                                         setState(() => rec['is_favorite'] =
                                             !parseBool(rec['is_favorite']));
                                         try {
-                                          await _api.toggleFavorite(id);
+                                          await _api.toggleRecommendationFavorite(id);
                                         } catch (_) {
                                           // ignore errors
                                         }

@@ -140,11 +140,11 @@ class ApiService {
     };
   }
 
-  /// Изменить состояние избранного для предложения
+  /// Изменить состояние избранного для предложения (benefit)
   /// [id] - идентификатор предложения
   /// Возвращает текущий признак избранного. Если сервер не вернул
   /// ожидаемого флага, возвращает `null`.
-  Future<bool?> toggleFavorite(int id) async {
+  Future<bool?> toggleBenefitFavorite(int id) async {
     try {
       final formData = FormData.fromMap({'id': id});
       final res = await _dio.post('/benefits/favorites', data: formData);
@@ -162,7 +162,35 @@ class ApiService {
       return null;
     } catch (e) {
       if (kDebugMode) {
-        print('toggleFavorite error: $e');
+        print('toggleBenefitFavorite error: $e');
+      }
+      rethrow;
+    }
+  }
+
+  /// Изменить состояние избранного для рекомендации
+  /// [id] - идентификатор рекомендации
+  /// Возвращает текущий признак избранного. Если сервер не вернул
+  /// ожидаемого флага, возвращает `null`.
+  Future<bool?> toggleRecommendationFavorite(int id) async {
+    try {
+      final formData = FormData.fromMap({'id': id});
+      final res = await _dio.post('/recommendation/favorites', data: formData);
+      final raw = res.data;
+      final data = raw is Map && raw['data'] is Map ? raw['data'] : raw;
+      if (data is Map) {
+        final value = data.containsKey('favorites')
+            ? data['favorites']
+            : data['is_favorite'];
+        if (value == null) return null;
+        if (value is bool || value is String || value is num) {
+          return parseBool(value);
+        }
+      }
+      return null;
+    } catch (e) {
+      if (kDebugMode) {
+        print('toggleRecommendationFavorite error: $e');
       }
       rethrow;
     }
