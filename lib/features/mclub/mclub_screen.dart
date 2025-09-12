@@ -113,9 +113,10 @@ class _MClubScreenState extends State<MClubScreen> with TickerProviderStateMixin
       }
 
       WidgetsBinding.instance.addPostFrameCallback((_) {
-        _tabScrollController = Scrollable.of(
-          _tabBarKey.currentContext!,
-        )?.widget.controller;
+        final ctx = _tabKeys.isNotEmpty ? _tabKeys[0].currentContext : null;
+        if (ctx != null) {
+          _tabScrollController = Scrollable.of(ctx)?.widget.controller;
+        }
       });
     } catch (e, stack) {
       // Log the exception so debugging information is available in the console
