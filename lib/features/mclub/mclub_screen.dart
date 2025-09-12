@@ -227,7 +227,10 @@ class _MClubScreenState extends State<MClubScreen>
       () => showDialog(
         context: context,
         builder: (_) => AlertDialog(
-          content: const Text('Рядом есть предложения. Показать их?'),
+          content: const Text(
+            'Рядом есть предложения. Показать их?',
+            style: TextStyle(color: Colors.black),
+          ),
           actions: [
             TextButton(
               style: TextButton.styleFrom(
