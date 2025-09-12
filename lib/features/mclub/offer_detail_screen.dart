@@ -11,6 +11,7 @@ import '../../core/services/api_service.dart';
 import '../../core/widgets/primary_button.dart';
 import 'offer_model.dart';
 import '../auth/club_card_screen.dart';
+import 'widgets/rating_widget.dart';
 
 class OfferDetailScreen extends StatefulWidget {
   final Offer offer;
@@ -237,8 +238,6 @@ class _OfferDetailScreenState extends State<OfferDetailScreen> {
     final branches = o.branches;
     final linkIcons = _buildLinkIcons(context, o.links);
     final sponsorEmail = o.sponsorEmail;
-    final ratingColor =
-        _rating > 0 ? Colors.orange : (_rating < 0 ? Colors.blue : Colors.grey);
 
     final iconColor = _collapsed ? Colors.black87 : Colors.white;
     final overlayStyle = _collapsed ? SystemUiOverlayStyle.dark : SystemUiOverlayStyle.light;
@@ -370,62 +369,15 @@ class _OfferDetailScreenState extends State<OfferDetailScreen> {
                 child: Row(
                   crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
-                    Container(
-                      decoration: BoxDecoration(
-                        color: Colors.grey.shade100,
-                        border: Border.all(color: Colors.grey.shade300),
-                        borderRadius: BorderRadius.circular(8),
-                      ),
-                      child: Row(
-                        mainAxisSize: MainAxisSize.min,
-                        crossAxisAlignment: CrossAxisAlignment.center,
-                        children: [
-                          IconButton(
-                            padding: EdgeInsets.zero,
-                            constraints: const BoxConstraints.tightFor(
-                              width: 32,
-                              height: 32,
-                            ),
-                            icon: Icon(
-                              _userVote == 1
-                                  ? Icons.arrow_upward
-                                  : Icons.arrow_upward_outlined,
-                              color:
-                                  _userVote == 1 ? Colors.orange : Colors.grey,
-                            ),
-                            onPressed: _isVoting || _userVote == 1
-                                ? null
-                                : () => _sendVote(1),
-                          ),
-                          const SizedBox(width: 8),
-                          Text(
-                            '$_rating',
-                            style: TextStyle(
-                              fontSize: 16,
-                              fontWeight: FontWeight.w600,
-                              color: ratingColor,
-                            ),
-                          ),
-                          const SizedBox(width: 8),
-                          IconButton(
-                            padding: EdgeInsets.zero,
-                            constraints: const BoxConstraints.tightFor(
-                              width: 32,
-                              height: 32,
-                            ),
-                            icon: Icon(
-                              _userVote == -1
-                                  ? Icons.arrow_downward
-                                  : Icons.arrow_downward_outlined,
-                              color:
-                                  _userVote == -1 ? Colors.blue : Colors.grey,
-                            ),
-                            onPressed: _isVoting || _userVote == -1
-                                ? null
-                                : () => _sendVote(-1),
-                          ),
-                        ],
-                      ),
+                    RatingWidget(
+                      rating: _rating,
+                      userVote: _userVote,
+                      onVoteUp: _isVoting || _userVote == 1
+                          ? null
+                          : () => _sendVote(1),
+                      onVoteDown: _isVoting || _userVote == -1
+                          ? null
+                          : () => _sendVote(-1),
                     ),
                     if (widget.offer.dateEnd != null) ...[
                       const Spacer(),
