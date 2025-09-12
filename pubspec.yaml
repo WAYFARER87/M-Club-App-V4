@@ -42,6 +42,7 @@ dependencies:
   carousel_slider: ^5.1.1
   flutter_svg: ^2.0.10+1
   barcode_widget: ^2.0.4
+  palette_generator: ^0.3.3
 
 dev_dependencies:
   flutter_test:

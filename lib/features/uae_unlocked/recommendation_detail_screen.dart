@@ -9,6 +9,7 @@ import 'package:url_launcher/url_launcher.dart';
 import '../../core/services/api_service.dart';
 import 'recommendation_model.dart';
 import '../mclub/widgets/rating_widget.dart';
+import '../../core/utils/image_brightness.dart';
 
 class RecommendationDetailScreen extends StatefulWidget {
   final Recommendation recommendation;
@@ -35,6 +36,7 @@ class _RecommendationDetailScreenState extends State<RecommendationDetailScreen>
   int _userVote = 0; // -1 дизлайк, 1 лайк, 0 — не голосовал
   bool _isVoting = false;
   bool _isFavorite = false;
+  bool? _isPhotoDark;
 
   @override
   void initState() {
@@ -44,6 +46,7 @@ class _RecommendationDetailScreenState extends State<RecommendationDetailScreen>
     _rating = widget.recommendation.rating;
     _userVote = widget.recommendation.vote;
     _isFavorite = widget.recommendation.isFavorite;
+    _analyzePhoto();
   }
 
   @override
@@ -97,6 +100,13 @@ class _RecommendationDetailScreenState extends State<RecommendationDetailScreen>
     final title = widget.recommendation.title;
     final text = [title, link].where((e) => e.trim().isNotEmpty).join('\n');
     Share.share(text);
+  }
+
+  Future<void> _analyzePhoto() async {
+    final url = widget.recommendation.photoUrl;
+    if (url == null || url.isEmpty) return;
+    final dark = await isImageDark(url);
+    if (mounted) setState(() => _isPhotoDark = dark);
   }
 
   Future<void> _toggleFavorite() async {
@@ -235,8 +245,13 @@ class _RecommendationDetailScreenState extends State<RecommendationDetailScreen>
     final branches = o.branches;
     final linkIcons = _buildLinkIcons(context, o.links);
 
-    final iconColor = _collapsed ? Colors.black87 : Colors.white;
-    final overlayStyle = _collapsed ? SystemUiOverlayStyle.dark : SystemUiOverlayStyle.light;
+    final dark = _isPhotoDark ?? true;
+    final iconColor = _collapsed
+        ? Colors.black87
+        : (dark ? Colors.white : Colors.black87);
+    final overlayStyle = _collapsed
+        ? SystemUiOverlayStyle.dark
+        : (dark ? SystemUiOverlayStyle.light : SystemUiOverlayStyle.dark);
 
     return WillPopScope(
       onWillPop: () async {
