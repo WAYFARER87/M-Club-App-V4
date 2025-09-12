@@ -373,8 +373,9 @@ class _OfferDetailScreenState extends State<OfferDetailScreen> {
                         border: Border.all(color: Colors.grey.shade300),
                         borderRadius: BorderRadius.circular(8),
                       ),
-                      child: Column(
+                      child: Row(
                         mainAxisSize: MainAxisSize.min,
+                        crossAxisAlignment: CrossAxisAlignment.center,
                         children: [
                           IconButton(
                             icon: Icon(
@@ -388,6 +389,7 @@ class _OfferDetailScreenState extends State<OfferDetailScreen> {
                                 ? null
                                 : () => _sendVote(1),
                           ),
+                          const SizedBox(width: 8),
                           Text(
                             '$_rating',
                             style: TextStyle(
@@ -396,6 +398,7 @@ class _OfferDetailScreenState extends State<OfferDetailScreen> {
                               color: ratingColor,
                             ),
                           ),
+                          const SizedBox(width: 8),
                           IconButton(
                             icon: Icon(
                               _userVote == -1
