@@ -225,18 +225,12 @@ class _ProfileScreenState extends State<ProfileScreen> {
     final profile = _profile;
     if (profile == null) return const SizedBox();
 
-    Widget buildTile(String label, String value, IconData icon, {bool? verified}) {
+    Widget buildTile(String label, String value, IconData icon) {
       return ListTile(
         leading: Icon(icon),
         contentPadding: EdgeInsets.zero,
         title: Text(label),
         subtitle: Text(value),
-        trailing: verified == null
-            ? null
-            : Icon(
-                verified ? Icons.check_circle : Icons.error,
-                color: verified ? Colors.green : Colors.red,
-              ),
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
       );
     }
@@ -292,10 +286,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                buildTile('Телефон', profile.phone, Icons.phone,
-                    verified: profile.isVerifiedPhone),
-                buildTile('Email', profile.email, Icons.email,
-                    verified: profile.isVerifiedEmail),
+                buildTile('Телефон', profile.phone, Icons.phone),
+                buildTile('Email', profile.email, Icons.email),
               ],
             ),
           ),
