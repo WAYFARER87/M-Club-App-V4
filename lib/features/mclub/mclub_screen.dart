@@ -222,28 +222,31 @@ class _MClubScreenState extends State<MClubScreen>
 
     _nearbyHintShown = true;
 
-    showDialog(
-      context: context,
-      builder: (_) => AlertDialog(
-        content: const Text('Рядом есть предложения. Показать их?'),
-        actions: [
-          TextButton(
-            onPressed: () {
-              Navigator.pop(context);
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (_) => const MClubScreen(showNearbyOnly: true),
-                ),
-              );
-            },
-            child: const Text('Показать'),
-          ),
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text('Отмена'),
-          ),
-        ],
+    Future.delayed(
+      const Duration(seconds: 15),
+      () => showDialog(
+        context: context,
+        builder: (_) => AlertDialog(
+          content: const Text('Рядом есть предложения. Показать их?'),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.pop(context);
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (_) => const MClubScreen(showNearbyOnly: true),
+                  ),
+                );
+              },
+              child: const Text('Показать'),
+            ),
+            TextButton(
+              onPressed: () => Navigator.pop(context),
+              child: const Text('Отмена'),
+            ),
+          ],
+        ),
       ),
     );
   }
