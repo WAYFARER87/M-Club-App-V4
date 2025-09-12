@@ -30,6 +30,34 @@ void main() {
     service.dio.interceptors.clear();
   });
 
+  test('checkinBenefit sends id and coordinates', () async {
+    final service = ApiService();
+    service.dio.interceptors.clear();
+    service.dio.interceptors.add(
+      InterceptorsWrapper(
+        onRequest: (options, handler) {
+          expect(options.method, 'POST');
+          expect(options.path, '/benefits/checkin');
+          expect(options.data, isA<FormData>());
+          final form = options.data as FormData;
+          final fields = {for (final f in form.fields) f.key: f.value};
+          expect(fields['id'], '123');
+          expect(fields['coordinates'], '{"lat":10.0,"lng":20.0}');
+          handler.resolve(
+            Response(
+              requestOptions: options,
+              statusCode: 200,
+            ),
+          );
+        },
+      ),
+    );
+
+    await service.checkinBenefit(123, 10.0, 20.0);
+
+    service.dio.interceptors.clear();
+  });
+
   test('fetchProfile parses response into UserProfile', () async {
     final service = ApiService();
     service.dio.interceptors.clear();

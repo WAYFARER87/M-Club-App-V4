@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'dart:ui' as ui;
 import 'package:dio/dio.dart';
 import 'package:flutter/foundation.dart';
@@ -162,6 +163,22 @@ class ApiService {
     } catch (e) {
       if (kDebugMode) {
         print('toggleFavorite error: $e');
+      }
+      rethrow;
+    }
+  }
+
+  /// Отметиться в предложении
+  Future<void> checkinBenefit(int id, double lat, double lng) async {
+    try {
+      final formData = FormData.fromMap({
+        'id': id,
+        'coordinates': jsonEncode({'lat': lat, 'lng': lng}),
+      });
+      await _dio.post('/benefits/checkin', data: formData);
+    } on DioException catch (e) {
+      if (kDebugMode) {
+        print('checkinBenefit error: $e');
       }
       rethrow;
     }
