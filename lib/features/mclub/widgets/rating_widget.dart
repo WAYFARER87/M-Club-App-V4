@@ -51,12 +51,18 @@ class RatingWidget extends StatelessWidget {
             onPressed: onVoteUp,
           ),
           _gap,
-          Text(
-            '$rating',
-            style: TextStyle(
-              fontSize: 16,
-              fontWeight: FontWeight.w600,
-              color: ratingColor,
+          AnimatedSwitcher(
+            duration: const Duration(milliseconds: 200),
+            transitionBuilder: (child, animation) =>
+                ScaleTransition(scale: animation, child: child),
+            child: Text(
+              '$rating',
+              key: ValueKey(rating),
+              style: TextStyle(
+                fontSize: 16,
+                fontWeight: FontWeight.w600,
+                color: ratingColor,
+              ),
             ),
           ),
           _gap,
