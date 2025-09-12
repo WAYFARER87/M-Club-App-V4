@@ -10,6 +10,7 @@ import 'package:intl/intl.dart';
 import '../../core/services/api_service.dart';
 import '../../core/widgets/primary_button.dart';
 import 'offer_model.dart';
+import '../auth/club_card_screen.dart';
 
 class OfferDetailScreen extends StatefulWidget {
   final Offer offer;
@@ -424,6 +425,24 @@ class _OfferDetailScreenState extends State<OfferDetailScreen> {
                       ),
                     ],
                   ],
+                ),
+              ),
+            ),
+            SliverToBoxAdapter(
+              child: Padding(
+                padding: const EdgeInsets.fromLTRB(16, 8, 16, 0),
+                child: SizedBox(
+                  width: double.infinity,
+                  child: PrimaryButton(
+                    text: 'Клубная карта',
+                    onPressed: () {
+                      Navigator.of(context).push(
+                        MaterialPageRoute(
+                          builder: (_) => const ClubCardScreen(),
+                        ),
+                      );
+                    },
+                  ),
                 ),
               ),
             ),
