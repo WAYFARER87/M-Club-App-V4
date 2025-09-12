@@ -397,7 +397,7 @@ class _OfferDetailScreenState extends State<OfferDetailScreen> {
                     if (widget.offer.dateEnd != null) ...[
                       const SizedBox(width: 16),
                       Text(
-                        DateFormat('dd.MM.yyyy').format(widget.offer.dateEnd!),
+                        'Действует до ${DateFormat('dd.MM.yyyy').format(widget.offer.dateEnd!)}',
                         style: const TextStyle(fontSize: 16),
                       ),
                     ],
