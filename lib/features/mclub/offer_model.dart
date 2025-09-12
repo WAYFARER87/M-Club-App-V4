@@ -21,6 +21,7 @@ class Offer {
   final List<String> photosUrl;     // галерея
 
   final String? shareUrl;           // ссылка для шаринга
+  final String? sponsorEmail;       // email менеджера
   final List<Branch> branches;
   final OfferLinks links;
   final int rating;                 // текущий рейтинг
@@ -42,6 +43,7 @@ class Offer {
     required this.photoUrl,
     required this.photosUrl,
     required this.shareUrl,
+    this.sponsorEmail,
     required this.branches,
     required this.links,
     required this.rating,
@@ -118,6 +120,7 @@ class Offer {
       photoUrl: (json['photo_url'] as String?)?.toString(),
       photosUrl: photos,
       shareUrl: links.shareUrl,
+      sponsorEmail: (json['sponsor_email'] as String?)?.toString(),
       branches: branches,
       links: links,
       rating: int.tryParse((json['rating'] ?? '0').toString()) ?? 0,

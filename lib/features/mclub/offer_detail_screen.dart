@@ -8,6 +8,7 @@ import 'package:share_plus/share_plus.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:intl/intl.dart';
 import '../../core/services/api_service.dart';
+import '../../core/widgets/primary_button.dart';
 import 'offer_model.dart';
 
 class OfferDetailScreen extends StatefulWidget {
@@ -234,6 +235,7 @@ class _OfferDetailScreenState extends State<OfferDetailScreen> {
     final descHtml = o.descriptionHtml;
     final branches = o.branches;
     final linkIcons = _buildLinkIcons(context, o.links);
+    final sponsorEmail = o.sponsorEmail;
     final ratingColor =
         _rating > 0 ? Colors.orange : (_rating < 0 ? Colors.blue : Colors.grey);
 
@@ -464,6 +466,27 @@ class _OfferDetailScreenState extends State<OfferDetailScreen> {
                           children: linkIcons,
                         ),
                       ),
+
+                    const SizedBox(height: 16),
+                    Row(
+                      children: [
+                        Expanded(
+                          child: PrimaryButton(
+                            text: 'Отказали в скидке?',
+                            onPressed: () {},
+                          ),
+                        ),
+                        const SizedBox(width: 12),
+                        Expanded(
+                          child: PrimaryButton(
+                            text: 'Контакт менеджера',
+                            onPressed: (sponsorEmail == null || sponsorEmail.trim().isEmpty)
+                                ? null
+                                : () => _mailto(sponsorEmail!),
+                          ),
+                        ),
+                      ],
+                    ),
 
                     // Подзаголовок "Адреса"
                     if (branches.isNotEmpty) ...[
