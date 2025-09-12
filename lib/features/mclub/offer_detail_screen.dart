@@ -381,6 +381,11 @@ class _OfferDetailScreenState extends State<OfferDetailScreen> {
                         crossAxisAlignment: CrossAxisAlignment.center,
                         children: [
                           IconButton(
+                            padding: EdgeInsets.zero,
+                            constraints: const BoxConstraints.tightFor(
+                              width: 32,
+                              height: 32,
+                            ),
                             icon: Icon(
                               _userVote == 1
                                   ? Icons.arrow_upward
@@ -403,6 +408,11 @@ class _OfferDetailScreenState extends State<OfferDetailScreen> {
                           ),
                           const SizedBox(width: 8),
                           IconButton(
+                            padding: EdgeInsets.zero,
+                            constraints: const BoxConstraints.tightFor(
+                              width: 32,
+                              height: 32,
+                            ),
                             icon: Icon(
                               _userVote == -1
                                   ? Icons.arrow_downward
@@ -419,9 +429,12 @@ class _OfferDetailScreenState extends State<OfferDetailScreen> {
                     ),
                     if (widget.offer.dateEnd != null) ...[
                       const Spacer(),
-                      Text(
-                        'Действует до ${DateFormat('dd.MM.yyyy').format(widget.offer.dateEnd!)}',
-                        style: const TextStyle(fontSize: 16),
+                      Container(
+                        padding: const EdgeInsets.symmetric(vertical: 8),
+                        child: Text(
+                          'Действует до ${DateFormat('dd.MM.yyyy').format(widget.offer.dateEnd!)}',
+                          style: const TextStyle(fontSize: 16),
+                        ),
                       ),
                     ],
                   ],
