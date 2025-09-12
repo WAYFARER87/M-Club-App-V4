@@ -8,22 +8,27 @@ import 'offers_map_screen.dart';
 import 'category_model.dart';
 
 class MClubScreen extends StatefulWidget {
-  const MClubScreen({super.key});
+  const MClubScreen({super.key, this.showNearbyOnly = false});
+
+  final bool showNearbyOnly;
 
   @override
   State<MClubScreen> createState() => _MClubScreenState();
 }
 
 
-class _MClubScreenState extends State<MClubScreen> with TickerProviderStateMixin {
-
+class _MClubScreenState extends State<MClubScreen>
+    with TickerProviderStateMixin {
   final _api = ApiService();
+
+  static bool _nearbyHintShown = false;
 
   List<dynamic> _categories = [];
   List<dynamic> _offers = [];
   String? _selectedCategoryId;
   String _sortMode = 'alphabet'; // 'alphabet' | 'distance'
   bool _showFavoritesOnly = false;
+  bool _nearbyOnly = false;
 
   bool _isLoading = false;
   String? _error;
@@ -42,6 +47,7 @@ class _MClubScreenState extends State<MClubScreen> with TickerProviderStateMixin
   @override
   void initState() {
     super.initState();
+    _nearbyOnly = widget.showNearbyOnly;
     _initLocation();
     _loadData();
   }
@@ -78,6 +84,7 @@ class _MClubScreenState extends State<MClubScreen> with TickerProviderStateMixin
       _curLng = _fallbackLng;
     } finally {
       if (mounted) setState(() {});
+      _maybeShowNearbyHint();
     }
   }
 
@@ -110,6 +117,7 @@ class _MClubScreenState extends State<MClubScreen> with TickerProviderStateMixin
           _offers = offers;
           _selectedCategoryId = null;
         });
+        _maybeShowNearbyHint();
       }
 
       WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -164,6 +172,12 @@ class _MClubScreenState extends State<MClubScreen> with TickerProviderStateMixin
           filtered.where((o) => parseBool(o['is_favorite'])).toList();
     }
 
+    if (_nearbyOnly) {
+      filtered = filtered
+          .where((o) => _minDistanceMeters(o['branches']) <= 300)
+          .toList();
+    }
+
     return filtered;
   }
 
@@ -191,6 +205,47 @@ class _MClubScreenState extends State<MClubScreen> with TickerProviderStateMixin
     } else {
       return '${meters.toStringAsFixed(0)} м';
     }
+  }
+
+  void _maybeShowNearbyHint() {
+    if (_nearbyHintShown ||
+        _curLat == null ||
+        _curLng == null ||
+        _offers.isEmpty) {
+      return;
+    }
+
+    final hasNearby = _offers.any(
+      (o) => _minDistanceMeters(o['branches']) <= 300,
+    );
+    if (!hasNearby) return;
+
+    _nearbyHintShown = true;
+
+    showDialog(
+      context: context,
+      builder: (_) => AlertDialog(
+        content: const Text('Рядом есть предложения. Показать их?'),
+        actions: [
+          TextButton(
+            onPressed: () {
+              Navigator.pop(context);
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (_) => const MClubScreen(showNearbyOnly: true),
+                ),
+              );
+            },
+            child: const Text('Показать'),
+          ),
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('Отмена'),
+          ),
+        ],
+      ),
+    );
   }
 
   void _centerSelectedTab() {
