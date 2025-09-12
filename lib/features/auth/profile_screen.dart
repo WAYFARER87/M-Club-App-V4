@@ -300,6 +300,10 @@ class _ProfileScreenState extends State<ProfileScreen> {
           width: double.infinity,
           child: OutlinedButton(
             onPressed: () => setState(() => _isEditing = true),
+            style: OutlinedButton.styleFrom(
+              foregroundColor: const Color(0xFF182857),
+              side: const BorderSide(color: Color(0xFF182857)),
+            ),
             child: const Text('Изменить профиль'),
           ),
         ),
