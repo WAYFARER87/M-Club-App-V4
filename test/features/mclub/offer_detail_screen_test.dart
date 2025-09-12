@@ -80,4 +80,26 @@ void main() {
     expect(upPos.dx < ratingPos.dx, true);
     expect(ratingPos.dx < downPos.dx, true);
   });
+
+  testWidgets('rating and date containers have equal height', (tester) async {
+    final offer =
+        _buildOffer(vote: 0, rating: 5, dateEnd: DateTime(2024, 5, 20));
+    await tester.pumpWidget(MaterialApp(home: OfferDetailScreen(offer: offer)));
+    await tester.pumpAndSettle();
+
+    final ratingContainer = find.ancestor(
+      of: find.byIcon(Icons.arrow_upward_outlined),
+      matching:
+          find.byWidgetPredicate((w) => w is Container && w.decoration != null),
+    );
+
+    final dateContainer = find.ancestor(
+      of: find.text('Действует до 20.05.2024'),
+      matching: find.byType(Container),
+    );
+
+    final ratingSize = tester.getSize(ratingContainer);
+    final dateSize = tester.getSize(dateContainer);
+    expect(ratingSize.height, dateSize.height);
+  });
 }
