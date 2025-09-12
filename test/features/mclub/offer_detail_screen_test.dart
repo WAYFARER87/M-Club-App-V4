@@ -38,7 +38,7 @@ void main() {
     final upIcon = tester.widget<Icon>(find.byIcon(Icons.arrow_upward));
     final downIcon =
         tester.widget<Icon>(find.byIcon(Icons.arrow_downward_outlined));
-    expect(upIcon.color, Colors.orange);
+    expect(upIcon.color, Colors.green);
     expect(downIcon.color, Colors.grey);
     expect(find.text('42'), findsOneWidget);
   });
@@ -52,7 +52,7 @@ void main() {
         tester.widget<Icon>(find.byIcon(Icons.arrow_upward_outlined));
     final downIcon = tester.widget<Icon>(find.byIcon(Icons.arrow_downward));
     expect(upIcon.color, Colors.grey);
-    expect(downIcon.color, Colors.blue);
+    expect(downIcon.color, Colors.red);
     expect(find.text('7'), findsOneWidget);
   });
 

@@ -20,8 +20,8 @@ class RatingWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final ratingColor = rating > 0
-        ? Colors.orange
-        : (rating < 0 ? Colors.blue : Colors.grey);
+        ? Colors.green
+        : (rating < 0 ? Colors.red : Colors.grey);
 
     return Container(
       decoration: BoxDecoration(
@@ -43,7 +43,7 @@ class RatingWidget extends StatelessWidget {
               userVote == 1
                   ? Icons.arrow_upward
                   : Icons.arrow_upward_outlined,
-              color: userVote == 1 ? Colors.orange : Colors.grey,
+              color: userVote == 1 ? Colors.green : Colors.grey,
             ),
             onPressed: onVoteUp,
           ),
@@ -67,7 +67,7 @@ class RatingWidget extends StatelessWidget {
               userVote == -1
                   ? Icons.arrow_downward
                   : Icons.arrow_downward_outlined,
-              color: userVote == -1 ? Colors.blue : Colors.grey,
+              color: userVote == -1 ? Colors.red : Colors.grey,
             ),
             onPressed: onVoteDown,
           ),
