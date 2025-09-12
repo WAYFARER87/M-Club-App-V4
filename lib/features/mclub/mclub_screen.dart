@@ -476,7 +476,7 @@ class _MClubScreenState extends State<MClubScreen> with TickerProviderStateMixin
                                         setState(() => offer['is_favorite'] =
                                             !parseBool(offer['is_favorite']));
                                         try {
-                                          await _api.toggleFavorite(id);
+                                          await _api.toggleBenefitFavorite(id);
                                         } catch (_) {
                                           // ignore errors
                                         }

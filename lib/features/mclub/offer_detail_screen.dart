@@ -151,7 +151,7 @@ class _OfferDetailScreenState extends State<OfferDetailScreen> {
       setState(() => _isFavorite = !_isFavorite);
     }
     try {
-      await _api.toggleFavorite(id);
+      await _api.toggleBenefitFavorite(id);
     } catch (_) {
       // ignore errors
     }
