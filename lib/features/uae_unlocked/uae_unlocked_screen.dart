@@ -89,7 +89,7 @@ class _UAEUnlockedScreenState extends State<UAEUnlockedScreen>
     });
 
     try {
-      final cats = await _api.fetchCategories();
+      final cats = await _api.fetchRecommendationCategories();
       final recs = await _api.fetchRecommendations();
 
       if (!mounted) return;
