@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_html/flutter_html.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:dio/dio.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:url_launcher/url_launcher.dart';
@@ -400,12 +401,86 @@ class _OfferDetailScreenState extends State<OfferDetailScreen> {
                   width: double.infinity,
                   child: PrimaryButton(
                     text: 'Клубная карта',
-                    onPressed: () {
-                      Navigator.of(context).push(
-                        MaterialPageRoute(
-                          builder: (_) => const ClubCardScreen(),
-                        ),
-                      );
+                    onPressed: () async {
+                      double curLat;
+                      double curLng;
+                      try {
+                        var perm = await Geolocator.checkPermission();
+                        if (perm == LocationPermission.denied) {
+                          perm = await Geolocator.requestPermission();
+                        }
+                        if (perm == LocationPermission.deniedForever ||
+                            perm == LocationPermission.denied) {
+                          if (mounted) {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              const SnackBar(
+                                  content: Text('Геолокация недоступна')),
+                            );
+                          }
+                          return;
+                        }
+                        final pos = await Geolocator.getCurrentPosition(
+                            desiredAccuracy: LocationAccuracy.high);
+                        curLat = pos.latitude;
+                        curLng = pos.longitude;
+                      } catch (e) {
+                        if (mounted) {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(
+                                content: Text(
+                                    'Не удалось определить местоположение: $e')),
+                          );
+                        }
+                        return;
+                      }
+
+                      var isNear = false;
+                      for (final b in widget.offer.branches) {
+                        final lat = b.lat;
+                        final lng = b.lng;
+                        if (lat == null || lng == null) continue;
+                        final d = Geolocator.distanceBetween(
+                            curLat, curLng, lat, lng);
+                        if (d <= 300) {
+                          isNear = true;
+                          break;
+                        }
+                      }
+
+                      if (!isNear) {
+                        if (mounted) {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(
+                                content:
+                                    Text('Вы слишком далеко от партнёра')),
+                          );
+                        }
+                        return;
+                      }
+
+                      final id = int.tryParse(widget.offer.id);
+                      if (id == null) return;
+                      try {
+                        await _api.checkinBenefit(id, curLat, curLng);
+                        if (!mounted) return;
+                        Navigator.of(context).push(
+                          MaterialPageRoute(
+                            builder: (_) => const ClubCardScreen(),
+                          ),
+                        );
+                      } on DioException catch (e) {
+                        if (mounted) {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(content: Text('Ошибка сети: $e')),
+                          );
+                        }
+                      } catch (e) {
+                        if (mounted) {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(content: Text('Ошибка: $e')),
+                          );
+                        }
+                      }
                     },
                   ),
                 ),
