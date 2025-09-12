@@ -1,3 +1,6 @@
+// Displays UAE unlocked recommendations on a map.
+// Adapted from the MClub OffersMapScreen with Offer replaced by Recommendation
+// and without benefitText usage.
 import 'dart:math';
 import 'dart:typed_data';
 import 'dart:ui' as ui;
