@@ -331,9 +331,10 @@ class _AuthCodeScreenState extends State<_AuthCodeScreen> {
       final ok = await ApiService().verifyCode(widget.email, _code);
       if (!ok) throw _L.of(context).errorTokenMissing;
       if (!mounted) return;
+      // После успешной верификации очищаем стек и открываем главную
       Navigator.of(context).pushAndRemoveUntil(
         MaterialPageRoute(builder: (_) => const HomeScreen()),
-        (route) => false,
+        (_) => false,
       );
     } catch (e) {
       if (!mounted) return;
