@@ -125,6 +125,7 @@ class _AuthEmailScreenState extends State<AuthEmailScreen> {
       borderRadius: BorderRadius.circular(12),
       borderSide: BorderSide(color: Colors.grey.shade300, width: 1),
     );
+    final double topPadding = MediaQuery.of(context).padding.top + kToolbarHeight;
 
     return Scaffold(
       backgroundColor: Colors.transparent,
@@ -143,7 +144,7 @@ class _AuthEmailScreenState extends State<AuthEmailScreen> {
           ),
         ),
         child: Padding(
-          padding: const EdgeInsets.all(16),
+          padding: EdgeInsets.fromLTRB(16, topPadding + 16, 16, 16),
           child: Form(
           key: _formKey,
           child: Column(
@@ -390,6 +391,7 @@ class _AuthCodeScreenState extends State<_AuthCodeScreen> {
   @override
   Widget build(BuildContext context) {
     final t = _L.of(context);
+    final double topPadding = MediaQuery.of(context).padding.top + kToolbarHeight;
 
     return Scaffold(
       backgroundColor: Colors.transparent,
@@ -408,7 +410,7 @@ class _AuthCodeScreenState extends State<_AuthCodeScreen> {
           ),
         ),
         child: Padding(
-          padding: const EdgeInsets.all(16),
+          padding: EdgeInsets.fromLTRB(16, topPadding + 16, 16, 16),
           child: Column(
           children: [
             const SizedBox(height: 24),
