@@ -35,9 +35,10 @@ void main() {
     await tester.pumpWidget(MaterialApp(home: OfferDetailScreen(offer: offer)));
     await tester.pumpAndSettle();
 
-    final upIcon = tester.widget<Icon>(find.byIcon(Icons.thumb_up));
-    final downIcon = tester.widget<Icon>(find.byIcon(Icons.thumb_down_outlined));
-    expect(upIcon.color, Colors.green);
+    final upIcon = tester.widget<Icon>(find.byIcon(Icons.arrow_upward));
+    final downIcon =
+        tester.widget<Icon>(find.byIcon(Icons.arrow_downward_outlined));
+    expect(upIcon.color, Colors.orange);
     expect(downIcon.color, Colors.grey);
     expect(find.text('42'), findsOneWidget);
   });
@@ -47,10 +48,11 @@ void main() {
     await tester.pumpWidget(MaterialApp(home: OfferDetailScreen(offer: offer)));
     await tester.pumpAndSettle();
 
-    final upIcon = tester.widget<Icon>(find.byIcon(Icons.thumb_up_outlined));
-    final downIcon = tester.widget<Icon>(find.byIcon(Icons.thumb_down));
+    final upIcon =
+        tester.widget<Icon>(find.byIcon(Icons.arrow_upward_outlined));
+    final downIcon = tester.widget<Icon>(find.byIcon(Icons.arrow_downward));
     expect(upIcon.color, Colors.grey);
-    expect(downIcon.color, Colors.red);
+    expect(downIcon.color, Colors.blue);
     expect(find.text('7'), findsOneWidget);
   });
 
@@ -62,18 +64,20 @@ void main() {
     expect(find.text('Действует до 20.05.2024'), findsOneWidget);
   });
 
-  testWidgets('lays out vote row horizontally', (tester) async {
+  testWidgets('lays out vote column vertically', (tester) async {
     final offer = _buildOffer(vote: 0, rating: 10);
     await tester.pumpWidget(MaterialApp(home: OfferDetailScreen(offer: offer)));
     await tester.pumpAndSettle();
 
-    final upPos = tester.getTopLeft(find.byIcon(Icons.thumb_up_outlined));
+    final upPos =
+        tester.getTopLeft(find.byIcon(Icons.arrow_upward_outlined));
     final ratingPos = tester.getTopLeft(find.text('10'));
-    final downPos = tester.getTopLeft(find.byIcon(Icons.thumb_down_outlined));
+    final downPos =
+        tester.getTopLeft(find.byIcon(Icons.arrow_downward_outlined));
 
-    expect(upPos.dy, ratingPos.dy);
-    expect(ratingPos.dy, downPos.dy);
-    expect(upPos.dx < ratingPos.dx, true);
-    expect(ratingPos.dx < downPos.dx, true);
+    expect(upPos.dx, closeTo(ratingPos.dx, 1));
+    expect(ratingPos.dx, closeTo(downPos.dx, 1));
+    expect(upPos.dy < ratingPos.dy, true);
+    expect(ratingPos.dy < downPos.dy, true);
   });
 }

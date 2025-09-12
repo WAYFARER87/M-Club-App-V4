@@ -234,7 +234,8 @@ class _OfferDetailScreenState extends State<OfferDetailScreen> {
     final descHtml = o.descriptionHtml;
     final branches = o.branches;
     final linkIcons = _buildLinkIcons(context, o.links);
-    final ratingColor = _rating > 0 ? Colors.green : (_rating < 0 ? Colors.red : Colors.grey);
+    final ratingColor =
+        _rating > 0 ? Colors.orange : (_rating < 0 ? Colors.blue : Colors.grey);
 
     final iconColor = _collapsed ? Colors.black87 : Colors.white;
     final overlayStyle = _collapsed ? SystemUiOverlayStyle.dark : SystemUiOverlayStyle.light;
@@ -364,32 +365,51 @@ class _OfferDetailScreenState extends State<OfferDetailScreen> {
                 color: Colors.white,
                 padding: const EdgeInsets.fromLTRB(16, 8, 16, 8),
                 child: Row(
-                  mainAxisAlignment: MainAxisAlignment.start,
                   crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
-                    IconButton(
-                      icon: Icon(
-                        _userVote == 1 ? Icons.thumb_up : Icons.thumb_up_outlined,
-                        color: _userVote == 1 ? Colors.green : Colors.grey,
+                    Container(
+                      decoration: BoxDecoration(
+                        color: Colors.grey.shade100,
+                        border: Border.all(color: Colors.grey.shade300),
+                        borderRadius: BorderRadius.circular(8),
                       ),
-                      onPressed: _isVoting || _userVote == 1 ? null : () => _sendVote(1),
-                    ),
-                    const SizedBox(width: 8),
-                    Text(
-                      '$_rating',
-                      style: TextStyle(
-                        fontSize: 16,
-                        fontWeight: FontWeight.w600,
-                        color: ratingColor,
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          IconButton(
+                            icon: Icon(
+                              _userVote == 1
+                                  ? Icons.arrow_upward
+                                  : Icons.arrow_upward_outlined,
+                              color:
+                                  _userVote == 1 ? Colors.orange : Colors.grey,
+                            ),
+                            onPressed: _isVoting || _userVote == 1
+                                ? null
+                                : () => _sendVote(1),
+                          ),
+                          Text(
+                            '$_rating',
+                            style: TextStyle(
+                              fontSize: 16,
+                              fontWeight: FontWeight.w600,
+                              color: ratingColor,
+                            ),
+                          ),
+                          IconButton(
+                            icon: Icon(
+                              _userVote == -1
+                                  ? Icons.arrow_downward
+                                  : Icons.arrow_downward_outlined,
+                              color:
+                                  _userVote == -1 ? Colors.blue : Colors.grey,
+                            ),
+                            onPressed: _isVoting || _userVote == -1
+                                ? null
+                                : () => _sendVote(-1),
+                          ),
+                        ],
                       ),
-                    ),
-                    const SizedBox(width: 8),
-                    IconButton(
-                      icon: Icon(
-                        _userVote == -1 ? Icons.thumb_down : Icons.thumb_down_outlined,
-                        color: _userVote == -1 ? Colors.red : Colors.grey,
-                      ),
-                      onPressed: _isVoting || _userVote == -1 ? null : () => _sendVote(-1),
                     ),
                     if (widget.offer.dateEnd != null) ...[
                       const Spacer(),
