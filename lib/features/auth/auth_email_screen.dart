@@ -6,6 +6,7 @@ import 'package:flutter_svg/flutter_svg.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 import '../../core/services/api_service.dart';
+import '../../core/widgets/auth_gate.dart';
 import '../home/home_screen.dart'; // проверь путь под свой проект
 
 /// Простая локализация без flutter_gen (ru/en)
@@ -331,11 +332,10 @@ class _AuthCodeScreenState extends State<_AuthCodeScreen> {
       final ok = await ApiService().verifyCode(widget.email, _code);
       if (!ok) throw _L.of(context).errorTokenMissing;
       if (!mounted) return;
-      // После успешной верификации очищаем стек и открываем главную
-      Navigator.of(context).pushAndRemoveUntil(
-        MaterialPageRoute(builder: (_) => const HomeScreen()),
-        (_) => false,
-      );
+      // После успешной верификации обновляем состояние авторизации
+      // и возвращаемся к корневому экрану, где [AuthGate] покажет приложение.
+      AuthGate.of(context)?.refreshAuthState();
+      Navigator.of(context).popUntil((route) => route.isFirst);
     } catch (e) {
       if (!mounted) return;
       final t = _L.of(context);
