@@ -238,12 +238,7 @@ class _MClubScreenState extends State<MClubScreen>
               ),
               onPressed: () {
                 Navigator.pop(context);
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (_) => const MClubScreen(showNearbyOnly: true),
-                  ),
-                );
+                setState(() => _nearbyOnly = true);
               },
               child: const Text('Показать'),
             ),

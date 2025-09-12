@@ -7,7 +7,9 @@ import '../news/news_screen.dart';
 import '../auth/profile_screen.dart';
 
 class HomeScreen extends StatefulWidget {
-  const HomeScreen({super.key});
+  const HomeScreen({super.key, this.showNearbyOnly = false});
+
+  final bool showNearbyOnly;
 
   @override
   State<HomeScreen> createState() => _HomeScreenState();
@@ -18,13 +20,19 @@ class _HomeScreenState extends State<HomeScreen> {
 
   static const _primary = Color(0xFF182857);
 
-  final _pages = const [
-    MClubScreen(),
-    UAEUnlockedScreen(),
-    RadioScreen(),
-    NewsScreen(),
-    ProfileScreen(),
-  ];
+  late final List<Widget> _pages;
+
+  @override
+  void initState() {
+    super.initState();
+    _pages = [
+      MClubScreen(showNearbyOnly: widget.showNearbyOnly),
+      const UAEUnlockedScreen(),
+      const RadioScreen(),
+      const NewsScreen(),
+      const ProfileScreen(),
+    ];
+  }
 
   @override
   Widget build(BuildContext context) {
