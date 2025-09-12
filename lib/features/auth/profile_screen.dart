@@ -86,6 +86,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
       if (upd != null) {
         setState(() {
           _profile = upd;
+          _nameCtrl.text = upd.name;
+          _lastNameCtrl.text = upd.lastname;
           _phoneCtrl.text = upd.phone;
           _emailCtrl.text = upd.email;
           _isEditing = false;
