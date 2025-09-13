@@ -107,9 +107,15 @@ class _NewsListState extends State<NewsList> {
 
     return RefreshIndicator(
       onRefresh: _refresh,
-      child: ListView.builder(
+      child: ListView.separated(
         controller: _scrollController,
         itemCount: _items.length + (showBottom ? 1 : 0),
+        separatorBuilder: (context, index) {
+          if (index >= _items.length - 1) {
+            return const SizedBox.shrink();
+          }
+          return const Divider(height: 0);
+        },
         itemBuilder: (context, index) {
           if (index >= _items.length) {
             if (_isLoading) {
@@ -153,98 +159,93 @@ class NewsListItem extends StatelessWidget {
     final imageHeight = MediaQuery.of(context).size.width * 0.6;
     return GestureDetector(
       onTap: onTap,
-      child: Card(
-        margin: const EdgeInsets.only(bottom: 12),
-        clipBehavior: Clip.antiAlias,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            if (item.image.isNotEmpty)
-              Image.network(
-                item.image,
-                width: double.infinity,
-                height: imageHeight,
-                fit: BoxFit.cover,
-                errorBuilder: (_, __, ___) => Container(
-                  height: imageHeight,
-                  color: Colors.grey.shade200,
-                ),
-              )
-            else
-              Container(
-                width: double.infinity,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          if (item.image.isNotEmpty)
+            Image.network(
+              item.image,
+              width: double.infinity,
+              height: imageHeight,
+              fit: BoxFit.cover,
+              errorBuilder: (_, __, ___) => Container(
                 height: imageHeight,
                 color: Colors.grey.shade200,
               ),
-            Padding(
-              padding: const EdgeInsets.all(12),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  if (item.rubric != null && item.rubric!.name.isNotEmpty)
-                    Text(
-                      item.rubric!.name.toUpperCase(),
-                      style: const TextStyle(
-                        fontSize: 12,
-                        fontWeight: FontWeight.w500,
-                        color: Colors.grey,
-                      ),
-                    ),
+            )
+          else
+            Container(
+              width: double.infinity,
+              height: imageHeight,
+              color: Colors.grey.shade200,
+            ),
+          Padding(
+            padding: const EdgeInsets.all(12),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                if (item.rubric != null && item.rubric!.name.isNotEmpty)
                   Text(
-                    item.title,
+                    item.rubric!.name.toUpperCase(),
                     style: const TextStyle(
-                      fontSize: 18,
-                      fontWeight: FontWeight.w400,
+                      fontSize: 12,
+                      fontWeight: FontWeight.w500,
+                      color: Colors.grey,
+                    ),
+                  ),
+                Text(
+                  item.title,
+                  style: const TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.w400,
+                    fontFamily: 'Roboto',
+                  ),
+                ),
+                Padding(
+                  padding: const EdgeInsets.only(top: 8),
+                  child: Text(
+                    item.contentPreview,
+                    style: const TextStyle(
+                      fontSize: 14,
+                      fontWeight: FontWeight.w300,
                       fontFamily: 'Roboto',
                     ),
                   ),
-                  Padding(
-                    padding: const EdgeInsets.only(top: 8),
-                    child: Text(
-                      item.contentPreview,
-                      style: const TextStyle(
-                        fontSize: 14,
-                        fontWeight: FontWeight.w300,
-                        fontFamily: 'Roboto',
-                      ),
-                    ),
-                  ),
-                  Padding(
-                    padding: const EdgeInsets.only(top: 12),
-                    child: Row(
-                      children: [
-                        Expanded(
-                          child: Text(
-                            [
-                              if (item.published != null)
-                                timeAgo(item.published),
-                              if (item.author.trim().isNotEmpty) item.author,
-                            ].join(' · '),
-                            style: const TextStyle(
-                              fontSize: 14,
-                              color: Colors.grey,
-                            ),
+                ),
+                Padding(
+                  padding: const EdgeInsets.only(top: 12),
+                  child: Row(
+                    children: [
+                      Expanded(
+                        child: Text(
+                          [
+                            if (item.published != null)
+                              timeAgo(item.published),
+                            if (item.author.trim().isNotEmpty) item.author,
+                          ].join(' · '),
+                          style: const TextStyle(
+                            fontSize: 14,
+                            color: Colors.grey,
                           ),
                         ),
-                        IconButton(
-                          icon: const Icon(Icons.share),
-                          onPressed: () {
-                            final text = [
-                              item.title,
-                              item.url,
-                            ].where((e) => e.trim().isNotEmpty).join('\n');
-                            if (text.isNotEmpty) Share.share(text);
-                          },
-                        ),
-                      ],
-                    ),
+                      ),
+                      IconButton(
+                        icon: const Icon(Icons.share),
+                        onPressed: () {
+                          final text = [
+                            item.title,
+                            item.url,
+                          ].where((e) => e.trim().isNotEmpty).join('\n');
+                          if (text.isNotEmpty) Share.share(text);
+                        },
+                      ),
+                    ],
                   ),
-                ],
-              ),
+                ),
+              ],
             ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }
