@@ -10,7 +10,7 @@ class NewsApiService {
   NewsApiService._internal() {
     _dio = Dio(
       BaseOptions(
-        baseUrl: 'https://russianemirates.com/api/v4',
+        baseUrl: 'https://russianemirates.com/api/v4/',
         headers: {
           'Content-Type': 'application/json',
           'Accept-Language': _resolveLang(),
