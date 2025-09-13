@@ -5,11 +5,13 @@ import 'package:flutter/material.dart';
 class NearbyDiscountsSheet extends StatelessWidget {
   final List<dynamic> offers;
   final VoidCallback? onShowAll;
+  final String Function(double)? distanceFormatter;
 
   const NearbyDiscountsSheet({
     super.key,
     required this.offers,
     this.onShowAll,
+    this.distanceFormatter,
   });
 
   @override
@@ -54,6 +56,12 @@ class NearbyDiscountsSheet extends StatelessWidget {
                 final photo = (offer['photo_url'] ?? '').toString();
                 final title = (offer['title'] ?? '').toString();
                 final benefit = (offer['benefit'] ?? '').toString();
+                final d = offer['distance'];
+                final trailingText = d is num
+                    ? (distanceFormatter != null
+                        ? distanceFormatter!(d.toDouble())
+                        : d.toString())
+                    : null;
                 return ListTile(
                   leading: photo.isNotEmpty
                       ? Image.network(
@@ -82,6 +90,8 @@ class NearbyDiscountsSheet extends StatelessWidget {
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                   ),
+                  trailing:
+                      trailingText != null ? Text(trailingText) : null,
                 );
               },
             ),
