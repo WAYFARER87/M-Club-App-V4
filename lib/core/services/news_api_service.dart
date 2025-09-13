@@ -52,7 +52,7 @@ class NewsApiService {
     int perPage = 20,
     String? categoryId,
   }) async {
-    final params = {
+    final params = <String, dynamic>{
       'page': page,
       'per-page': perPage,
     };
