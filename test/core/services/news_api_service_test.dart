@@ -107,4 +107,34 @@ void main() {
     expect(page.total, 15);
     expect(page.pages, 2);
   });
+
+  test('fetchNews sends category id when provided', () async {
+    String? passedCategoryId;
+    service.dio.interceptors.add(
+      InterceptorsWrapper(
+        onRequest: (options, handler) {
+          passedCategoryId = options.queryParameters['category_id']?.toString();
+          handler.resolve(
+            Response(
+              requestOptions: options,
+              data: {
+                'data': [
+                  {'id': 1, 'title': 'Only'},
+                ],
+                'pagination': {
+                  'page': 1,
+                  'perPage': 10,
+                  'total': 1,
+                  'pages': 1,
+                },
+              },
+            ),
+          );
+        },
+      ),
+    );
+
+    await service.fetchNews(categoryId: 'cat123');
+    expect(passedCategoryId, 'cat123');
+  });
 }

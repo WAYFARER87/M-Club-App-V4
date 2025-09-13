@@ -11,7 +11,7 @@ class NewsCategoryScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return DefaultTabController(
-      length: category.rubrics.length,
+      length: category.rubrics.length + 1,
       child: Scaffold(
         appBar: AppBar(
           leading: const BackButton(),
@@ -19,12 +19,14 @@ class NewsCategoryScreen extends StatelessWidget {
           bottom: TabBar(
             isScrollable: true,
             tabs: [
+              const Tab(text: 'Все'),
               for (final rubric in category.rubrics) Tab(text: rubric.name),
             ],
           ),
         ),
         body: TabBarView(
           children: [
+            NewsList(categoryId: category.id),
             for (final rubric in category.rubrics)
               NewsList(categoryId: rubric.id),
           ],
