@@ -1,5 +1,6 @@
 import 'dart:ui' as ui;
 import 'package:dio/dio.dart';
+import 'package:flutter/foundation.dart';
 import 'package:m_club/features/news/models/news_category.dart';
 import 'package:m_club/features/news/models/news_item.dart';
 import 'package:m_club/features/news/models/news_page.dart';
@@ -22,6 +23,9 @@ class NewsApiService {
   }
 
   late Dio _dio;
+
+  @visibleForTesting
+  Dio get dio => _dio;
 
   /// Получить список новостных лент (feeds)
   Future<List<NewsCategory>> fetchFeeds() async {
@@ -59,11 +63,8 @@ class NewsApiService {
 
     final res = await _dio.get('news/', queryParameters: params);
     final raw = res.data;
-    final data = raw is Map && raw['data'] is Map ? raw['data'] : raw;
 
-    final rawItems = data is Map && data['items'] is List
-        ? data['items']
-        : (data is List ? data : []);
+    final rawItems = raw is Map && raw['data'] is List ? raw['data'] : [];
     final items = <NewsItem>[];
     if (rawItems is List) {
       for (final item in rawItems) {
@@ -73,15 +74,22 @@ class NewsApiService {
       }
     }
 
-    final pageNum = data is Map && data['page'] is num
-        ? (data['page'] as num).toInt()
+    final pagination = raw is Map && raw['pagination'] is Map
+        ? raw['pagination'] as Map
+        : const {};
+    final pageNum = pagination['page'] is num
+        ? (pagination['page'] as num).toInt()
         : page;
-    final pages = data is Map && data['pages'] is num
-        ? (data['pages'] as num).toInt()
-        : 1;
-    final total = data is Map && data['total'] is num
-        ? (data['total'] as num).toInt()
+    final perPageVal = pagination['perPage'] is num
+        ? (pagination['perPage'] as num).toInt()
+        : perPage;
+    final total = pagination['total'] is num
+        ? (pagination['total'] as num).toInt()
         : items.length;
+    int? pages = pagination['pages'] is num
+        ? (pagination['pages'] as num).toInt()
+        : null;
+    pages ??= (total / perPageVal).ceil();
 
     return NewsPage(items: items, page: pageNum, pages: pages, total: total);
   }
