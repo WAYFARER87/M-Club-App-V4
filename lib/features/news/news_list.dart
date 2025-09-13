@@ -143,61 +143,76 @@ class _NewsListState extends State<NewsList> {
 }
 
 class NewsListItem extends StatelessWidget {
-  const NewsListItem({super.key, required this.item});
+  const NewsListItem({super.key, required this.item, this.onTap});
 
   final NewsItem item;
+  final VoidCallback? onTap;
 
   @override
   Widget build(BuildContext context) {
-    return Card(
-      margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+    final imageHeight = MediaQuery.of(context).size.width * 0.6;
+    return GestureDetector(
+      onTap: onTap,
       child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           if (item.image.isNotEmpty)
-            ClipRRect(
-              borderRadius: const BorderRadius.vertical(top: Radius.circular(12)),
-              child: Image.network(
-                item.image,
-                fit: BoxFit.cover,
+            Image.network(
+              item.image,
+              width: double.infinity,
+              height: imageHeight,
+              fit: BoxFit.cover,
+              errorBuilder: (_, __, ___) => Container(
+                height: imageHeight,
+                color: Colors.grey.shade200,
               ),
             )
           else
-            const SizedBox(
-              height: 180,
-              child: ColoredBox(color: Colors.black12),
+            Container(
+              width: double.infinity,
+              height: imageHeight,
+              color: Colors.grey.shade200,
             ),
           Padding(
-            padding: const EdgeInsets.all(16),
+            padding: const EdgeInsets.all(12),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
                   item.title,
-                  style: Theme.of(context)
-                      .textTheme
-                      .titleMedium
-                      ?.copyWith(fontWeight: FontWeight.bold),
+                  style: const TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.w400,
+                    fontFamily: 'Roboto',
+                  ),
                 ),
-                const SizedBox(height: 8),
-                Text(
-                  item.contentPreview,
-                  maxLines: 2,
-                  overflow: TextOverflow.ellipsis,
-                ),
-                const SizedBox(height: 8),
                 if (item.published != null)
-                  Text(
-                    DateFormat('dd.MM.yyyy').format(item.published!),
-                    style: Theme.of(context)
-                        .textTheme
-                        .bodySmall
-                        ?.copyWith(color: Colors.grey),
+                  Padding(
+                    padding: const EdgeInsets.only(top: 4),
+                    child: Text(
+                      DateFormat('dd.MM.yyyy').format(item.published!),
+                      style: const TextStyle(
+                        fontSize: 14,
+                        color: Colors.grey,
+                      ),
+                    ),
                   ),
               ],
             ),
           ),
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 12),
+            child: Text(
+              item.contentPreview,
+              style: const TextStyle(
+                fontSize: 14,
+                fontWeight: FontWeight.w300,
+                fontFamily: 'Roboto',
+              ),
+            ),
+          ),
+          const SizedBox(height: 8),
+          const Divider(height: 1),
         ],
       ),
     );
