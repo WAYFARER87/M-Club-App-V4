@@ -3,6 +3,7 @@ import '../../core/services/news_api_service.dart';
 import '../../core/utils/time_ago.dart';
 import 'models/news_item.dart';
 import 'package:share_plus/share_plus.dart';
+import 'news_detail_screen.dart';
 
 class NewsList extends StatefulWidget {
   const NewsList({super.key, this.categoryId});
@@ -141,7 +142,16 @@ class _NewsListState extends State<NewsList> {
             }
           }
           final item = _items[index];
-          return NewsListItem(item: item);
+          return NewsListItem(
+            item: item,
+            onTap: () {
+              Navigator.of(context).push(
+                MaterialPageRoute(
+                  builder: (_) => NewsDetailScreen(item: item),
+                ),
+              );
+            },
+          );
         },
       ),
     );
