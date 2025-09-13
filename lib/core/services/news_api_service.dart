@@ -25,7 +25,7 @@ class NewsApiService {
 
   /// Получить список новостных лент (feeds)
   Future<List<NewsCategory>> fetchFeeds() async {
-    final res = await _dio.get('/news/feeds/');
+    final res = await _dio.get('news/feeds/');
     final raw = res.data;
     final data = raw is Map && raw['data'] is List ? raw['data'] : raw;
 
@@ -60,7 +60,7 @@ class NewsApiService {
       params['category_id'] = categoryId;
     }
 
-    final res = await _dio.get('/news/', queryParameters: params);
+    final res = await _dio.get('news/', queryParameters: params);
     final raw = res.data;
     final data = raw is Map && raw['data'] is Map ? raw['data'] : raw;
 
