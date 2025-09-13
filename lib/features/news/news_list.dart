@@ -4,6 +4,7 @@ import '../../core/utils/time_ago.dart';
 import 'models/news_item.dart';
 import 'package:share_plus/share_plus.dart';
 import 'news_detail_screen.dart';
+import 'widgets/news_list_item_skeleton.dart';
 
 class NewsList extends StatefulWidget {
   const NewsList({super.key, this.categoryId});
@@ -85,7 +86,11 @@ class _NewsListState extends State<NewsList> {
   Widget build(BuildContext context) {
     if (_items.isEmpty) {
       if (_isLoading) {
-        return const Center(child: CircularProgressIndicator());
+        return ListView.separated(
+          itemCount: 5,
+          separatorBuilder: (_, __) => const Divider(height: 0),
+          itemBuilder: (_, __) => const NewsListItemSkeleton(),
+        );
       }
       if (_error != null) {
         return Center(
@@ -120,10 +125,7 @@ class _NewsListState extends State<NewsList> {
         itemBuilder: (context, index) {
           if (index >= _items.length) {
             if (_isLoading) {
-              return const Padding(
-                padding: EdgeInsets.symmetric(vertical: 16),
-                child: Center(child: CircularProgressIndicator()),
-              );
+              return const NewsListItemSkeleton();
             } else {
               return Padding(
                 padding: const EdgeInsets.symmetric(vertical: 16),
