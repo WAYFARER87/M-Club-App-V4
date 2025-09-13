@@ -197,18 +197,18 @@ class NewsListItem extends StatelessWidget {
                       ),
                     ),
                   ),
+                Padding(
+                  padding: const EdgeInsets.only(top: 8),
+                  child: Text(
+                    item.contentPreview,
+                    style: const TextStyle(
+                      fontSize: 14,
+                      fontWeight: FontWeight.w300,
+                      fontFamily: 'Roboto',
+                    ),
+                  ),
+                ),
               ],
-            ),
-          ),
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 12),
-            child: Text(
-              item.contentPreview,
-              style: const TextStyle(
-                fontSize: 14,
-                fontWeight: FontWeight.w300,
-                fontFamily: 'Roboto',
-              ),
             ),
           ),
           const SizedBox(height: 8),
@@ -218,5 +218,3 @@ class NewsListItem extends StatelessWidget {
     );
   }
 }
-
-
