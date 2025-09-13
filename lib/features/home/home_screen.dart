@@ -39,16 +39,18 @@ class _HomeScreenState extends State<HomeScreen> {
       appBar: AppBar(
         toolbarHeight: 52,                 // компактная шапка
         automaticallyImplyLeading: false,  // без пустой «назад»-кнопки
-        leading: IconButton(
-          icon: Icon(Icons.person, color: _primary),
-          onPressed: () {
-            Navigator.of(context).push(
-              MaterialPageRoute(builder: (_) => const ProfileScreen()),
-            );
-          },
-        ),
         backgroundColor: Colors.white,
         centerTitle: true,
+        actions: [
+          IconButton(
+            icon: Icon(Icons.account_circle, color: _primary),
+            onPressed: () {
+              Navigator.of(context).push(
+                MaterialPageRoute(builder: (_) => const ProfileScreen()),
+              );
+            },
+          ),
+        ],
         elevation: 0,
         title: SvgPicture.asset(
           'assets/images/mclub_logo.svg',
