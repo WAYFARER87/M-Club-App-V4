@@ -16,17 +16,13 @@ class NearbyDiscountsSheet extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    const itemHeight = 72.0;
-    const headerHeight = 64.0;
-    const actionsHeight = 120.0;
     final visibleItems = min(offers.length, 3);
-    final contentHeight =
-        headerHeight + actionsHeight + itemHeight * visibleItems;
-    final height = min(contentHeight, MediaQuery.of(context).size.height);
+    final maxHeight = MediaQuery.of(context).size.height * 0.8;
 
-    return SizedBox(
-      height: height,
+    return ConstrainedBox(
+      constraints: BoxConstraints(maxHeight: maxHeight),
       child: Column(
+        mainAxisSize: MainAxisSize.min,
         children: [
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
@@ -48,55 +44,52 @@ class NearbyDiscountsSheet extends StatelessWidget {
               ],
             ),
           ),
-          Expanded(
-            child: ListView.builder(
-              physics: const NeverScrollableScrollPhysics(),
-              shrinkWrap: true,
-              itemCount: visibleItems,
-              itemBuilder: (context, index) {
-                final offer = offers[index];
-                final photo = (offer['photo_url'] ?? '').toString();
-                final title = (offer['title'] ?? '').toString();
-                final benefit = (offer['benefit'] ?? '').toString();
-                final d = offer['distance'];
-                final trailingText = d is num
-                    ? (distanceFormatter != null
-                        ? distanceFormatter!(d.toDouble())
-                        : d.toString())
-                    : null;
-                return ListTile(
-                  leading: photo.isNotEmpty
-                      ? Image.network(
-                          photo,
-                          width: 56,
-                          height: 56,
-                          fit: BoxFit.cover,
-                          errorBuilder: (_, __, ___) => Container(
-                            width: 56,
-                            height: 56,
-                            color: Colors.grey.shade200,
-                          ),
-                        )
-                      : Container(
+          ListView.builder(
+            physics: const NeverScrollableScrollPhysics(),
+            shrinkWrap: true,
+            itemCount: visibleItems,
+            itemBuilder: (context, index) {
+              final offer = offers[index];
+              final photo = (offer['photo_url'] ?? '').toString();
+              final title = (offer['title'] ?? '').toString();
+              final benefit = (offer['benefit'] ?? '').toString();
+              final d = offer['distance'];
+              final trailingText = d is num
+                  ? (distanceFormatter != null
+                      ? distanceFormatter!(d.toDouble())
+                      : d.toString())
+                  : null;
+              return ListTile(
+                leading: photo.isNotEmpty
+                    ? Image.network(
+                        photo,
+                        width: 56,
+                        height: 56,
+                        fit: BoxFit.cover,
+                        errorBuilder: (_, __, ___) => Container(
                           width: 56,
                           height: 56,
                           color: Colors.grey.shade200,
                         ),
-                  title: Text(
-                    title,
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                  subtitle: Text(
-                    benefit,
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                  trailing:
-                      trailingText != null ? Text(trailingText) : null,
-                );
-              },
-            ),
+                      )
+                    : Container(
+                        width: 56,
+                        height: 56,
+                        color: Colors.grey.shade200,
+                      ),
+                title: Text(
+                  title,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                ),
+                subtitle: Text(
+                  benefit,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                ),
+                trailing: trailingText != null ? Text(trailingText) : null,
+              );
+            },
           ),
           SafeArea(
             top: false,
