@@ -77,18 +77,34 @@ class NewsApiService {
     final pagination = raw is Map && raw['pagination'] is Map
         ? raw['pagination'] as Map
         : const {};
-    final pageNum = pagination['page'] is num
-        ? (pagination['page'] as num).toInt()
-        : page;
-    final perPageVal = pagination['perPage'] is num
-        ? (pagination['perPage'] as num).toInt()
-        : perPage;
-    final total = pagination['total'] is num
-        ? (pagination['total'] as num).toInt()
-        : items.length;
-    int? pages = pagination['pages'] is num
-        ? (pagination['pages'] as num).toInt()
-        : null;
+
+    final pageRaw = pagination['page'];
+    final pageNum = pageRaw is num
+        ? pageRaw.toInt()
+        : pageRaw is String
+            ? int.tryParse(pageRaw) ?? page
+            : page;
+
+    final perPageRaw = pagination['perPage'];
+    final perPageVal = perPageRaw is num
+        ? perPageRaw.toInt()
+        : perPageRaw is String
+            ? int.tryParse(perPageRaw) ?? perPage
+            : perPage;
+
+    final totalRaw = pagination['total'];
+    final total = totalRaw is num
+        ? totalRaw.toInt()
+        : totalRaw is String
+            ? int.tryParse(totalRaw) ?? items.length
+            : items.length;
+
+    final pagesRaw = pagination['pages'];
+    int? pages = pagesRaw is num
+        ? pagesRaw.toInt()
+        : pagesRaw is String
+            ? int.tryParse(pagesRaw)
+            : null;
     pages ??= (total / perPageVal).ceil();
 
     return NewsPage(items: items, page: pageNum, pages: pages, total: total);
