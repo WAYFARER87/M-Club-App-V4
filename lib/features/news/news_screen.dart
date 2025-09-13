@@ -14,6 +14,8 @@ class NewsScreen extends StatefulWidget {
 class _NewsScreenState extends State<NewsScreen> {
   final _api = NewsApiService();
   List<NewsCategory> _categories = [];
+  bool _isLoading = true;
+  String? _error;
 
   @override
   void initState() {
@@ -22,16 +24,38 @@ class _NewsScreenState extends State<NewsScreen> {
   }
 
   Future<void> _loadCategories() async {
-    final cats = await _api.fetchFeeds();
-    if (mounted) {
-      setState(() => _categories = cats);
+    setState(() {
+      _isLoading = true;
+      _error = null;
+    });
+    try {
+      final cats = await _api.fetchFeeds();
+      if (mounted) {
+        setState(() => _categories = cats);
+      }
+    } catch (e) {
+      if (mounted) {
+        setState(() => _error = 'Ошибка загрузки');
+      }
+    } finally {
+      if (mounted) {
+        setState(() => _isLoading = false);
+      } else {
+        _isLoading = false;
+      }
     }
   }
 
   @override
   Widget build(BuildContext context) {
-    if (_categories.isEmpty) {
+    if (_isLoading) {
       return const Center(child: CircularProgressIndicator());
+    }
+
+    if (_categories.isEmpty) {
+      return Center(
+        child: Text(_error ?? 'Нет данных'),
+      );
     }
 
     return DefaultTabController(
