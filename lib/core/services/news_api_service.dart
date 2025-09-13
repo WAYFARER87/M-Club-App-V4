@@ -34,6 +34,12 @@ class NewsApiService {
           categories.add(NewsCategory.fromJson(item));
         }
       }
+    } else if (data is Map) {
+      for (final item in data.values) {
+        if (item is Map<String, dynamic>) {
+          categories.add(NewsCategory.fromJson(item));
+        }
+      }
     }
     return categories;
   }
