@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 
 import '../../core/services/news_api_service.dart';
 import 'models/news_item.dart';
@@ -134,15 +135,73 @@ class _NewsListState extends State<NewsList> {
             }
           }
           final item = _items[index];
-          return ListTile(
-            title: Text(item.title),
-            subtitle: item.published != null
-                ? Text(item.published!.toLocal().toString())
-                : null,
-          );
+          return NewsListItem(item: item);
         },
       ),
     );
   }
 }
+
+class NewsListItem extends StatelessWidget {
+  const NewsListItem({super.key, required this.item});
+
+  final NewsItem item;
+
+  @override
+  Widget build(BuildContext context) {
+    return Card(
+      margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          if (item.image.isNotEmpty)
+            ClipRRect(
+              borderRadius: const BorderRadius.vertical(top: Radius.circular(12)),
+              child: Image.network(
+                item.image,
+                fit: BoxFit.cover,
+              ),
+            )
+          else
+            const SizedBox(
+              height: 180,
+              child: ColoredBox(color: Colors.black12),
+            ),
+          Padding(
+            padding: const EdgeInsets.all(16),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  item.title,
+                  style: Theme.of(context)
+                      .textTheme
+                      .titleMedium
+                      ?.copyWith(fontWeight: FontWeight.bold),
+                ),
+                const SizedBox(height: 8),
+                Text(
+                  item.contentPreview,
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
+                ),
+                const SizedBox(height: 8),
+                if (item.published != null)
+                  Text(
+                    DateFormat('dd.MM.yyyy').format(item.published!),
+                    style: Theme.of(context)
+                        .textTheme
+                        .bodySmall
+                        ?.copyWith(color: Colors.grey),
+                  ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
 
