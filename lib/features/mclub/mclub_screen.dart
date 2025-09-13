@@ -209,19 +209,22 @@ class _MClubScreenState extends State<MClubScreen>
   }
 
   void _showNearbyDiscountsSheet() {
-    final sorted = _offers
-        .where((o) => _minDistanceMeters(o['branches']) <= 300)
-        .toList()
-      ..sort(
-        (a, b) => _minDistanceMeters(a['branches'])
-            .compareTo(_minDistanceMeters(b['branches'])),
-      );
-    final nearby = sorted.take(3).toList();
+    final enriched = <dynamic>[];
+    for (final o in _offers) {
+      final d = _minDistanceMeters(o['branches']);
+      o['distance'] = d;
+      if (d <= 300) enriched.add(o);
+    }
+    enriched.sort(
+      (a, b) => (a['distance'] as double).compareTo(b['distance'] as double),
+    );
+    final nearby = enriched.take(3).toList();
     if (nearby.isEmpty) return;
     showModalBottomSheet(
       context: context,
       builder: (ctx) => NearbyDiscountsSheet(
         offers: nearby,
+        distanceFormatter: _formatDistance,
         onShowAll: () {
           Navigator.pop(ctx);
           setState(() => _nearbyOnly = true);
