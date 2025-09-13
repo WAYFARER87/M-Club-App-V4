@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:share_plus/share_plus.dart';
+import 'package:cached_network_image/cached_network_image.dart';
+
 import '../../core/services/news_api_service.dart';
 import '../../core/utils/time_ago.dart';
 import 'models/news_item.dart';
-import 'package:share_plus/share_plus.dart';
 import 'news_detail_screen.dart';
 import 'widgets/news_list_item_skeleton.dart';
 
@@ -178,12 +180,19 @@ class NewsListItem extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           if (item.image.isNotEmpty)
-            Image.network(
-              item.image,
+            CachedNetworkImage(
+              imageUrl: item.image,
               width: double.infinity,
               height: imageHeight,
               fit: BoxFit.cover,
-              errorBuilder: (_, __, ___) => Container(
+              fadeInDuration: const Duration(milliseconds: 300),
+              placeholder: (_, __) => Container(
+                width: double.infinity,
+                height: imageHeight,
+                color: Colors.grey.shade200,
+              ),
+              errorWidget: (_, __, ___) => Container(
+                width: double.infinity,
                 height: imageHeight,
                 color: Colors.grey.shade200,
               ),

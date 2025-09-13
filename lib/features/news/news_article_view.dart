@@ -1,3 +1,4 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_html/flutter_html.dart';
@@ -114,10 +115,13 @@ class _NewsArticleViewState extends State<NewsArticleView> {
                     if (item.image.isEmpty)
                       Container(color: Colors.grey.shade200)
                     else
-                      Image.network(
-                        item.image,
+                      CachedNetworkImage(
+                        imageUrl: item.image,
                         fit: BoxFit.cover,
-                        errorBuilder: (_, __, ___) =>
+                        fadeInDuration: const Duration(milliseconds: 300),
+                        placeholder: (_, __) =>
+                            Container(color: Colors.grey.shade200),
+                        errorWidget: (_, __, ___) =>
                             Container(color: Colors.grey.shade200),
                       ),
                     Positioned.fill(
