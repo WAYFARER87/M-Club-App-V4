@@ -17,7 +17,14 @@ void main() {
       rubric: null,
     );
 
-    await tester.pumpWidget(MaterialApp(home: NewsDetailScreen(item: item)));
+    await tester.pumpWidget(
+      MaterialApp(
+        home: NewsDetailScreen(
+          initialItems: [item],
+          initialIndex: 0,
+        ),
+      ),
+    );
     await tester.pumpAndSettle();
 
     expect(find.text('Test title'), findsOneWidget);
