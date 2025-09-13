@@ -1,3 +1,5 @@
+import 'dart:math';
+
 import 'package:flutter/material.dart';
 
 class NearbyDiscountsSheet extends StatelessWidget {
@@ -12,7 +14,14 @@ class NearbyDiscountsSheet extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final height = MediaQuery.of(context).size.height * 0.33;
+    const itemHeight = 72.0;
+    const headerHeight = 64.0;
+    const actionsHeight = 120.0;
+    final visibleItems = min(offers.length, 3);
+    final contentHeight =
+        headerHeight + actionsHeight + itemHeight * visibleItems;
+    final height = min(contentHeight, MediaQuery.of(context).size.height);
+
     return SizedBox(
       height: height,
       child: Column(
