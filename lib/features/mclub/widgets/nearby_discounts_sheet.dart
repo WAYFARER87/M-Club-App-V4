@@ -53,11 +53,11 @@ class NearbyDiscountsSheet extends StatelessWidget {
               final photo = (offer['photo_url'] ?? '').toString();
               final title = (offer['title'] ?? '').toString();
               final benefit = (offer['benefit'] ?? '').toString();
-              final d = offer['distance'];
-              final trailingText = d is num
+              final distance = offer['distance'];
+              final trailingText = distance is num
                   ? (distanceFormatter != null
-                      ? distanceFormatter!(d.toDouble())
-                      : d.toString())
+                      ? distanceFormatter!(distance.toDouble())
+                      : distance.toString())
                   : null;
               return ListTile(
                 leading: photo.isNotEmpty
