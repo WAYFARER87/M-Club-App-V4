@@ -33,9 +33,13 @@ class _L {
   String get privacyPolicy => ru ? 'Политика конфиденциальности' : 'Privacy Policy';
 
   String get codeTitle => ru ? 'Подтверждение' : 'Confirmation';
-  String codeSentTo(String email) =>
-      ru ? 'Код отправлен на $email' : 'A code was sent to $email';
+  String codeSentTo(String email) => ru
+      ? 'Мы отправили 6-значный код на вашу почту $email.\nПожалуйста, введите его ниже, чтобы войти.'
+      : 'We sent a 6-digit code to your email $email.\nPlease enter it below to sign in.';
   String get signInButton => ru ? 'Войти' : 'Sign in';
+
+  String get checkSpam =>
+      ru ? 'Не получили письмо? Проверьте папку «Спам».' : 'Didn\'t get the email? Check your spam folder.';
 
   String get resendCode => ru ? 'Отправить код ещё раз' : 'Send code again';
   String resendCodeWithSeconds(int s) =>
@@ -421,9 +425,11 @@ class _AuthCodeScreenState extends State<_AuthCodeScreen> {
             SvgPicture.asset('assets/images/mclub_logo.svg', height: 80),
             const SizedBox(height: 24),
 
-            Align(
-              alignment: Alignment.centerLeft,
-              child: Text(t.codeSentTo(widget.email)),
+            Center(
+              child: Text(
+                t.codeSentTo(widget.email),
+                textAlign: TextAlign.center,
+              ),
             ),
             const SizedBox(height: 16),
 
@@ -464,6 +470,13 @@ class _AuthCodeScreenState extends State<_AuthCodeScreen> {
               ],
             ),
 
+            const SizedBox(height: 16),
+            Center(
+              child: Text(
+                t.checkSpam,
+                textAlign: TextAlign.center,
+              ),
+            ),
             const SizedBox(height: 16),
 
             SizedBox(
