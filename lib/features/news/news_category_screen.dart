@@ -9,9 +9,26 @@ class NewsCategoryScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(title: Text(category.name)),
-      body: Center(child: Text('Категория: ${category.name}')),
+    return DefaultTabController(
+      length: category.rubrics.length,
+      child: Scaffold(
+        appBar: AppBar(
+          leading: const BackButton(),
+          title: Text(category.name),
+          bottom: TabBar(
+            isScrollable: true,
+            tabs: [
+              for (final rubric in category.rubrics) Tab(text: rubric.name),
+            ],
+          ),
+        ),
+        body: TabBarView(
+          children: [
+            for (final _ in category.rubrics)
+              const Center(child: Text('Список новостей')),
+          ],
+        ),
+      ),
     );
   }
 }
