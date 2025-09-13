@@ -209,17 +209,30 @@ class _MClubScreenState extends State<MClubScreen>
   }
 
   void _showNearbyDiscountsSheet() {
-    final enriched = <dynamic>[];
+    if (_curLat == null || _curLng == null) return;
+
+    final nearby = <dynamic>[];
+
     for (final o in _offers) {
-      final d = _minDistanceMeters(o['branches']);
-      o['distance'] = d;
-      if (d <= 300) enriched.add(o);
+      final branches = o['branches'] as List<dynamic>? ?? [];
+      var best = double.infinity;
+      for (final br in branches) {
+        final lat = double.tryParse((br['lattitude'] ?? '').toString());
+        final lng = double.tryParse((br['longitude'] ?? '').toString());
+        if (lat == null || lng == null) continue;
+        final d = Geolocator.distanceBetween(_curLat!, _curLng!, lat, lng);
+        if (d < best) best = d;
+      }
+      o['distance'] = best;
+      if (best <= 300) nearby.add(o);
     }
-    enriched.sort(
+
+    nearby.sort(
       (a, b) => (a['distance'] as double).compareTo(b['distance'] as double),
     );
-    final nearby = enriched.take(3).toList();
+
     if (nearby.isEmpty) return;
+
     showModalBottomSheet(
       context: context,
       builder: (ctx) => NearbyDiscountsSheet(
