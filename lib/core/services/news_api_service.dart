@@ -52,11 +52,8 @@ class NewsApiService {
     int perPage = 20,
     String? categoryId,
   }) async {
-    final params = <String, dynamic>{
-      'page': page,
-      'per-page': perPage,
-    };
-    if (categoryId != null) {
+    final params = <String, dynamic>{'page': page, 'per-page': perPage};
+    if (categoryId?.isNotEmpty ?? false) {
       params['category_id'] = categoryId;
     }
 
@@ -76,8 +73,9 @@ class NewsApiService {
       }
     }
 
-    final pageNum =
-        data is Map && data['page'] is num ? (data['page'] as num).toInt() : page;
+    final pageNum = data is Map && data['page'] is num
+        ? (data['page'] as num).toInt()
+        : page;
     final pages = data is Map && data['pages'] is num
         ? (data['pages'] as num).toInt()
         : 1;
@@ -89,8 +87,8 @@ class NewsApiService {
   }
 
   String _resolveLang() {
-    final code = ui.PlatformDispatcher.instance.locale.languageCode.toLowerCase();
+    final code = ui.PlatformDispatcher.instance.locale.languageCode
+        .toLowerCase();
     return code == 'ru' ? 'ru' : 'en';
   }
 }
-
