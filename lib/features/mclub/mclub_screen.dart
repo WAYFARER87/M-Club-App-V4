@@ -6,6 +6,7 @@ import 'offer_detail_screen.dart';
 import 'offer_model.dart';
 import 'offers_map_screen.dart';
 import 'category_model.dart';
+import 'widgets/nearby_discounts_sheet.dart';
 
 class MClubScreen extends StatefulWidget {
   const MClubScreen({super.key, this.showNearbyOnly = false});
@@ -207,6 +208,28 @@ class _MClubScreenState extends State<MClubScreen>
     }
   }
 
+  void _showNearbyDiscountsSheet() {
+    final sorted = _offers
+        .where((o) => _minDistanceMeters(o['branches']) <= 300)
+        .toList()
+      ..sort(
+        (a, b) => _minDistanceMeters(a['branches'])
+            .compareTo(_minDistanceMeters(b['branches'])),
+      );
+    final nearby = sorted.take(3).toList();
+    if (nearby.isEmpty) return;
+    showModalBottomSheet(
+      context: context,
+      builder: (ctx) => NearbyDiscountsSheet(
+        offers: nearby,
+        onShowAll: () {
+          Navigator.pop(ctx);
+          setState(() => _nearbyOnly = true);
+        },
+      ),
+    );
+  }
+
   void _maybeShowNearbyHint() {
     if (_nearbyHintShown ||
         _curLat == null ||
@@ -224,34 +247,7 @@ class _MClubScreenState extends State<MClubScreen>
 
     Future.delayed(
       const Duration(seconds: 15),
-      () => showDialog(
-        context: context,
-        builder: (_) => AlertDialog(
-          content: const Text(
-            'Рядом есть предложения. Показать их?',
-            style: TextStyle(color: Colors.black),
-          ),
-          actions: [
-            TextButton(
-              style: TextButton.styleFrom(
-                foregroundColor: const Color(0xFF182857),
-              ),
-              onPressed: () {
-                Navigator.pop(context);
-                setState(() => _nearbyOnly = true);
-              },
-              child: const Text('Показать'),
-            ),
-            TextButton(
-              style: TextButton.styleFrom(
-                foregroundColor: const Color(0xFF182857),
-              ),
-              onPressed: () => Navigator.pop(context),
-              child: const Text('Отмена'),
-            ),
-          ],
-        ),
-      ),
+      _showNearbyDiscountsSheet,
     );
   }
 
