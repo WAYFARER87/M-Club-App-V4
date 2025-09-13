@@ -339,7 +339,10 @@ class _AuthCodeScreenState extends State<_AuthCodeScreen> {
       // После успешной верификации обновляем состояние авторизации
       // и возвращаемся к корневому экрану, где [AuthGate] покажет приложение.
       AuthGate.of(context)?.refreshAuthState();
-      Navigator.of(context).popUntil((route) => route.isFirst);
+      Navigator.of(context).pushAndRemoveUntil(
+        MaterialPageRoute(builder: (_) => const HomeScreen()),
+        (_) => false,
+      );
     } catch (e) {
       if (!mounted) return;
       final t = _L.of(context);
