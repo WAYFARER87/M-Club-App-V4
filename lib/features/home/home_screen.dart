@@ -30,7 +30,6 @@ class _HomeScreenState extends State<HomeScreen> {
       const UAEUnlockedScreen(),
       const RadioScreen(),
       const NewsScreen(),
-      const ProfileScreen(),
     ];
   }
 
@@ -40,6 +39,14 @@ class _HomeScreenState extends State<HomeScreen> {
       appBar: AppBar(
         toolbarHeight: 52,                 // компактная шапка
         automaticallyImplyLeading: false,  // без пустой «назад»-кнопки
+        leading: IconButton(
+          icon: Icon(Icons.person, color: _primary),
+          onPressed: () {
+            Navigator.of(context).push(
+              MaterialPageRoute(builder: (_) => const ProfileScreen()),
+            );
+          },
+        ),
         backgroundColor: Colors.white,
         centerTitle: true,
         elevation: 0,
@@ -62,7 +69,6 @@ class _HomeScreenState extends State<HomeScreen> {
           BottomNavigationBarItem(icon: Icon(Icons.map), label: 'Рекомендации'),
           BottomNavigationBarItem(icon: Icon(Icons.radio), label: 'Радио'),
           BottomNavigationBarItem(icon: Icon(Icons.article), label: 'Новости'),
-          BottomNavigationBarItem(icon: Icon(Icons.person), label: 'Профиль'),
         ],
       ),
     );
