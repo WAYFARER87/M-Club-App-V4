@@ -46,6 +46,38 @@ void main() {
     expect(page.pages, 2);
   });
 
+  test('fetchNews parses pagination when numbers are strings', () async {
+    service.dio.interceptors.add(
+      InterceptorsWrapper(
+        onRequest: (options, handler) {
+          handler.resolve(
+            Response(
+              requestOptions: options,
+              data: {
+                'data': [
+                  {'id': 1, 'title': 'First'},
+                  {'id': 2, 'title': 'Second'},
+                ],
+                'pagination': {
+                  'page': '2',
+                  'perPage': '10',
+                  'total': '20',
+                  'pages': '2',
+                },
+              },
+            ),
+          );
+        },
+      ),
+    );
+
+    final page = await service.fetchNews(page: 2, perPage: 10);
+    expect(page.items, hasLength(2));
+    expect(page.page, 2);
+    expect(page.total, 20);
+    expect(page.pages, 2);
+  });
+
   test('fetchNews computes pages when missing', () async {
     service.dio.interceptors.add(
       InterceptorsWrapper(
