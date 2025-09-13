@@ -1,9 +1,66 @@
 import 'package:flutter/material.dart';
 
-class NewsScreen extends StatelessWidget {
+import '../../core/services/news_api_service.dart';
+import 'models/news_category.dart';
+import 'news_category_screen.dart';
+
+class NewsScreen extends StatefulWidget {
   const NewsScreen({super.key});
+
+  @override
+  State<NewsScreen> createState() => _NewsScreenState();
+}
+
+class _NewsScreenState extends State<NewsScreen> {
+  final _api = NewsApiService();
+  List<NewsCategory> _categories = [];
+
+  @override
+  void initState() {
+    super.initState();
+    _loadCategories();
+  }
+
+  Future<void> _loadCategories() async {
+    final cats = await _api.fetchFeeds();
+    if (mounted) {
+      setState(() => _categories = cats);
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
-    return const Center(child: Text('Новости из ОАЭ: ленты'));
+    if (_categories.isEmpty) {
+      return const Center(child: CircularProgressIndicator());
+    }
+
+    return DefaultTabController(
+      length: _categories.length + 1,
+      child: Column(
+        children: [
+          TabBar(
+            isScrollable: true,
+            tabs: [
+              const Tab(text: 'Все новости'),
+              for (final cat in _categories) Tab(text: cat.name),
+            ],
+            onTap: (index) {
+              if (index == 0) return;
+              final category = _categories[index - 1];
+              Navigator.of(context).push(
+                MaterialPageRoute(
+                  builder: (_) => NewsCategoryScreen(category: category),
+                ),
+              );
+            },
+          ),
+          const Expanded(
+            child: Center(
+              child: Text('Новости из ОАЭ: ленты'),
+            ),
+          ),
+        ],
+      ),
+    );
   }
 }
