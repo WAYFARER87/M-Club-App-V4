@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import '../../core/services/news_api_service.dart';
 import '../../core/utils/time_ago.dart';
 import 'models/news_item.dart';
+import 'package:share_plus/share_plus.dart';
 
 class NewsList extends StatefulWidget {
   const NewsList({super.key, this.categoryId});
@@ -152,67 +153,98 @@ class NewsListItem extends StatelessWidget {
     final imageHeight = MediaQuery.of(context).size.width * 0.6;
     return GestureDetector(
       onTap: onTap,
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          if (item.image.isNotEmpty)
-            Image.network(
-              item.image,
-              width: double.infinity,
-              height: imageHeight,
-              fit: BoxFit.cover,
-              errorBuilder: (_, __, ___) => Container(
+      child: Card(
+        margin: const EdgeInsets.only(bottom: 12),
+        clipBehavior: Clip.antiAlias,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            if (item.image.isNotEmpty)
+              Image.network(
+                item.image,
+                width: double.infinity,
+                height: imageHeight,
+                fit: BoxFit.cover,
+                errorBuilder: (_, __, ___) => Container(
+                  height: imageHeight,
+                  color: Colors.grey.shade200,
+                ),
+              )
+            else
+              Container(
+                width: double.infinity,
                 height: imageHeight,
                 color: Colors.grey.shade200,
               ),
-            )
-          else
-            Container(
-              width: double.infinity,
-              height: imageHeight,
-              color: Colors.grey.shade200,
-            ),
-          Padding(
-            padding: const EdgeInsets.all(12),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  item.title,
-                  style: const TextStyle(
-                    fontSize: 18,
-                    fontWeight: FontWeight.w400,
-                    fontFamily: 'Roboto',
-                  ),
-                ),
-                if (item.published != null)
-                  Padding(
-                    padding: const EdgeInsets.only(top: 4),
-                    child: Text(
-                      timeAgo(item.published),
+            Padding(
+              padding: const EdgeInsets.all(12),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  if (item.rubric != null && item.rubric!.name.isNotEmpty)
+                    Text(
+                      item.rubric!.name.toUpperCase(),
                       style: const TextStyle(
-                        fontSize: 14,
+                        fontSize: 12,
+                        fontWeight: FontWeight.w500,
                         color: Colors.grey,
                       ),
                     ),
-                  ),
-                Padding(
-                  padding: const EdgeInsets.only(top: 8),
-                  child: Text(
-                    item.contentPreview,
+                  Text(
+                    item.title,
                     style: const TextStyle(
-                      fontSize: 14,
-                      fontWeight: FontWeight.w300,
+                      fontSize: 18,
+                      fontWeight: FontWeight.w400,
                       fontFamily: 'Roboto',
                     ),
                   ),
-                ),
-              ],
+                  Padding(
+                    padding: const EdgeInsets.only(top: 8),
+                    child: Text(
+                      item.contentPreview,
+                      style: const TextStyle(
+                        fontSize: 14,
+                        fontWeight: FontWeight.w300,
+                        fontFamily: 'Roboto',
+                      ),
+                    ),
+                  ),
+                  Padding(
+                    padding: const EdgeInsets.only(top: 12),
+                    child: Row(
+                      children: [
+                        Expanded(
+                          child: Text(
+                            [
+                              if (item.published != null)
+                                timeAgo(item.published),
+                              if (item.author.trim().isNotEmpty) item.author,
+                            ].join(' · '),
+                            style: const TextStyle(
+                              fontSize: 14,
+                              color: Colors.grey,
+                            ),
+                          ),
+                        ),
+                        IconButton(
+                          icon: const Icon(Icons.share),
+                          onPressed: () {
+                            final text = [
+                              item.title,
+                              item.url,
+                            ].where((e) => e.trim().isNotEmpty).join('\n');
+                            if (text.isNotEmpty) Share.share(text);
+                          },
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
             ),
-          ),
-          const SizedBox(height: 8),
-          const Divider(height: 1),
-        ],
+          ],
+        ),
       ),
     );
   }
