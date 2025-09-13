@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import 'models/news_category.dart';
+import 'news_list.dart';
 
 class NewsCategoryScreen extends StatelessWidget {
   const NewsCategoryScreen({super.key, required this.category});
@@ -24,8 +25,8 @@ class NewsCategoryScreen extends StatelessWidget {
         ),
         body: TabBarView(
           children: [
-            for (final _ in category.rubrics)
-              const Center(child: Text('Список новостей')),
+            for (final rubric in category.rubrics)
+              NewsList(categoryId: rubric.id),
           ],
         ),
       ),
