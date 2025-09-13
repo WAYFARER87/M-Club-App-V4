@@ -5,6 +5,7 @@ import 'package:m_club/core/utils/parse_bool.dart';
 import 'offer_detail_screen.dart';
 import 'offer_model.dart';
 import 'offers_map_screen.dart';
+import 'nearby_discounts_screen.dart';
 import 'category_model.dart';
 import 'widgets/nearby_discounts_sheet.dart';
 
@@ -240,7 +241,15 @@ class _MClubScreenState extends State<MClubScreen>
         distanceFormatter: _formatDistance,
         onShowAll: () {
           Navigator.pop(ctx);
-          setState(() => _nearbyOnly = true);
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (_) => NearbyDiscountsScreen(
+                offers: nearby,
+                distanceFormatter: _formatDistance,
+              ),
+            ),
+          );
         },
       ),
     );
