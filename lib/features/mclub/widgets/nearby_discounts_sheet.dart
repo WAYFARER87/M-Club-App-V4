@@ -46,11 +46,9 @@ class NearbyDiscountsSheet extends StatelessWidget {
               ],
             ),
           ),
-          const Divider(height: 1),
           Expanded(
-            child: ListView.separated(
+            child: ListView.builder(
               itemCount: offers.length,
-              separatorBuilder: (_, __) => const Divider(height: 1),
               itemBuilder: (context, index) {
                 final offer = offers[index];
                 final photo = (offer['photo_url'] ?? '').toString();
