@@ -64,14 +64,37 @@ class NewsApiService {
     final res = await _dio.get('news/', queryParameters: params);
     final raw = res.data;
 
-    final rawItems = raw is Map && raw['data'] is List ? raw['data'] : [];
-    final items = <NewsItem>[];
-    if (rawItems is List) {
-      for (final item in rawItems) {
-        if (item is Map<String, dynamic>) {
-          items.add(NewsItem.fromJson(item));
+    List? rawItems;
+    if (raw is List) {
+      rawItems = raw;
+    } else if (raw is Map) {
+      if (raw['data'] is List) {
+        rawItems = raw['data'] as List;
+      } else if (raw['news'] is List) {
+        rawItems = raw['news'] as List;
+      } else if (raw['items'] is List) {
+        rawItems = raw['items'] as List;
+      } else {
+        final firstList = raw.values.whereType<List>().toList();
+        if (firstList.isNotEmpty) {
+          rawItems = firstList.first;
         }
       }
+    }
+
+    if (rawItems == null || rawItems.isEmpty) {
+      throw Exception('No news items found in response');
+    }
+
+    final items = <NewsItem>[];
+    for (final item in rawItems) {
+      if (item is Map<String, dynamic>) {
+        items.add(NewsItem.fromJson(item));
+      }
+    }
+
+    if (items.isEmpty) {
+      throw Exception('No news items could be parsed');
     }
 
     final pagination = raw is Map && raw['pagination'] is Map
