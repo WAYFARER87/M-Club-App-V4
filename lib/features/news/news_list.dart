@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:intl/intl.dart';
-
 import '../../core/services/news_api_service.dart';
+import '../../core/utils/time_ago.dart';
 import 'models/news_item.dart';
 
 class NewsList extends StatefulWidget {
@@ -190,7 +189,7 @@ class NewsListItem extends StatelessWidget {
                   Padding(
                     padding: const EdgeInsets.only(top: 4),
                     child: Text(
-                      DateFormat('dd.MM.yyyy').format(item.published!),
+                      timeAgo(item.published),
                       style: const TextStyle(
                         fontSize: 14,
                         color: Colors.grey,
