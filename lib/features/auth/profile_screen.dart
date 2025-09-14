@@ -435,14 +435,17 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   ),
                 ]
               : null,
-          bottom: const TabBar(
-            labelColor: Color(0xFF182857),
-            unselectedLabelColor: Colors.black54,
-            tabAlignment: TabAlignment.start,
-            tabs: [
-              Tab(text: 'Клубная карта'),
-              Tab(text: 'Профиль'),
-            ],
+          bottom: PreferredSize(
+            preferredSize: const Size.fromHeight(kToolbarHeight),
+            child: const TabBar(
+              isScrollable: true,
+              labelColor: Color(0xFF182857),
+              unselectedLabelColor: Colors.black54,
+              tabs: [
+                Tab(text: 'Клубная карта'),
+                Tab(text: 'Профиль'),
+              ],
+            ),
           ),
         ),
         body: TabBarView(
