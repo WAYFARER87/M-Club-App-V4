@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_html/flutter_html.dart';
 import 'package:share_plus/share_plus.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../core/utils/image_brightness.dart';
 import '../../core/utils/time_ago.dart';
@@ -21,6 +22,8 @@ class _NewsArticleViewState extends State<NewsArticleView> {
   bool _collapsed = false;
   bool? _isPhotoDark;
 
+  double _textScaleFactor = 1.0;
+
   static const double _expandedHeight = 320;
 
   @override
@@ -28,6 +31,7 @@ class _NewsArticleViewState extends State<NewsArticleView> {
     super.initState();
     _scrollController.addListener(_onScroll);
     _analyzePhoto();
+    _loadScaleFactor();
   }
 
   @override
@@ -61,6 +65,20 @@ class _NewsArticleViewState extends State<NewsArticleView> {
     final title = widget.item.title;
     final text = [title, link].where((e) => e.trim().isNotEmpty).join('\n');
     if (text.isNotEmpty) Share.share(text);
+  }
+
+  Future<void> _loadScaleFactor() async {
+    final prefs = await SharedPreferences.getInstance();
+    final saved = prefs.getDouble('news_text_scale') ?? 1.0;
+    if (mounted) setState(() => _textScaleFactor = saved);
+  }
+
+  Future<void> _changeScale(double delta) async {
+    setState(() {
+      _textScaleFactor = (_textScaleFactor + delta).clamp(0.5, 2.0);
+    });
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setDouble('news_text_scale', _textScaleFactor);
   }
 
   @override
@@ -100,6 +118,16 @@ class _NewsArticleViewState extends State<NewsArticleView> {
                 tooltip: 'Назад',
               ),
               actions: [
+                IconButton(
+                  icon: Text('A-', style: TextStyle(color: iconColor)),
+                  onPressed: () => _changeScale(-0.1),
+                  tooltip: 'Меньше',
+                ),
+                IconButton(
+                  icon: Text('A+', style: TextStyle(color: iconColor)),
+                  onPressed: () => _changeScale(0.1),
+                  tooltip: 'Больше',
+                ),
                 IconButton(
                   icon: Icon(Icons.share, color: iconColor),
                   onPressed: _share,
@@ -228,7 +256,12 @@ class _NewsArticleViewState extends State<NewsArticleView> {
                           ),
                         ),
                       ),
-                    Html(data: item.contentFull),
+                    Html(
+                      data: item.contentFull,
+                      style: {
+                        '*': Style(fontSize: FontSize(16 * _textScaleFactor)),
+                      },
+                    ),
                   ],
                 ),
               ),
