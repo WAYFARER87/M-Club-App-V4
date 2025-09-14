@@ -207,71 +207,74 @@ class _RadioView extends StatelessWidget {
                 children: [
                   SizedBox(
                     width: double.infinity,
-                    child: Stack(
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
                       children: [
-                        Align(
-                          alignment: Alignment.center,
-                          child: Column(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              ElevatedButton(
-                                style: ElevatedButton.styleFrom(
-                                  shape: const CircleBorder(),
-                                  padding: const EdgeInsets.all(16),
-                                  minimumSize: const Size(72, 72),
-                                  backgroundColor: Colors.grey[200],
-                                  elevation: 4,
-                                  shadowColor: Colors.grey,
-                                  foregroundColor: Colors.black,
-                                ),
-                                onPressed: () =>
-                                    context.read<RadioController>().togglePlay(),
-                                child: controller.isConnecting ||
-                                        controller.isBuffering
-                                    ? const SizedBox(
-                                        width: 24,
-                                        height: 24,
-                                        child: CircularProgressIndicator(
-                                            strokeWidth: 2),
-                                      )
-                                    : Icon(
-                                        controller.isPlaying
-                                            ? Icons.pause
-                                            : Icons.play_arrow,
-                                        size: 36,
-                                      ),
+                        Row(
+                          mainAxisSize: MainAxisSize.min,
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          crossAxisAlignment: CrossAxisAlignment.center,
+                          children: [
+                            ElevatedButton(
+                              style: ElevatedButton.styleFrom(
+                                shape: const CircleBorder(),
+                                padding: const EdgeInsets.all(16),
+                                minimumSize: const Size(72, 72),
+                                backgroundColor: Colors.grey[200],
+                                elevation: 4,
+                                shadowColor: Colors.grey,
+                                foregroundColor: Colors.black,
                               ),
-                              if (controller.isConnecting)
-                                const Padding(
-                                  padding: EdgeInsets.only(top: 8.0),
-                                  child: Text('Подключаемся…'),
-                                ),
-                              if (controller.isBuffering)
-                                const Padding(
-                                  padding: EdgeInsets.only(top: 8.0),
-                                  child: Text('Буферизация…'),
-                                ),
-                            ],
-                          ),
-                        ),
-                        Align(
-                          alignment: const Alignment(0.5, 0),
-                          child: IconButton(
-                            constraints: const BoxConstraints(
-                                minWidth: 60, minHeight: 60),
-                            iconSize: 36,
-                            onPressed: controller.isConnecting ||
-                                    controller.isBuffering
-                                ? null
-                                : () =>
-                                    context.read<RadioController>().toggleMute(),
-                            icon: Icon(
-                              controller.volume == 0
-                                  ? Icons.volume_off
-                                  : Icons.volume_up,
+                              onPressed: () =>
+                                  context.read<RadioController>().togglePlay(),
+                              child: controller.isConnecting ||
+                                      controller.isBuffering
+                                  ? const SizedBox(
+                                      width: 24,
+                                      height: 24,
+                                      child: CircularProgressIndicator(
+                                          strokeWidth: 2),
+                                    )
+                                  : Icon(
+                                      controller.isPlaying
+                                          ? Icons.pause
+                                          : Icons.play_arrow,
+                                      size: 36,
+                                    ),
                             ),
-                          ),
+                            const SizedBox(width: 24),
+                            ElevatedButton(
+                              style: ElevatedButton.styleFrom(
+                                shape: const CircleBorder(),
+                                minimumSize: const Size(48, 48),
+                                backgroundColor: Colors.grey[200],
+                                elevation: 0,
+                                foregroundColor: Colors.black,
+                              ),
+                              onPressed: controller.isConnecting ||
+                                      controller.isBuffering
+                                  ? null
+                                  : () =>
+                                      context.read<RadioController>().toggleMute(),
+                              child: Icon(
+                                controller.volume == 0
+                                    ? Icons.volume_off
+                                    : Icons.volume_up,
+                                size: 24,
+                              ),
+                            ),
+                          ],
                         ),
+                        if (controller.isConnecting)
+                          const Padding(
+                            padding: EdgeInsets.only(top: 8.0),
+                            child: Text('Подключаемся…'),
+                          ),
+                        if (controller.isBuffering)
+                          const Padding(
+                            padding: EdgeInsets.only(top: 8.0),
+                            child: Text('Буферизация…'),
+                          ),
                       ],
                     ),
                   ),
