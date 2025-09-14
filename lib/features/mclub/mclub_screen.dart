@@ -429,6 +429,7 @@ class _MClubScreenState extends State<MClubScreen>
                           key: _tabBarKey,
                           controller: _tabController,
                           isScrollable: true,
+                          tabAlignment: TabAlignment.start,
                           labelColor: const Color(0xFF182857),
                           unselectedLabelColor: Colors.black54,
                           indicatorColor: Colors.transparent,

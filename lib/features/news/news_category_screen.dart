@@ -18,6 +18,7 @@ class NewsCategoryScreen extends StatelessWidget {
           title: Text(category.name),
           bottom: TabBar(
             isScrollable: true,
+            tabAlignment: TabAlignment.start,
             tabs: [
               const Tab(text: 'Все'),
               for (final rubric in category.rubrics) Tab(text: rubric.name),
