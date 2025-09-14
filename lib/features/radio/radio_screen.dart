@@ -54,6 +54,7 @@ class _RadioView extends StatelessWidget {
       child: Column(
         children: [
           Expanded(
+            flex: 3,
             child: LayoutBuilder(
               builder: (context, constraints) {
                 final size = math.min(
@@ -191,75 +192,83 @@ class _RadioView extends StatelessWidget {
                             ),
                           ),
                         ),
-                      const SizedBox(height: 24),
                     ],
                   ),
                 );
               },
             ),
           ),
-          Padding(
-            padding: const EdgeInsets.only(bottom: 16),
-            child: SizedBox(
-              width: double.infinity,
-              child: Stack(
+          Expanded(
+            flex: 1,
+            child: Padding(
+              padding: const EdgeInsets.only(bottom: 16),
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Align(
-                    alignment: Alignment.center,
-                    child: Column(
-                      mainAxisSize: MainAxisSize.min,
+                  SizedBox(
+                    width: double.infinity,
+                    child: Stack(
                       children: [
-                        ElevatedButton(
-                          style: ElevatedButton.styleFrom(
-                            shape: const CircleBorder(),
-                            padding: const EdgeInsets.all(16),
-                            minimumSize: const Size(72, 72),
-                          ),
-                          onPressed: () =>
-                              context.read<RadioController>().togglePlay(),
-                          child: controller.isConnecting ||
-                                  controller.isBuffering
-                              ? const SizedBox(
-                                  width: 24,
-                                  height: 24,
-                                  child:
-                                      CircularProgressIndicator(strokeWidth: 2),
-                                )
-                              : Icon(
-                                  controller.isPlaying
-                                      ? Icons.pause
-                                      : Icons.play_arrow,
-                                  size: 36,
+                        Align(
+                          alignment: Alignment.center,
+                          child: Column(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              ElevatedButton(
+                                style: ElevatedButton.styleFrom(
+                                  shape: const CircleBorder(),
+                                  padding: const EdgeInsets.all(16),
+                                  minimumSize: const Size(72, 72),
                                 ),
+                                onPressed: () =>
+                                    context.read<RadioController>().togglePlay(),
+                                child: controller.isConnecting ||
+                                        controller.isBuffering
+                                    ? const SizedBox(
+                                        width: 24,
+                                        height: 24,
+                                        child: CircularProgressIndicator(
+                                            strokeWidth: 2),
+                                      )
+                                    : Icon(
+                                        controller.isPlaying
+                                            ? Icons.pause
+                                            : Icons.play_arrow,
+                                        size: 36,
+                                      ),
+                              ),
+                              if (controller.isConnecting)
+                                const Padding(
+                                  padding: EdgeInsets.only(top: 8.0),
+                                  child: Text('Подключаемся…'),
+                                ),
+                              if (controller.isBuffering)
+                                const Padding(
+                                  padding: EdgeInsets.only(top: 8.0),
+                                  child: Text('Буферизация…'),
+                                ),
+                            ],
+                          ),
                         ),
-                        if (controller.isConnecting)
-                          const Padding(
-                            padding: EdgeInsets.only(top: 8.0),
-                            child: Text('Подключаемся…'),
+                        Align(
+                          alignment: const Alignment(0.5, 0),
+                          child: IconButton(
+                            constraints: const BoxConstraints(
+                                minWidth: 60, minHeight: 60),
+                            iconSize: 36,
+                            onPressed: controller.isConnecting ||
+                                    controller.isBuffering
+                                ? null
+                                : () =>
+                                    context.read<RadioController>().toggleMute(),
+                            icon: Icon(
+                              controller.volume == 0
+                                  ? Icons.volume_off
+                                  : Icons.volume_up,
+                            ),
                           ),
-                        if (controller.isBuffering)
-                          const Padding(
-                            padding: EdgeInsets.only(top: 8.0),
-                            child: Text('Буферизация…'),
-                          ),
+                        ),
                       ],
-                    ),
-                  ),
-                  Align(
-                    alignment: const Alignment(0.5, 0),
-                    child: IconButton(
-                      constraints:
-                          const BoxConstraints(minWidth: 60, minHeight: 60),
-                      iconSize: 36,
-                      onPressed: controller.isConnecting ||
-                              controller.isBuffering
-                          ? null
-                          : () => context.read<RadioController>().toggleMute(),
-                      icon: Icon(
-                        controller.volume == 0
-                            ? Icons.volume_off
-                            : Icons.volume_up,
-                      ),
                     ),
                   ),
                 ],
