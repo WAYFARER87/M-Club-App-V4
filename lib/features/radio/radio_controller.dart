@@ -67,7 +67,14 @@ class RadioController extends ChangeNotifier {
       _audioHandlerCompleter.complete();
     }
 
-    _streams = await _api.fetchStreams();
+    try {
+      _streams = await _api.fetchStreams();
+    } catch (e, s) {
+      _hasError = true;
+      notifyListeners();
+      debugPrint('Failed to fetch radio streams: $e\n$s');
+      return;
+    }
     if (_streams.isEmpty) return;
 
     _quality = quality ?? _streams.keys.first;
@@ -89,7 +96,14 @@ class RadioController extends ChangeNotifier {
     if (url == null) return;
     _hasError = false;
     await _audioHandler.stop();
-    await _player.setUrl(url);
+    try {
+      await _player.setUrl(url);
+    } catch (e, s) {
+      _hasError = true;
+      notifyListeners();
+      debugPrint('Failed to set radio stream URL: $e\n$s');
+      return;
+    }
     await _audioHandler.play();
     await _updateTrackInfo();
   }
