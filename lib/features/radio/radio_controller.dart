@@ -141,10 +141,10 @@ class _RadioAudioHandler extends BaseAudioHandler with SeekHandler {
         ProcessingState.ready: AudioProcessingState.ready,
         ProcessingState.completed: AudioProcessingState.completed,
       }[event.processingState]!,
-      playing: event.playing,
-      updatePosition: event.position,
-      bufferedPosition: event.bufferedPosition,
-      speed: event.speed,
+      playing: _player.playing,
+      updatePosition: _player.position,
+      bufferedPosition: _player.bufferedPosition,
+      speed: _player.speed,
     );
   }
 
