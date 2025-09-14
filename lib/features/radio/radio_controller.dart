@@ -20,7 +20,7 @@ class RadioController extends ChangeNotifier {
 
   Map<String, String> _streams = {};
   String? _quality;
-  PlayerState _playerState = const PlayerState(false, ProcessingState.idle);
+  PlayerState _playerState = PlayerState(false, ProcessingState.idle);
   RadioTrack? _track;
   Timer? _trackTimer;
 
