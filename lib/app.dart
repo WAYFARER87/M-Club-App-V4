@@ -10,16 +10,17 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final colorScheme = ColorScheme.fromSeed(
-      seedColor: _primary,
-      brightness: Brightness.light,
-    ).copyWith(
-      primary: const Color(0xFFF5F5F5),
-      onPrimary: Colors.black,
-      surface: const Color(0xFFFAFAFA),
-      surfaceVariant: const Color(0xFFF0F0F0),
-      background: Colors.white,
-    );
+    final colorScheme =
+        ColorScheme.fromSeed(
+          seedColor: _primary,
+          brightness: Brightness.light,
+        ).copyWith(
+          primary: const Color(0xFFF5F5F5),
+          onPrimary: Colors.black,
+          surface: const Color(0xFFFAFAFA),
+          surfaceVariant: const Color(0xFFF0F0F0),
+          background: Colors.white,
+        );
 
     final base = ThemeData(
       useMaterial3: true,
@@ -41,7 +42,7 @@ class MyApp extends StatelessWidget {
           elevation: 0,
           centerTitle: false,
         ),
-        tabBarTheme: TabBarTheme(
+        tabBarTheme: TabBarThemeData(
           labelColor: _primary,
           unselectedLabelColor: Colors.black54,
           labelStyle: base.textTheme.titleMedium?.copyWith(
@@ -64,9 +65,7 @@ class MyApp extends StatelessWidget {
           ),
         ),
         textButtonTheme: TextButtonThemeData(
-          style: TextButton.styleFrom(
-            foregroundColor: _primary,
-          ),
+          style: TextButton.styleFrom(foregroundColor: _primary),
         ),
         textTheme: base.textTheme.copyWith(
           titleLarge: base.textTheme.titleLarge?.copyWith(
