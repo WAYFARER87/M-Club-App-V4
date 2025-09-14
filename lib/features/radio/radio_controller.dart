@@ -289,20 +289,35 @@ class _RadioAudioHandler extends BaseAudioHandler with SeekHandler {
 
   /// Updates the current track information for external clients.
   void updateTrack(RadioTrack track) {
+    Uri? artUri;
+    if (track.image.isNotEmpty) {
+      final uri = Uri.tryParse(track.image);
+      if (uri != null && (uri.scheme == 'http' || uri.scheme == 'https')) {
+        artUri = uri;
+      }
+    }
+    artUri ??= Uri.parse('asset:///assets/images/Radio_RE_Logo.webp');
+
     mediaItem.add(
       MediaItem(
         id: 'mclub_radio',
         title: track.title,
         artist: track.artist,
-        artUri: Uri.parse('asset:///assets/images/Radio_RE_Logo.webp'),
+        artUri: artUri,
       ),
     );
   }
 
   PlaybackState _transformEvent(PlaybackEvent event) {
+    final playing = _player.playing;
+    final controls = <MediaControl>[
+      playing ? MediaControl.pause : MediaControl.play,
+      MediaControl.stop,
+    ];
+
     return PlaybackState(
-      controls: [MediaControl.stop],
-      androidCompactActionIndices: const [0],
+      controls: controls,
+      androidCompactActionIndices: const [0, 1],
       processingState: const {
         ProcessingState.idle: AudioProcessingState.idle,
         ProcessingState.loading: AudioProcessingState.loading,
@@ -310,7 +325,7 @@ class _RadioAudioHandler extends BaseAudioHandler with SeekHandler {
         ProcessingState.ready: AudioProcessingState.ready,
         ProcessingState.completed: AudioProcessingState.completed,
       }[event.processingState]!,
-      playing: _player.playing,
+      playing: playing,
       updatePosition: _player.position,
       bufferedPosition: _player.bufferedPosition,
       speed: _player.speed,
@@ -324,6 +339,9 @@ class _RadioAudioHandler extends BaseAudioHandler with SeekHandler {
   Future<void> pause() => _player.pause();
 
   @override
-  Future<void> stop() => _player.stop();
+  Future<void> stop() async {
+    await _player.stop();
+    await super.stop();
+  }
 }
 
