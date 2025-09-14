@@ -11,7 +11,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 /// Controller responsible for playing radio streams and
 /// providing information about current track and player state.
 class RadioController extends ChangeNotifier {
-  RadioController() {
+  RadioController._internal() {
     _player.playerStateStream.listen((state) {
       _playerState = state;
       notifyListeners();
@@ -33,6 +33,10 @@ class RadioController extends ChangeNotifier {
       _updateTrackInfo();
     });
   }
+
+  static final RadioController _instance = RadioController._internal();
+
+  factory RadioController() => _instance;
 
   final RadioApiService _api = RadioApiService();
   static final AudioPlayer _player = AudioPlayer();
@@ -127,10 +131,7 @@ class RadioController extends ChangeNotifier {
 
   /// Loads available streams and starts playback using selected [quality].
   Future<void> init({String? quality}) async {
-    await _initAudioHandler();
-    if (!_audioHandlerCompleter.isCompleted) {
-      _audioHandlerCompleter.complete();
-    }
+    await ensureAudioService();
     if (_hasError) {
       notifyListeners();
       return;
@@ -237,6 +238,18 @@ class RadioController extends ChangeNotifier {
   void dispose() {
     _trackTimer?.cancel();
     super.dispose();
+  }
+
+  /// Ensures that [AudioService] is initialized and ready for use.
+  ///
+  /// Safe to call multiple times; subsequent calls have no effect.
+  /// This is useful when the app process restarts and needs to
+  /// reconnect to a running background audio service.
+  Future<void> ensureAudioService() async {
+    await _initAudioHandler();
+    if (!_audioHandlerCompleter.isCompleted) {
+      _audioHandlerCompleter.complete();
+    }
   }
 
   Future<void> _initAudioHandler() async {

@@ -6,9 +6,12 @@ import 'features/radio/radio_controller.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  final radioController = RadioController();
+  await radioController.ensureAudioService();
+  radioController.init();
   runApp(
-    ChangeNotifierProvider(
-      create: (_) => RadioController()..init(),
+    ChangeNotifierProvider.value(
+      value: radioController,
       child: const MyApp(),
     ),
   );
