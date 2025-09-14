@@ -41,10 +41,16 @@ class MyApp extends StatelessWidget {
           elevation: 0,
           centerTitle: false,
         ),
-        tabBarTheme: const TabBarThemeData(
+        tabBarTheme: TabBarTheme(
           labelColor: _primary,
           unselectedLabelColor: Colors.black54,
-          indicator: UnderlineTabIndicator(
+          labelStyle: base.textTheme.titleMedium?.copyWith(
+            fontSize: (base.textTheme.titleMedium?.fontSize ?? 14) + 2,
+          ),
+          unselectedLabelStyle: base.textTheme.titleMedium?.copyWith(
+            fontSize: (base.textTheme.titleMedium?.fontSize ?? 14) + 2,
+          ),
+          indicator: const UnderlineTabIndicator(
             borderSide: BorderSide(color: _primary, width: 2),
           ),
         ),
