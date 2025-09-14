@@ -58,18 +58,29 @@ class _RadioView extends StatelessWidget {
                 children: [
                   Stack(
                     children: [
-                      Container(
-                        width: size,
-                        height: size,
-                        decoration: BoxDecoration(
-                          image: DecorationImage(
-                            image: track != null && track.image.isNotEmpty
-                                ? NetworkImage(track.image)
-                                : const AssetImage(
-                                        'assets/images/Radio_RE_Logo.webp')
-                                    as ImageProvider,
-                            fit: BoxFit.cover,
-                          ),
+                      ClipRRect(
+                        borderRadius: const BorderRadius.vertical(
+                            top: Radius.circular(24)),
+                        child: SizedBox(
+                          width: size,
+                          height: size,
+                          child: track != null && track.image.isNotEmpty
+                              ? Image.network(
+                                  track.image,
+                                  fit: BoxFit.cover,
+                                )
+                              : Container(
+                                  decoration: const BoxDecoration(
+                                    gradient: LinearGradient(
+                                      begin: Alignment.topLeft,
+                                      end: Alignment.bottomRight,
+                                      colors: [
+                                        Color(0xFFE0E0E0),
+                                        Color(0xFFF5F5F5),
+                                      ],
+                                    ),
+                                  ),
+                                ),
                         ),
                       ),
                       if (controller.quality != null)
@@ -77,30 +88,51 @@ class _RadioView extends StatelessWidget {
                           alignment: Alignment.topRight,
                           child: Padding(
                             padding: const EdgeInsets.all(8.0),
-                            child: PopupMenuButton<String>(
-                              padding: EdgeInsets.zero,
-                              onSelected: (quality) {
-                                controller.setQuality(quality);
-                              },
-                              itemBuilder: (context) {
-                                return controller.streams.keys
-                                    .map((quality) => PopupMenuItem<String>(
-                                          value: quality,
-                                          child: Text('HQ $quality'),
-                                        ))
-                                    .toList();
-                              },
-                              child: Container(
-                                padding: const EdgeInsets.symmetric(
-                                    horizontal: 8, vertical: 4),
-                                decoration: BoxDecoration(
-                                  color: Colors.black54,
-                                  borderRadius: BorderRadius.circular(12),
-                                ),
-                                child: Text(
-                                  'HQ ${controller.quality}',
-                                  style: const TextStyle(
-                                      color: Colors.white, fontSize: 12),
+                            child: Material(
+                              color: Colors.black54,
+                              borderRadius: BorderRadius.circular(12),
+                              child: InkWell(
+                                borderRadius: BorderRadius.circular(12),
+                                onTap: () {
+                                  showModalBottomSheet(
+                                    context: context,
+                                    builder: (context) {
+                                      return SafeArea(
+                                        child: Column(
+                                          mainAxisSize: MainAxisSize.min,
+                                          children: controller.streams.keys
+                                              .map((quality) => ListTile(
+                                                    title: Text('HQ $quality'),
+                                                    trailing:
+                                                        controller.quality ==
+                                                                quality
+                                                            ? const Icon(
+                                                                Icons.check)
+                                                            : null,
+                                                    onTap: () {
+                                                      controller
+                                                          .setQuality(quality);
+                                                      Navigator.pop(context);
+                                                    },
+                                                  ))
+                                              .toList(),
+                                        ),
+                                      );
+                                    },
+                                  );
+                                },
+                                child: Container(
+                                  constraints: const BoxConstraints(
+                                      minWidth: 44, minHeight: 44),
+                                  padding: const EdgeInsets.symmetric(
+                                      horizontal: 8, vertical: 4),
+                                  child: Center(
+                                    child: Text(
+                                      'HQ ${controller.quality}',
+                                      style: const TextStyle(
+                                          color: Colors.white, fontSize: 12),
+                                    ),
+                                  ),
                                 ),
                               ),
                             ),
@@ -108,7 +140,7 @@ class _RadioView extends StatelessWidget {
                         ),
                     ],
                   ),
-                  const SizedBox(height: 12),
+                  const SizedBox(height: 16),
                   if (track != null) ...[
                     Text(
                       track.artist,
@@ -118,13 +150,13 @@ class _RadioView extends StatelessWidget {
                           ?.copyWith(fontWeight: FontWeight.bold),
                       textAlign: TextAlign.center,
                     ),
-                    const SizedBox(height: 4),
+                    const SizedBox(height: 8),
                     Text(
                       track.title,
                       style: Theme.of(context).textTheme.bodyMedium,
                       textAlign: TextAlign.center,
                     ),
-                    const SizedBox(height: 8),
+                    const SizedBox(height: 12),
                     Container(
                       padding: const EdgeInsets.symmetric(
                           horizontal: 8, vertical: 2),
@@ -137,7 +169,7 @@ class _RadioView extends StatelessWidget {
                         style: TextStyle(color: Colors.white, fontSize: 12),
                       ),
                     ),
-                    const SizedBox(height: 12),
+                    const SizedBox(height: 24),
                   ],
                   if (controller.hasError) ...[
                     Text(
@@ -159,7 +191,8 @@ class _RadioView extends StatelessWidget {
                 ElevatedButton(
                   style: ElevatedButton.styleFrom(
                     shape: const CircleBorder(),
-                    padding: const EdgeInsets.all(16),
+                    padding: const EdgeInsets.all(20),
+                    minimumSize: const Size(64, 64),
                   ),
                   onPressed: () =>
                       context.read<RadioController>().togglePlay(),
@@ -171,7 +204,10 @@ class _RadioView extends StatelessWidget {
                 ),
                 const SizedBox(width: 16),
                 IconButton(
-                  onPressed: () => _showVolumeDialog(context),
+                  constraints: const BoxConstraints(
+                      minWidth: 44, minHeight: 44),
+                  onPressed: () =>
+                      context.read<RadioController>().toggleMute(),
                   icon: Icon(
                     controller.volume == 0
                         ? Icons.volume_off
@@ -183,45 +219,6 @@ class _RadioView extends StatelessWidget {
           ),
         ],
       ),
-    );
-  }
-
-  void _showVolumeDialog(BuildContext context) {
-    final controller = context.read<RadioController>();
-    showDialog(
-      context: context,
-      builder: (context) {
-        return AlertDialog(
-          title: const Text('Volume'),
-          content: StatefulBuilder(
-            builder: (context, setState) {
-              return Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Slider(
-                    value: controller.volume,
-                    onChanged: (value) {
-                      controller.setVolume(value);
-                      setState(() {});
-                    },
-                  ),
-                  IconButton(
-                    icon: Icon(
-                      controller.volume == 0
-                          ? Icons.volume_off
-                          : Icons.volume_up,
-                    ),
-                    onPressed: () {
-                      controller.toggleMute();
-                      setState(() {});
-                    },
-                  ),
-                ],
-              );
-            },
-          ),
-        );
-      },
     );
   }
 }
