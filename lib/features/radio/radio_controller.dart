@@ -38,14 +38,22 @@ class RadioController extends ChangeNotifier {
   RadioTrack? _track;
   Timer? _trackTimer;
   bool _hasError = false;
+  bool _streamsUnavailable = false;
   double _volume = 1.0;
   double _previousVolume = 1.0;
+
+  /// Default streams used when API is unreachable.
+  static const Map<String, String> _defaultStreams = {
+    '64': 'https://example.com/stream-64.mp3',
+    '128': 'https://example.com/stream-128.mp3',
+  };
 
   Map<String, String> get streams => _streams;
   String? get quality => _quality;
   PlayerState get playerState => _playerState;
   RadioTrack? get track => _track;
   bool get hasError => _hasError;
+  bool get streamsUnavailable => _streamsUnavailable;
   double get volume => _volume;
 
   /// Starts playback if the stream is not playing and stops otherwise.
@@ -92,15 +100,29 @@ class RadioController extends ChangeNotifier {
       _audioHandlerCompleter.complete();
     }
 
+    _streamsUnavailable = false;
     try {
       _streams = await _api.fetchStreams();
     } catch (e, s) {
-      _hasError = true;
-      notifyListeners();
-      debugPrint('Failed to fetch radio streams: $e\n$s');
-      return;
+      if (_defaultStreams.isNotEmpty) {
+        _streams = Map<String, String>.from(_defaultStreams);
+      } else {
+        _streamsUnavailable = true;
+        notifyListeners();
+        debugPrint('Failed to fetch radio streams: $e\n$s');
+        return;
+      }
     }
-    if (_streams.isEmpty) return;
+
+    if (_streams.isEmpty) {
+      if (_defaultStreams.isNotEmpty) {
+        _streams = Map<String, String>.from(_defaultStreams);
+      } else {
+        _streamsUnavailable = true;
+        notifyListeners();
+        return;
+      }
+    }
 
     _quality = quality ?? _streams.keys.first;
     await _startStream();
