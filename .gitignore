@@ -3,8 +3,6 @@
 .packages
 .idea/
 .vscode/
-android/
-ios/
 linux/
 web/
 windows/
