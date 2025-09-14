@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:url_launcher/url_launcher.dart';
+import 'package:dio/dio.dart';
 
 import '../../core/services/api_service.dart';
 import '../../core/widgets/auth_gate.dart';
@@ -54,6 +55,8 @@ class _L {
   String get errorTokenMissing => ru ? 'Токен не получен' : 'Token missing';
   String get errorSendCode => ru ? 'Не удалось отправить код' : 'Failed to send code';
   String get errorVerifyCode => ru ? 'Не удалось подтвердить код' : 'Failed to verify code';
+  String get errorInvalidCode =>
+      ru ? 'Неверный код. Попробуйте ещё раз.' : 'Invalid code. Try again.';
   String get codeResent => ru ? 'Код повторно отправлен' : 'Code sent again';
 }
 
@@ -273,6 +276,7 @@ class _AuthCodeScreenState extends State<_AuthCodeScreen> {
   bool _loading = false;
   int _secondsLeft = RESEND_SECONDS;
   Timer? _timer;
+  bool _invalid = false;
 
   static const _primary = Color(0xFF182857);
 
@@ -321,7 +325,10 @@ class _AuthCodeScreenState extends State<_AuthCodeScreen> {
         selection: TextSelection.collapsed(offset: digits.length),
       );
     }
-    setState(() => _code = digits);
+    setState(() {
+      _code = digits;
+      if (_invalid) _invalid = false;
+    });
   }
 
   Future<void> _verify() async {
@@ -343,6 +350,18 @@ class _AuthCodeScreenState extends State<_AuthCodeScreen> {
         MaterialPageRoute(builder: (_) => const HomeScreen()),
         (_) => false,
       );
+    } on DioException catch (e) {
+      if (!mounted) return;
+      final t = _L.of(context);
+      if (e.response?.statusCode == 400) {
+        setState(() => _invalid = true);
+        ScaffoldMessenger.of(context)
+            .showSnackBar(SnackBar(content: Text(t.errorInvalidCode)));
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('${t.errorVerifyCode}: ${e.message}')),
+        );
+      }
     } catch (e) {
       if (!mounted) return;
       final t = _L.of(context);
@@ -376,13 +395,15 @@ class _AuthCodeScreenState extends State<_AuthCodeScreen> {
   // Ячейка отображения
   Widget _buildBox(int index) {
     final ch = index < _code.length ? _code[index] : '';
-    return Container(
+    final borderColor = _invalid ? Colors.red : Colors.grey.shade300;
+    return AnimatedContainer(
+      duration: const Duration(milliseconds: 200),
       width: 48,
       height: 56,
       alignment: Alignment.center,
       decoration: BoxDecoration(
         color: Colors.white.withOpacity(0.9),
-        border: Border.all(color: Colors.grey.shade300, width: 1),
+        border: Border.all(color: borderColor, width: 1),
         borderRadius: BorderRadius.circular(8),
         boxShadow: [
           BoxShadow(
