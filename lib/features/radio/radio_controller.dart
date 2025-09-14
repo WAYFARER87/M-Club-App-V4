@@ -1,10 +1,12 @@
 import 'dart:async';
+import 'dart:convert';
 
-import 'package:flutter/foundation.dart';
 import 'package:audio_service/audio_service.dart';
+import 'package:flutter/foundation.dart';
 import 'package:just_audio/just_audio.dart';
 import 'package:m_club/core/services/radio_api_service.dart';
 import 'package:m_club/features/radio/models/radio_track.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 /// Controller responsible for playing radio streams and
 /// providing information about current track and player state.
@@ -44,11 +46,7 @@ class RadioController extends ChangeNotifier {
   double _previousVolume = 1.0;
   String? _errorMessage;
 
-  /// Default streams used when API is unreachable.
-  static const Map<String, String> _defaultStreams = {
-    '64': 'https://example.com/stream-64.mp3',
-    '128': 'https://example.com/stream-128.mp3',
-  };
+  static const String _cachedStreamsKey = 'radio_streams';
 
   Map<String, String> get streams => _streams;
   String? get quality => _quality;
@@ -135,23 +133,22 @@ class RadioController extends ChangeNotifier {
     _streamsUnavailable = false;
     try {
       _streams = await _api.fetchStreams();
-    } catch (e, s) {
-      if (_defaultStreams.isNotEmpty) {
-        _streams = Map<String, String>.from(_defaultStreams);
+      if (_streams.isNotEmpty) {
+        await _saveStreamsToCache(_streams);
       } else {
+        _streams = await _loadStreamsFromCache();
+        if (_streams.isEmpty) {
+          _streamsUnavailable = true;
+          notifyListeners();
+          return;
+        }
+      }
+    } catch (e, s) {
+      _streams = await _loadStreamsFromCache();
+      if (_streams.isEmpty) {
         _streamsUnavailable = true;
         notifyListeners();
         debugPrint('Failed to fetch radio streams: $e\n$s');
-        return;
-      }
-    }
-
-    if (_streams.isEmpty) {
-      if (_defaultStreams.isNotEmpty) {
-        _streams = Map<String, String>.from(_defaultStreams);
-      } else {
-        _streamsUnavailable = true;
-        notifyListeners();
         return;
       }
     }
@@ -186,6 +183,27 @@ class RadioController extends ChangeNotifier {
       _errorMessage = 'Failed to start radio playback: ${e.toString()}';
       _logPlaybackFailure('startStream', e, s);
       notifyListeners();
+    }
+  }
+
+  Future<void> _saveStreamsToCache(Map<String, String> streams) async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.setString(_cachedStreamsKey, jsonEncode(streams));
+    } catch (_) {
+      // ignore cache errors
+    }
+  }
+
+  Future<Map<String, String>> _loadStreamsFromCache() async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final data = prefs.getString(_cachedStreamsKey);
+      if (data == null) return {};
+      final Map<String, dynamic> decoded = jsonDecode(data);
+      return decoded.map((key, value) => MapEntry(key, value as String));
+    } catch (_) {
+      return {};
     }
   }
 
