@@ -23,63 +23,121 @@ class _RadioView extends StatelessWidget {
     final controller = context.watch<RadioController>();
     final track = controller.track;
 
-    return Center(
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Image.asset(
-            'assets/images/Radio_RE_Logo.webp',
-            width: 150,
-          ),
-          const SizedBox(height: 16),
-          if (track != null) ...[
-            if (track.image.isNotEmpty)
-              Image.network(
-                track.image,
-                height: 200,
-                width: 200,
-                fit: BoxFit.cover,
-              ),
-            const SizedBox(height: 8),
-            Text('${track.artist} – ${track.title}',
-                textAlign: TextAlign.center),
-            const SizedBox(height: 16),
-          ],
-          if (controller.streams.isNotEmpty)
-            DropdownButton<String>(
-              value: controller.quality,
-              items: controller.streams.keys
-                  .map(
-                    (q) => DropdownMenuItem(
-                      value: q,
-                      child: Text('$q kbps'),
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final size = constraints.maxWidth * 0.6;
+        return Stack(
+          alignment: Alignment.topCenter,
+          children: [
+            Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Stack(
+                  children: [
+                    Container(
+                      width: size,
+                      height: size,
+                      decoration: BoxDecoration(
+                        image: DecorationImage(
+                          image: track != null && track.image.isNotEmpty
+                              ? NetworkImage(track.image)
+                              : const AssetImage(
+                                      'assets/images/Radio_RE_Logo.webp')
+                                  as ImageProvider,
+                          fit: BoxFit.cover,
+                        ),
+                      ),
                     ),
-                  )
-                  .toList(),
-              onChanged: (q) {
-                if (q != null) {
-                  context.read<RadioController>().setQuality(q);
-                }
-              },
+                    if (controller.quality != null)
+                      Positioned(
+                        top: 8,
+                        right: 8,
+                        child: Container(
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 8, vertical: 4),
+                          decoration: BoxDecoration(
+                            color: Colors.black54,
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                          child: Text(
+                            'HQ ${controller.quality}',
+                            style: const TextStyle(
+                                color: Colors.white, fontSize: 12),
+                          ),
+                        ),
+                      ),
+                  ],
+                ),
+                const SizedBox(height: 12),
+                if (track != null) ...[
+                  Text(
+                    track.artist,
+                    style: Theme.of(context)
+                        .textTheme
+                        .titleMedium
+                        ?.copyWith(fontWeight: FontWeight.bold),
+                    textAlign: TextAlign.center,
+                  ),
+                  Text(
+                    track.title,
+                    style: Theme.of(context).textTheme.titleMedium,
+                    textAlign: TextAlign.center,
+                  ),
+                  const SizedBox(height: 8),
+                  Container(
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: 8, vertical: 2),
+                    decoration: BoxDecoration(
+                      color: Colors.red,
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    child: const Text(
+                      'LIVE',
+                      style: TextStyle(color: Colors.white, fontSize: 12),
+                    ),
+                  ),
+                  const SizedBox(height: 12),
+                ],
+                if (controller.hasError) ...[
+                  const Text(
+                    'Playback error. Press Play to try again.',
+                    textAlign: TextAlign.center,
+                  ),
+                  const SizedBox(height: 8),
+                ],
+              ],
             ),
-          const SizedBox(height: 16),
-          if (controller.hasError) ...[
-            const Text(
-              'Playback error. Press Play to try again.',
-              textAlign: TextAlign.center,
+            Positioned(
+              bottom: 0,
+              left: 0,
+              right: 0,
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  ElevatedButton(
+                    style: ElevatedButton.styleFrom(
+                      shape: const CircleBorder(),
+                      padding: const EdgeInsets.all(16),
+                    ),
+                    onPressed: () =>
+                        context.read<RadioController>().togglePlay(),
+                    child: Icon(
+                      controller.playerState.playing
+                          ? Icons.pause
+                          : Icons.play_arrow,
+                    ),
+                  ),
+                  const SizedBox(width: 16),
+                  IconButton(
+                    onPressed: () {},
+                    icon: const Icon(Icons.volume_up),
+                  ),
+                ],
+              ),
             ),
-            const SizedBox(height: 8),
           ],
-          ElevatedButton.icon(
-            onPressed: () => context.read<RadioController>().togglePlay(),
-            icon: Icon(controller.playerState.playing
-                ? Icons.stop
-                : Icons.play_arrow),
-            label: Text(
-                controller.playerState.playing ? 'Stop' : 'Play'),
-          ),
-        ],
-      ),
+        );
+      },
     );
   }
 }
