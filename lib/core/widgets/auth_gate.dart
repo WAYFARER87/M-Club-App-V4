@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import '../../features/auth/auth_email_screen.dart';
 import '../services/api_service.dart' show ApiService;
@@ -28,12 +29,21 @@ class _AuthGateState extends State<AuthGate> {
   }
 
   Future<void> _check() async {
-    final ok = await ApiService().isLoggedIn();
-    if (!mounted) return;
-    setState(() {
-      _loggedIn = ok;
-      _loading = false;
-    });
+    try {
+      final ok = await ApiService().isLoggedIn();
+      if (!mounted) return;
+      setState(() {
+        _loggedIn = ok;
+        _loading = false;
+      });
+    } catch (e) {
+      debugPrint('AuthGate._check error: $e');
+      if (!mounted) return;
+      setState(() {
+        _loggedIn = false;
+        _loading = false;
+      });
+    }
   }
 
   /// Выполняет повторную проверку токена и обновляет состояние виджета.

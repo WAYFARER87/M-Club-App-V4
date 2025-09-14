@@ -247,8 +247,13 @@ class ApiService {
 
   /// Проверка, есть ли сохранённый токен
   Future<bool> isLoggedIn() async {
-    final token = await _storage.read(key: 'auth_token');
-    return token != null;
+    try {
+      final token = await _storage.read(key: 'auth_token');
+      return token != null;
+    } catch (e) {
+      debugPrint('isLoggedIn error: $e');
+      return false;
+    }
   }
   String _resolveLang() {
     final code = ui.PlatformDispatcher.instance.locale.languageCode.toLowerCase();
