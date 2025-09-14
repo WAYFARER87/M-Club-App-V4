@@ -102,7 +102,7 @@ class _RadioView extends StatelessWidget {
                                           mainAxisSize: MainAxisSize.min,
                                           children: controller.streams.keys
                                               .map((quality) => ListTile(
-                                                    title: Text('HQ $quality'),
+                                                    title: Text(quality),
                                                     trailing:
                                                         controller.quality ==
                                                                 quality
@@ -128,7 +128,7 @@ class _RadioView extends StatelessWidget {
                                       horizontal: 8, vertical: 4),
                                   child: Center(
                                     child: Text(
-                                      'HQ ${controller.quality}',
+                                      controller.quality!,
                                       style: const TextStyle(
                                           color: Colors.white, fontSize: 12),
                                     ),
