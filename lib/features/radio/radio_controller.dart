@@ -10,16 +10,16 @@ import 'package:m_club/features/radio/models/radio_track.dart';
 /// providing information about current track and player state.
 class RadioController extends ChangeNotifier {
   RadioController() {
-    _initAudioHandler();
     _player.playerStateStream.listen((state) {
       _playerState = state;
       notifyListeners();
     });
 
-    _player.processingStateStream.listen((state) {
+    _player.processingStateStream.listen((state) async {
       if (state == ProcessingState.idle && _player.audioSource != null) {
         _hasError = true;
-        _audioHandler.stop();
+        await _audioHandlerReady;
+        await _audioHandler.stop();
       }
       notifyListeners();
     });
@@ -28,6 +28,9 @@ class RadioController extends ChangeNotifier {
   final RadioApiService _api = RadioApiService();
   final AudioPlayer _player = AudioPlayer();
   late final AudioHandler _audioHandler;
+  final Completer<void> _audioHandlerCompleter = Completer<void>();
+
+  Future<void> get _audioHandlerReady => _audioHandlerCompleter.future;
 
   Map<String, String> _streams = {};
   String? _quality;
@@ -44,6 +47,7 @@ class RadioController extends ChangeNotifier {
 
   /// Starts playback if the stream is not playing and stops otherwise.
   Future<void> togglePlay() async {
+    await _audioHandlerReady;
     if (_player.playing) {
       await _audioHandler.stop();
     } else {
@@ -58,6 +62,11 @@ class RadioController extends ChangeNotifier {
 
   /// Loads available streams and starts playback using selected [quality].
   Future<void> init({String? quality}) async {
+    await _initAudioHandler();
+    if (!_audioHandlerCompleter.isCompleted) {
+      _audioHandlerCompleter.complete();
+    }
+
     _streams = await _api.fetchStreams();
     if (_streams.isEmpty) return;
 
@@ -75,6 +84,7 @@ class RadioController extends ChangeNotifier {
   }
 
   Future<void> _startStream() async {
+    await _audioHandlerReady;
     final url = _streams[_quality];
     if (url == null) return;
     _hasError = false;
@@ -92,6 +102,7 @@ class RadioController extends ChangeNotifier {
   }
 
   Future<void> _updateTrackInfo() async {
+    await _audioHandlerReady;
     try {
       final info = await _api.fetchTrackInfo();
       if (info == null) return;
