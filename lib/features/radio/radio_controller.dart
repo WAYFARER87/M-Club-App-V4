@@ -83,14 +83,7 @@ class RadioController extends ChangeNotifier {
     try {
       final info = await _api.fetchTrackInfo();
       _track = info;
-      _audioHandler.mediaItem.add(
-        MediaItem(
-          id: 'mclub_radio',
-          title: info.title,
-          artist: info.artist,
-          artUri: Uri.parse('asset:///assets/images/Radio_RE_Logo.webp'),
-        ),
-      );
+      (_audioHandler as _RadioAudioHandler).updateTrack(info);
       notifyListeners();
     } catch (_) {
       // ignore errors
@@ -123,6 +116,18 @@ class _RadioAudioHandler extends BaseAudioHandler with SeekHandler {
   }
 
   final AudioPlayer _player;
+
+  /// Updates the current track information for external clients.
+  void updateTrack(RadioTrack track) {
+    mediaItem.add(
+      MediaItem(
+        id: 'mclub_radio',
+        title: track.title,
+        artist: track.artist,
+        artUri: Uri.parse('asset:///assets/images/Radio_RE_Logo.webp'),
+      ),
+    );
+  }
 
   PlaybackState _transformEvent(PlaybackEvent event) {
     return PlaybackState(
