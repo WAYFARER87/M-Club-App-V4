@@ -141,6 +141,18 @@ class _RadioView extends StatelessWidget {
                     ],
                   ),
                   const SizedBox(height: 16),
+                  if (controller.hasError) ...[
+                    Chip(
+                      label: const Text('ERROR'),
+                      labelStyle: const TextStyle(color: Colors.white),
+                      backgroundColor: Colors.red,
+                    ),
+                    TextButton(
+                      onPressed: () => context.read<RadioController>().retry(),
+                      child: const Text('Повторить'),
+                    ),
+                    const SizedBox(height: 16),
+                  ],
                   if (track != null) ...[
                     Text(
                       track.artist,
@@ -171,14 +183,6 @@ class _RadioView extends StatelessWidget {
                     ),
                     const SizedBox(height: 24),
                   ],
-                  if (controller.hasError) ...[
-                    Text(
-                      controller.errorMessage ??
-                          'Playback error. Press Play to try again.',
-                      textAlign: TextAlign.center,
-                    ),
-                    const SizedBox(height: 8),
-                  ],
                 ],
               ),
             ),
@@ -188,26 +192,49 @@ class _RadioView extends StatelessWidget {
             child: Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                ElevatedButton(
-                  style: ElevatedButton.styleFrom(
-                    shape: const CircleBorder(),
-                    padding: const EdgeInsets.all(20),
-                    minimumSize: const Size(64, 64),
-                  ),
-                  onPressed: () =>
-                      context.read<RadioController>().togglePlay(),
-                  child: Icon(
-                    controller.playerState.playing
-                        ? Icons.pause
-                        : Icons.play_arrow,
-                  ),
+                Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    ElevatedButton(
+                      style: ElevatedButton.styleFrom(
+                        shape: const CircleBorder(),
+                        padding: const EdgeInsets.all(20),
+                        minimumSize: const Size(64, 64),
+                      ),
+                      onPressed: () =>
+                          context.read<RadioController>().togglePlay(),
+                      child: controller.isConnecting || controller.isBuffering
+                          ? const SizedBox(
+                              width: 24,
+                              height: 24,
+                              child: CircularProgressIndicator(strokeWidth: 2),
+                            )
+                          : Icon(
+                              controller.isPlaying
+                                  ? Icons.pause
+                                  : Icons.play_arrow,
+                            ),
+                    ),
+                    if (controller.isConnecting)
+                      const Padding(
+                        padding: EdgeInsets.only(top: 8.0),
+                        child: Text('Подключаемся…'),
+                      ),
+                    if (controller.isBuffering)
+                      const Padding(
+                        padding: EdgeInsets.only(top: 8.0),
+                        child: Text('Буферизация…'),
+                      ),
+                  ],
                 ),
                 const SizedBox(width: 16),
                 IconButton(
-                  constraints: const BoxConstraints(
-                      minWidth: 44, minHeight: 44),
-                  onPressed: () =>
-                      context.read<RadioController>().toggleMute(),
+                  constraints:
+                      const BoxConstraints(minWidth: 44, minHeight: 44),
+                  onPressed: controller.isConnecting || controller.isBuffering
+                      ? null
+                      : () =>
+                          context.read<RadioController>().toggleMute(),
                   icon: Icon(
                     controller.volume == 0
                         ? Icons.volume_off
