@@ -36,6 +36,8 @@ dependencies:
 
   # Мультимедиа и ссылки
   just_audio: ^0.9.38
+  audio_service: ^0.18.18
+  just_audio_background: ^0.0.1-beta.17
   url_launcher: ^6.3.0
 
   # UI
