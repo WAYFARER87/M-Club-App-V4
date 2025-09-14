@@ -42,17 +42,27 @@ android {
     }
 
     signingConfigs {
-        create("release") {
-            storeFile = file(keystoreProperties["storeFile"] as String)
-            storePassword = keystoreProperties["storePassword"] as String
-            keyAlias = keystoreProperties["keyAlias"] as String
-            keyPassword = keystoreProperties["keyPassword"] as String
+        val storeFileProp = keystoreProperties.getProperty("storeFile")
+        val storePasswordProp = keystoreProperties.getProperty("storePassword")
+        val keyAliasProp = keystoreProperties.getProperty("keyAlias")
+        val keyPasswordProp = keystoreProperties.getProperty("keyPassword")
+
+        if (storeFileProp != null && storePasswordProp != null &&
+            keyAliasProp != null && keyPasswordProp != null) {
+            create("release") {
+                storeFile = file(storeFileProp)
+                storePassword = storePasswordProp
+                keyAlias = keyAliasProp
+                keyPassword = keyPasswordProp
+            }
+        } else {
+            println("Warning: key.properties is missing required fields; using debug signing config.")
         }
     }
 
     buildTypes {
         release {
-            signingConfig = signingConfigs.getByName("release")
+            signingConfig = signingConfigs.findByName("release") ?: signingConfigs.getByName("debug")
         }
     }
 }
