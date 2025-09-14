@@ -12,7 +12,7 @@ class _TestRadioArtwork extends StatelessWidget {
     return LayoutBuilder(
       builder: (context, constraints) {
         final size =
-            math.min(constraints.maxWidth, constraints.maxHeight) * 0.6;
+            math.min(constraints.maxWidth, constraints.maxHeight) * 0.8;
         return Center(
           child: SizedBox(
             width: size,
