@@ -38,12 +38,15 @@ class RadioController extends ChangeNotifier {
   RadioTrack? _track;
   Timer? _trackTimer;
   bool _hasError = false;
+  double _volume = 1.0;
+  double _previousVolume = 1.0;
 
   Map<String, String> get streams => _streams;
   String? get quality => _quality;
   PlayerState get playerState => _playerState;
   RadioTrack? get track => _track;
   bool get hasError => _hasError;
+  double get volume => _volume;
 
   /// Starts playback if the stream is not playing and stops otherwise.
   Future<void> togglePlay() async {
@@ -58,6 +61,28 @@ class RadioController extends ChangeNotifier {
       }
     }
     _hasError = false;
+  }
+
+  /// Sets the player volume to a value between 0.0 and 1.0.
+  Future<void> setVolume(double value) async {
+    _volume = value.clamp(0.0, 1.0);
+    if (_volume > 0) {
+      _previousVolume = _volume;
+    }
+    await _player.setVolume(_volume);
+    notifyListeners();
+  }
+
+  /// Toggles mute state preserving the last non-zero volume value.
+  Future<void> toggleMute() async {
+    if (_volume > 0) {
+      _previousVolume = _volume;
+      _volume = 0;
+    } else {
+      _volume = _previousVolume;
+    }
+    await _player.setVolume(_volume);
+    notifyListeners();
   }
 
   /// Loads available streams and starts playback using selected [quality].
