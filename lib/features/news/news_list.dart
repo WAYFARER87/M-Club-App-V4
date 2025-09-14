@@ -248,7 +248,7 @@ class NewsListItem extends StatelessWidget {
                         ),
                       ),
                       IconButton(
-                        icon: const Icon(Icons.share),
+                        icon: const Icon(Icons.share, color: Colors.grey),
                         onPressed: () {
                           final text = [
                             item.title,
