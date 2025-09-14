@@ -15,6 +15,14 @@ class RadioController extends ChangeNotifier {
       _playerState = state;
       notifyListeners();
     });
+
+    _player.processingStateStream.listen((state) {
+      if (state == ProcessingState.idle && _player.audioSource != null) {
+        _hasError = true;
+        _audioHandler.stop();
+      }
+      notifyListeners();
+    });
   }
 
   final RadioApiService _api = RadioApiService();
@@ -26,11 +34,13 @@ class RadioController extends ChangeNotifier {
   PlayerState _playerState = PlayerState(false, ProcessingState.idle);
   RadioTrack? _track;
   Timer? _trackTimer;
+  bool _hasError = false;
 
   Map<String, String> get streams => _streams;
   String? get quality => _quality;
   PlayerState get playerState => _playerState;
   RadioTrack? get track => _track;
+  bool get hasError => _hasError;
 
   /// Starts playback if the stream is not playing and stops otherwise.
   Future<void> togglePlay() async {
@@ -43,6 +53,7 @@ class RadioController extends ChangeNotifier {
         await _audioHandler.play();
       }
     }
+    _hasError = false;
   }
 
   /// Loads available streams and starts playback using selected [quality].
@@ -66,6 +77,7 @@ class RadioController extends ChangeNotifier {
   Future<void> _startStream() async {
     final url = _streams[_quality];
     if (url == null) return;
+    _hasError = false;
     await _audioHandler.stop();
     await _player.setUrl(url);
     await _audioHandler.play();
