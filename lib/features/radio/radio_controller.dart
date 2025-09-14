@@ -82,6 +82,7 @@ class RadioController extends ChangeNotifier {
   Future<void> _updateTrackInfo() async {
     try {
       final info = await _api.fetchTrackInfo();
+      if (info == null) return;
       _track = info;
       (_audioHandler as _RadioAudioHandler).updateTrack(info);
       notifyListeners();
