@@ -167,15 +167,17 @@ class _RadioView extends StatelessWidget {
                           track.artist,
                           style: Theme.of(context)
                               .textTheme
-                              .headlineSmall
+                              .headlineMedium
                               ?.copyWith(fontWeight: FontWeight.bold),
                           textAlign: TextAlign.center,
+                          softWrap: true,
                         ),
                         const SizedBox(height: 8),
                         Text(
                           track.title,
-                          style: Theme.of(context).textTheme.bodyMedium,
+                          style: Theme.of(context).textTheme.titleMedium,
                           textAlign: TextAlign.center,
+                          softWrap: true,
                         ),
                         const SizedBox(height: 12),
                         Container(
