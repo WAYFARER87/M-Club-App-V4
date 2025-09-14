@@ -84,10 +84,10 @@ class _RadioView extends StatelessWidget {
                         ),
                       ),
                       if (controller.quality != null)
-                        Align(
-                          alignment: Alignment.topRight,
-                          child: Padding(
-                            padding: const EdgeInsets.all(8.0),
+                        Positioned(
+                          top: 8,
+                          right: 8,
+                          child: SizedBox(
                             child: Material(
                               color: Colors.black54,
                               borderRadius: BorderRadius.circular(12),
@@ -122,8 +122,8 @@ class _RadioView extends StatelessWidget {
                                   );
                                 },
                                 child: Container(
-                                  constraints: const BoxConstraints(
-                                      minWidth: 44, minHeight: 44),
+                                  constraints:
+                                      const BoxConstraints(minHeight: 44),
                                   padding: const EdgeInsets.symmetric(
                                       horizontal: 8, vertical: 4),
                                   child: Center(
