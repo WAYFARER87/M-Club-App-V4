@@ -63,6 +63,9 @@ class _L {
       ru ? 'Не удалось отправить код' : 'Failed to send code';
   String get errorVerifyCode =>
       ru ? 'Не удалось подтвердить код' : 'Failed to verify code';
+  String get errorNoConnection => ru
+      ? 'Не удалось связаться с сервером, проверьте подключение к интернету'
+      : 'Could not reach the server, check your internet connection';
   String get errorInvalidCode =>
       ru ? 'Неверный код. Попробуйте ещё раз.' : 'Invalid code. Try again.';
   String get codeResent => ru ? 'Код повторно отправлен' : 'Code sent again';
@@ -109,6 +112,19 @@ class _AuthEmailScreenState extends State<AuthEmailScreen> {
       Navigator.of(
         context,
       ).push(MaterialPageRoute(builder: (_) => _AuthCodeScreen(email: email)));
+    } on DioException catch (e) {
+      if (!mounted) return;
+      final t = _L.of(context);
+      if (e.type == DioExceptionType.connectionTimeout ||
+          e.type == DioExceptionType.sendTimeout ||
+          e.type == DioExceptionType.receiveTimeout ||
+          e.type == DioExceptionType.connectionError) {
+        ScaffoldMessenger.of(context)
+            .showSnackBar(SnackBar(content: Text(t.errorNoConnection)));
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text('${t.errorSendCode}: ${e.message}')));
+      }
     } catch (e) {
       if (!mounted) return;
       final t = _L.of(context);
