@@ -25,6 +25,13 @@ class RadioController extends ChangeNotifier {
       }
       notifyListeners();
     });
+
+    // Listen to ICY metadata updates to refresh track information as soon
+    // as the streaming server reports new data. This supplements the
+    // periodic timer-based refresh below.
+    _player.icyMetadataStream.listen((_) {
+      _updateTrackInfo();
+    });
   }
 
   final RadioApiService _api = RadioApiService();
@@ -208,7 +215,7 @@ class RadioController extends ChangeNotifier {
 
   void _startTrackInfoTimer() {
     _trackTimer?.cancel();
-    _trackTimer = Timer.periodic(const Duration(seconds: 30), (_) {
+    _trackTimer = Timer.periodic(const Duration(seconds: 10), (_) {
       _updateTrackInfo();
     });
   }
