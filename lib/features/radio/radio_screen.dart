@@ -129,13 +129,56 @@ class _RadioView extends StatelessWidget {
                   ),
                   const SizedBox(width: 16),
                   IconButton(
-                    onPressed: () {},
-                    icon: const Icon(Icons.volume_up),
+                    onPressed: () => _showVolumeDialog(context),
+                    icon: Icon(
+                      controller.volume == 0
+                          ? Icons.volume_off
+                          : Icons.volume_up,
+                    ),
                   ),
                 ],
               ),
             ),
           ],
+        );
+      },
+    );
+  }
+
+  void _showVolumeDialog(BuildContext context) {
+    final controller = context.read<RadioController>();
+    showDialog(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          title: const Text('Volume'),
+          content: StatefulBuilder(
+            builder: (context, setState) {
+              return Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Slider(
+                    value: controller.volume,
+                    onChanged: (value) {
+                      controller.setVolume(value);
+                      setState(() {});
+                    },
+                  ),
+                  IconButton(
+                    icon: Icon(
+                      controller.volume == 0
+                          ? Icons.volume_off
+                          : Icons.volume_up,
+                    ),
+                    onPressed: () {
+                      controller.toggleMute();
+                      setState(() {});
+                    },
+                  ),
+                ],
+              );
+            },
+          ),
         );
       },
     );
