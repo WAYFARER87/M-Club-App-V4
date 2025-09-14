@@ -29,6 +29,20 @@ class RadioController extends ChangeNotifier {
   PlayerState get playerState => _playerState;
   RadioTrack? get track => _track;
 
+  /// Starts playback if the stream is not playing and stops otherwise.
+  Future<void> togglePlay() async {
+    if (_player.playing) {
+      await _player.stop();
+    } else {
+      // If no source is loaded yet, start the stream with the current quality.
+      if (_player.audioSource == null && _streams.isNotEmpty) {
+        await _startStream();
+      } else {
+        _player.play();
+      }
+    }
+  }
+
   /// Loads available streams and starts playback using selected [quality].
   Future<void> init({String? quality}) async {
     _streams = await _api.fetchStreams();
