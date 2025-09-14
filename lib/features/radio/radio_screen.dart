@@ -21,6 +21,29 @@ class _RadioView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final controller = context.watch<RadioController>();
+    if (controller.streamsUnavailable) {
+      return SafeArea(
+        child: Center(
+          child: Padding(
+            padding: const EdgeInsets.all(16.0),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                const Text(
+                  'Radio streams are currently unavailable. Please try again later.',
+                  textAlign: TextAlign.center,
+                ),
+                const SizedBox(height: 12),
+                ElevatedButton(
+                  onPressed: () => controller.init(),
+                  child: const Text('Retry'),
+                ),
+              ],
+            ),
+          ),
+        ),
+      );
+    }
     final track = controller.track;
     final size = MediaQuery.of(context).size.width * 0.6;
 
