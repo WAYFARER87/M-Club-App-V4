@@ -68,7 +68,7 @@ class _HomeScreenState extends State<HomeScreen> {
         onTap: (i) => setState(() => _index = i),
         items: const [
           BottomNavigationBarItem(icon: Icon(Icons.local_offer), label: 'М-Клуб'),
-          BottomNavigationBarItem(icon: Icon(Icons.map), label: 'Рекомендации'),
+          BottomNavigationBarItem(icon: Icon(Icons.travel_explore), label: 'Открой ОАЭ!'),
           BottomNavigationBarItem(icon: Icon(Icons.radio), label: 'Радио'),
           BottomNavigationBarItem(icon: Icon(Icons.article), label: 'Новости'),
         ],
