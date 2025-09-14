@@ -1,3 +1,4 @@
+import 'dart:math' as math;
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
@@ -45,146 +46,156 @@ class _RadioView extends StatelessWidget {
       );
     }
     final track = controller.track;
-    final size = MediaQuery.of(context).size.width * 0.6;
-
     return SafeArea(
       child: Column(
         children: [
           Expanded(
-            child: Align(
-              alignment: Alignment.center,
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Stack(
+            child: LayoutBuilder(
+              builder: (context, constraints) {
+                final size = math.min(
+                      constraints.maxWidth,
+                      constraints.maxHeight,
+                    ) *
+                    0.6;
+                return Align(
+                  alignment: Alignment.center,
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
                     children: [
-                      ClipRRect(
-                        borderRadius: const BorderRadius.vertical(
-                            top: Radius.circular(24)),
-                        child: SizedBox(
-                          width: size,
-                          height: size,
-                          child: track != null && track.image.isNotEmpty
-                              ? Image.network(
-                                  track.image,
-                                  fit: BoxFit.cover,
-                                )
-                              : Container(
-                                  decoration: const BoxDecoration(
-                                    gradient: LinearGradient(
-                                      begin: Alignment.topLeft,
-                                      end: Alignment.bottomRight,
-                                      colors: [
-                                        Color(0xFFE0E0E0),
-                                        Color(0xFFF5F5F5),
-                                      ],
+                      Stack(
+                        children: [
+                          ClipRRect(
+                            borderRadius: const BorderRadius.vertical(
+                                top: Radius.circular(24)),
+                            child: SizedBox(
+                              width: size,
+                              height: size,
+                              child: track != null && track.image.isNotEmpty
+                                  ? Image.network(
+                                      track.image,
+                                      fit: BoxFit.cover,
+                                    )
+                                  : Container(
+                                      decoration: const BoxDecoration(
+                                        gradient: LinearGradient(
+                                          begin: Alignment.topLeft,
+                                          end: Alignment.bottomRight,
+                                          colors: [
+                                            Color(0xFFE0E0E0),
+                                            Color(0xFFF5F5F5),
+                                          ],
+                                        ),
+                                      ),
                                     ),
-                                  ),
-                                ),
-                        ),
-                      ),
-                      if (controller.quality != null)
-                        Positioned(
-                          top: 8,
-                          right: 8,
-                          child: SizedBox(
-                            child: Material(
-                              color: Colors.black54,
-                              borderRadius: BorderRadius.circular(12),
-                              child: InkWell(
-                                borderRadius: BorderRadius.circular(12),
-                                onTap: () {
-                                  showModalBottomSheet(
-                                    context: context,
-                                    builder: (context) {
-                                      return SafeArea(
-                                        child: Column(
-                                          mainAxisSize: MainAxisSize.min,
-                                          children: controller.streams.keys
-                                              .map((quality) => ListTile(
-                                                    title: Text(quality),
-                                                    trailing:
-                                                        controller.quality ==
+                            ),
+                          ),
+                          if (controller.quality != null)
+                            Positioned(
+                              top: 8,
+                              right: 8,
+                              child: SizedBox(
+                                child: Material(
+                                  color: Colors.black54,
+                                  borderRadius: BorderRadius.circular(12),
+                                  child: InkWell(
+                                    borderRadius: BorderRadius.circular(12),
+                                    onTap: () {
+                                      showModalBottomSheet(
+                                        context: context,
+                                        builder: (context) {
+                                          return SafeArea(
+                                            child: Column(
+                                              mainAxisSize: MainAxisSize.min,
+                                              children: controller.streams.keys
+                                                  .map((quality) => ListTile(
+                                                        title: Text(quality),
+                                                        trailing: controller
+                                                                    .quality ==
                                                                 quality
                                                             ? const Icon(
                                                                 Icons.check)
                                                             : null,
-                                                    onTap: () {
-                                                      controller
-                                                          .setQuality(quality);
-                                                      Navigator.pop(context);
-                                                    },
-                                                  ))
-                                              .toList(),
-                                        ),
+                                                        onTap: () {
+                                                          controller.setQuality(
+                                                              quality);
+                                                          Navigator.pop(
+                                                              context);
+                                                        },
+                                                      ))
+                                                  .toList(),
+                                            ),
+                                          );
+                                        },
                                       );
                                     },
-                                  );
-                                },
-                                child: Container(
-                                  constraints:
-                                      const BoxConstraints(minHeight: 44),
-                                  padding: const EdgeInsets.symmetric(
-                                      horizontal: 8, vertical: 4),
-                                  child: Center(
-                                    child: Text(
-                                      controller.quality!,
-                                      style: const TextStyle(
-                                          color: Colors.white, fontSize: 12),
+                                    child: Container(
+                                      constraints:
+                                          const BoxConstraints(minHeight: 44),
+                                      padding: const EdgeInsets.symmetric(
+                                          horizontal: 8, vertical: 4),
+                                      child: Center(
+                                        child: Text(
+                                          controller.quality!,
+                                          style: const TextStyle(
+                                              color: Colors.white,
+                                              fontSize: 12),
+                                        ),
+                                      ),
                                     ),
                                   ),
                                 ),
                               ),
                             ),
+                        ],
+                      ),
+                      const SizedBox(height: 16),
+                      if (controller.hasError) ...[
+                        Chip(
+                          label: const Text('ERROR'),
+                          labelStyle: const TextStyle(color: Colors.white),
+                          backgroundColor: Colors.red,
+                        ),
+                        TextButton(
+                          onPressed: () =>
+                              context.read<RadioController>().retry(),
+                          child: const Text('Повторить'),
+                        ),
+                        const SizedBox(height: 16),
+                      ],
+                      if (track != null) ...[
+                        Text(
+                          track.artist,
+                          style: Theme.of(context)
+                              .textTheme
+                              .headlineSmall
+                              ?.copyWith(fontWeight: FontWeight.bold),
+                          textAlign: TextAlign.center,
+                        ),
+                        const SizedBox(height: 8),
+                        Text(
+                          track.title,
+                          style: Theme.of(context).textTheme.bodyMedium,
+                          textAlign: TextAlign.center,
+                        ),
+                        const SizedBox(height: 12),
+                        Container(
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 8, vertical: 2),
+                          decoration: BoxDecoration(
+                            color: Colors.red,
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                          child: const Text(
+                            'LIVE',
+                            style: TextStyle(color: Colors.white, fontSize: 12),
                           ),
                         ),
+                        const SizedBox(height: 24),
+                      ],
                     ],
                   ),
-                  const SizedBox(height: 16),
-                  if (controller.hasError) ...[
-                    Chip(
-                      label: const Text('ERROR'),
-                      labelStyle: const TextStyle(color: Colors.white),
-                      backgroundColor: Colors.red,
-                    ),
-                    TextButton(
-                      onPressed: () => context.read<RadioController>().retry(),
-                      child: const Text('Повторить'),
-                    ),
-                    const SizedBox(height: 16),
-                  ],
-                  if (track != null) ...[
-                    Text(
-                      track.artist,
-                      style: Theme.of(context)
-                          .textTheme
-                          .headlineSmall
-                          ?.copyWith(fontWeight: FontWeight.bold),
-                      textAlign: TextAlign.center,
-                    ),
-                    const SizedBox(height: 8),
-                    Text(
-                      track.title,
-                      style: Theme.of(context).textTheme.bodyMedium,
-                      textAlign: TextAlign.center,
-                    ),
-                    const SizedBox(height: 12),
-                    Container(
-                      padding: const EdgeInsets.symmetric(
-                          horizontal: 8, vertical: 2),
-                      decoration: BoxDecoration(
-                        color: Colors.red,
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                      child: const Text(
-                        'LIVE',
-                        style: TextStyle(color: Colors.white, fontSize: 12),
-                      ),
-                    ),
-                    const SizedBox(height: 24),
-                  ],
-                ],
-              ),
+                );
+              },
             ),
           ),
           Padding(
@@ -233,12 +244,9 @@ class _RadioView extends StatelessWidget {
                       const BoxConstraints(minWidth: 44, minHeight: 44),
                   onPressed: controller.isConnecting || controller.isBuffering
                       ? null
-                      : () =>
-                          context.read<RadioController>().toggleMute(),
+                      : () => context.read<RadioController>().toggleMute(),
                   icon: Icon(
-                    controller.volume == 0
-                        ? Icons.volume_off
-                        : Icons.volume_up,
+                    controller.volume == 0 ? Icons.volume_off : Icons.volume_up,
                   ),
                 ),
               ],
@@ -249,4 +257,3 @@ class _RadioView extends StatelessWidget {
     );
   }
 }
-
