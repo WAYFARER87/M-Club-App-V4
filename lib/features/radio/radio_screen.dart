@@ -69,8 +69,7 @@ class _RadioView extends StatelessWidget {
                       Stack(
                         children: [
                           ClipRRect(
-                            borderRadius: const BorderRadius.vertical(
-                                top: Radius.circular(24)),
+                            borderRadius: BorderRadius.circular(24),
                             child: SizedBox(
                               width: size,
                               height: size,
