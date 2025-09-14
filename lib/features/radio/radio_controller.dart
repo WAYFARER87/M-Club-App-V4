@@ -282,7 +282,9 @@ class RadioController extends ChangeNotifier {
 
 class _RadioAudioHandler extends BaseAudioHandler with SeekHandler {
   _RadioAudioHandler(this._player) {
-    _player.playbackEventStream.map(_transformEvent).pipe(playbackState);
+    _player.playbackEventStream
+        .map(_transformEvent)
+        .listen(playbackState.add);
   }
 
   final AudioPlayer _player;
@@ -341,7 +343,6 @@ class _RadioAudioHandler extends BaseAudioHandler with SeekHandler {
   @override
   Future<void> stop() async {
     await _player.stop();
-    await super.stop();
   }
 }
 
