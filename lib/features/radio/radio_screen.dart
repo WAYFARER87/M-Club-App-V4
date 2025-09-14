@@ -46,6 +46,10 @@ class _RadioView extends StatelessWidget {
       );
     }
     final track = controller.track;
+    final artist =
+        track?.artist ?? 'Радио «Русские Эмираты»';
+    final title =
+        track?.title ?? 'По-русски про Эмираты!';
     return SafeArea(
       child: Column(
         children: [
@@ -75,17 +79,9 @@ class _RadioView extends StatelessWidget {
                                       track.image,
                                       fit: BoxFit.cover,
                                     )
-                                  : Container(
-                                      decoration: const BoxDecoration(
-                                        gradient: LinearGradient(
-                                          begin: Alignment.topLeft,
-                                          end: Alignment.bottomRight,
-                                          colors: [
-                                            Color(0xFFE0E0E0),
-                                            Color(0xFFF5F5F5),
-                                          ],
-                                        ),
-                                      ),
+                                  : Image.asset(
+                                      'assets/images/Radio_RE_Logo.webp',
+                                      fit: BoxFit.contain,
                                     ),
                             ),
                           ),
@@ -162,24 +158,24 @@ class _RadioView extends StatelessWidget {
                         ),
                         const SizedBox(height: 16),
                       ],
-                      if (track != null) ...[
-                        Text(
-                          track.artist,
-                          style: Theme.of(context)
-                              .textTheme
-                              .headlineMedium
-                              ?.copyWith(fontWeight: FontWeight.bold),
-                          textAlign: TextAlign.center,
-                          softWrap: true,
-                        ),
-                        const SizedBox(height: 8),
-                        Text(
-                          track.title,
-                          style: Theme.of(context).textTheme.titleMedium,
-                          textAlign: TextAlign.center,
-                          softWrap: true,
-                        ),
-                        const SizedBox(height: 12),
+                      Text(
+                        artist,
+                        style: Theme.of(context)
+                            .textTheme
+                            .headlineMedium
+                            ?.copyWith(fontWeight: FontWeight.bold),
+                        textAlign: TextAlign.center,
+                        softWrap: true,
+                      ),
+                      const SizedBox(height: 8),
+                      Text(
+                        title,
+                        style: Theme.of(context).textTheme.titleMedium,
+                        textAlign: TextAlign.center,
+                        softWrap: true,
+                      ),
+                      const SizedBox(height: 12),
+                      if (track != null)
                         Container(
                           padding: const EdgeInsets.symmetric(
                               horizontal: 12, vertical: 4),
@@ -196,8 +192,7 @@ class _RadioView extends StatelessWidget {
                             ),
                           ),
                         ),
-                        const SizedBox(height: 24),
-                      ],
+                      const SizedBox(height: 24),
                     ],
                   ),
                 );
