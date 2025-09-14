@@ -21,16 +21,15 @@ class RadioController extends ChangeNotifier {
       if (state == ProcessingState.idle && _player.audioSource != null) {
         _hasError = true;
         await _audioHandlerReady;
-        await _audioHandler.stop();
+        await _audioHandler!.stop();
       }
       notifyListeners();
     });
   }
 
   final RadioApiService _api = RadioApiService();
-  final AudioPlayer _player = AudioPlayer();
-  static AudioHandler? _sharedHandler;
-  late final AudioHandler _audioHandler;
+  static final AudioPlayer _player = AudioPlayer();
+  static AudioHandler? _audioHandler;
   final Completer<void> _audioHandlerCompleter = Completer<void>();
 
   Future<void> get _audioHandlerReady => _audioHandlerCompleter.future;
@@ -72,12 +71,12 @@ class RadioController extends ChangeNotifier {
   Future<void> togglePlay() async {
     await _audioHandlerReady;
     if (_player.playing) {
-      await _audioHandler.stop();
+      await _audioHandler!.stop();
     } else {
       if (_player.audioSource == null && _streams.isNotEmpty) {
         await _startStream();
       } else {
-        await _audioHandler.play();
+        await _audioHandler!.play();
       }
     }
     _hasError = false;
@@ -173,9 +172,9 @@ class RadioController extends ChangeNotifier {
     _hasError = false;
     _errorMessage = null;
     try {
-      await _audioHandler.stop();
+      await _audioHandler!.stop();
       await _player.setUrl(url);
-      await _audioHandler.play();
+      await _audioHandler!.play();
       await _updateTrackInfo();
       notifyListeners();
     } catch (e, s) {
@@ -220,7 +219,7 @@ class RadioController extends ChangeNotifier {
       final info = await _api.fetchTrackInfo();
       if (info == null) return;
       _track = info;
-      (_audioHandler as _RadioAudioHandler).updateTrack(info);
+      (_audioHandler! as _RadioAudioHandler).updateTrack(info);
       notifyListeners();
     } catch (_) {
       // ignore errors
@@ -230,17 +229,15 @@ class RadioController extends ChangeNotifier {
   @override
   void dispose() {
     _trackTimer?.cancel();
-    unawaited(_player.dispose());
     super.dispose();
   }
 
   Future<void> _initAudioHandler() async {
-    if (_sharedHandler != null) {
-      _audioHandler = _sharedHandler!;
+    if (_audioHandler != null) {
       return;
     }
     try {
-      _sharedHandler = await AudioService.init(
+      _audioHandler = await AudioService.init(
         builder: () => _RadioAudioHandler(_player),
         config: const AudioServiceConfig(
           androidNotificationChannelId: 'm_club_radio_channel',
@@ -249,13 +246,11 @@ class RadioController extends ChangeNotifier {
           androidNotificationOngoing: true,
         ),
       );
-      _audioHandler = _sharedHandler!;
     } catch (e, s) {
       _hasError = true;
       _errorMessage = 'Audio service error: ${e.toString()}';
       _logPlaybackFailure('initAudioHandler', e, s);
-      _audioHandler = _sharedHandler ?? _RadioAudioHandler(_player);
-      _sharedHandler ??= _audioHandler;
+      _audioHandler ??= _RadioAudioHandler(_player);
     }
   }
 
