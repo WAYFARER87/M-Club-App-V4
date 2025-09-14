@@ -206,7 +206,7 @@ class NewsListItem extends StatelessWidget {
                   Text(
                     item.rubric!.name.toUpperCase(),
                     style: const TextStyle(
-                      fontSize: 12,
+                      fontSize: 14,
                       fontWeight: FontWeight.w500,
                       color: Colors.grey,
                     ),
@@ -214,7 +214,7 @@ class NewsListItem extends StatelessWidget {
                 Text(
                   item.title,
                   style: const TextStyle(
-                    fontSize: 18,
+                    fontSize: 20,
                     fontWeight: FontWeight.w400,
                     fontFamily: 'Roboto',
                   ),
@@ -224,7 +224,7 @@ class NewsListItem extends StatelessWidget {
                   child: Text(
                     item.contentPreview,
                     style: const TextStyle(
-                      fontSize: 14,
+                      fontSize: 16,
                       fontWeight: FontWeight.w300,
                       fontFamily: 'Roboto',
                     ),
@@ -242,7 +242,7 @@ class NewsListItem extends StatelessWidget {
                             if (item.author.trim().isNotEmpty) item.author,
                           ].join(' · '),
                           style: const TextStyle(
-                            fontSize: 14,
+                            fontSize: 16,
                             color: Colors.grey,
                           ),
                         ),
