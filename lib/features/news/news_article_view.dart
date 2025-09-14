@@ -114,11 +114,14 @@ class _NewsArticleViewState extends State<NewsArticleView> {
                     if (item.image.isEmpty)
                       Container(color: Colors.grey.shade200)
                     else
-                      Image.network(
-                        item.image,
-                        fit: BoxFit.cover,
-                        errorBuilder: (_, __, ___) =>
-                            Container(color: Colors.grey.shade200),
+                      Hero(
+                        tag: item.id,
+                        child: Image.network(
+                          item.image,
+                          fit: BoxFit.cover,
+                          errorBuilder: (_, __, ___) =>
+                              Container(color: Colors.grey.shade200),
+                        ),
                       ),
                     Positioned.fill(
                       child: IgnorePointer(
