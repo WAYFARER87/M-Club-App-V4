@@ -183,7 +183,7 @@ class _NewsArticleViewState extends State<NewsArticleView> {
                               item.rubric!.name.toUpperCase(),
                               style: const TextStyle(
                                 color: Colors.white70,
-                                fontSize: 12,
+                                fontSize: 14,
                                 fontWeight: FontWeight.w500,
                                 shadows: [
                                   Shadow(
@@ -200,7 +200,7 @@ class _NewsArticleViewState extends State<NewsArticleView> {
                             overflow: TextOverflow.ellipsis,
                             style: const TextStyle(
                               color: Colors.white,
-                              fontSize: 22,
+                              fontSize: 24,
                               fontWeight: FontWeight.w600,
                               height: 1.2,
                               shadows: [
@@ -220,7 +220,7 @@ class _NewsArticleViewState extends State<NewsArticleView> {
                               overflow: TextOverflow.ellipsis,
                               style: const TextStyle(
                                 color: Colors.white,
-                                fontSize: 16,
+                                fontSize: 18,
                                 height: 1.25,
                                 shadows: [
                                   Shadow(
@@ -251,7 +251,7 @@ class _NewsArticleViewState extends State<NewsArticleView> {
                         child: Text(
                           meta,
                           style: const TextStyle(
-                            fontSize: 14,
+                            fontSize: 16,
                             color: Colors.grey,
                           ),
                         ),
@@ -259,7 +259,7 @@ class _NewsArticleViewState extends State<NewsArticleView> {
                     Html(
                       data: item.contentFull,
                       style: {
-                        '*': Style(fontSize: FontSize(16 * _textScaleFactor)),
+                        '*': Style(fontSize: FontSize(18 * _textScaleFactor)),
                       },
                     ),
                   ],
