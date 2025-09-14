@@ -56,7 +56,7 @@ class _RadioView extends StatelessWidget {
                       constraints.maxWidth,
                       constraints.maxHeight,
                     ) *
-                    0.6;
+                    0.8;
                 return Align(
                   alignment: Alignment.center,
                   child: Column(
