@@ -219,6 +219,10 @@ class _RadioView extends StatelessWidget {
                                   shape: const CircleBorder(),
                                   padding: const EdgeInsets.all(16),
                                   minimumSize: const Size(72, 72),
+                                  backgroundColor: Colors.grey[200],
+                                  elevation: 4,
+                                  shadowColor: Colors.grey,
+                                  foregroundColor: Colors.black,
                                 ),
                                 onPressed: () =>
                                     context.read<RadioController>().togglePlay(),
