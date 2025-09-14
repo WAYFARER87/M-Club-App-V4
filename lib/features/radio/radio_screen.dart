@@ -74,13 +74,14 @@ class _RadioView extends StatelessWidget {
                     track.artist,
                     style: Theme.of(context)
                         .textTheme
-                        .titleMedium
+                        .headlineSmall
                         ?.copyWith(fontWeight: FontWeight.bold),
                     textAlign: TextAlign.center,
                   ),
+                  const SizedBox(height: 4),
                   Text(
                     track.title,
-                    style: Theme.of(context).textTheme.titleMedium,
+                    style: Theme.of(context).textTheme.bodyMedium,
                     textAlign: TextAlign.center,
                   ),
                   const SizedBox(height: 8),
