@@ -27,6 +27,7 @@ class RadioController extends ChangeNotifier {
 
   final RadioApiService _api = RadioApiService();
   final AudioPlayer _player = AudioPlayer();
+  static AudioHandler? _sharedHandler;
   late final AudioHandler _audioHandler;
   final Completer<void> _audioHandlerCompleter = Completer<void>();
 
@@ -193,8 +194,12 @@ class RadioController extends ChangeNotifier {
   }
 
   Future<void> _initAudioHandler() async {
+    if (_sharedHandler != null) {
+      _audioHandler = _sharedHandler!;
+      return;
+    }
     try {
-      _audioHandler = await AudioService.init(
+      _sharedHandler = await AudioService.init(
         builder: () => _RadioAudioHandler(_player),
         config: const AudioServiceConfig(
           androidNotificationChannelId: 'm_club_radio_channel',
@@ -203,11 +208,13 @@ class RadioController extends ChangeNotifier {
           androidNotificationOngoing: true,
         ),
       );
+      _audioHandler = _sharedHandler!;
     } catch (e, s) {
       _hasError = true;
       _errorMessage = 'Audio service error: ${e.toString()}';
       _logPlaybackFailure('initAudioHandler', e, s);
-      _audioHandler = _RadioAudioHandler(_player);
+      _audioHandler = _sharedHandler ?? _RadioAudioHandler(_player);
+      _sharedHandler ??= _audioHandler;
     }
   }
 
