@@ -115,9 +115,9 @@ class RadioController extends ChangeNotifier {
   }
 
   @override
-  Future<void> dispose() async {
+  void dispose() {
     _trackTimer?.cancel();
-    await _player.dispose();
+    unawaited(_player.dispose());
     super.dispose();
   }
 
