@@ -59,6 +59,17 @@ class RadioController extends ChangeNotifier {
   double get volume => _volume;
   String? get errorMessage => _errorMessage;
 
+  bool get isConnecting =>
+      _playerState.processingState == ProcessingState.loading;
+  bool get isBuffering =>
+      _playerState.processingState == ProcessingState.buffering;
+  bool get isPlaying =>
+      _playerState.playing &&
+      _playerState.processingState == ProcessingState.ready;
+  bool get isPaused =>
+      !_playerState.playing &&
+      _playerState.processingState == ProcessingState.ready;
+
   /// Starts playback if the stream is not playing and stops otherwise.
   Future<void> togglePlay() async {
     await _audioHandlerReady;
@@ -95,6 +106,18 @@ class RadioController extends ChangeNotifier {
       _volume = _previousVolume;
     }
     await _player.setVolume(_volume);
+    notifyListeners();
+  }
+
+  /// Retries playback of the current stream.
+  Future<void> retry() async {
+    _hasError = false;
+    _errorMessage = null;
+    if (_streams.isEmpty) {
+      await init(quality: _quality);
+    } else {
+      await _startStream();
+    }
     notifyListeners();
   }
 
