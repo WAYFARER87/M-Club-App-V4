@@ -41,6 +41,7 @@ class RadioController extends ChangeNotifier {
   bool _streamsUnavailable = false;
   double _volume = 1.0;
   double _previousVolume = 1.0;
+  String? _errorMessage;
 
   /// Default streams used when API is unreachable.
   static const Map<String, String> _defaultStreams = {
@@ -55,6 +56,7 @@ class RadioController extends ChangeNotifier {
   bool get hasError => _hasError;
   bool get streamsUnavailable => _streamsUnavailable;
   double get volume => _volume;
+  String? get errorMessage => _errorMessage;
 
   /// Starts playback if the stream is not playing and stops otherwise.
   Future<void> togglePlay() async {
@@ -69,6 +71,8 @@ class RadioController extends ChangeNotifier {
       }
     }
     _hasError = false;
+    _errorMessage = null;
+    notifyListeners();
   }
 
   /// Sets the player volume to a value between 0.0 and 1.0.
@@ -98,6 +102,10 @@ class RadioController extends ChangeNotifier {
     await _initAudioHandler();
     if (!_audioHandlerCompleter.isCompleted) {
       _audioHandlerCompleter.complete();
+    }
+    if (_hasError) {
+      notifyListeners();
+      return;
     }
 
     _streamsUnavailable = false;
@@ -142,17 +150,19 @@ class RadioController extends ChangeNotifier {
     final url = _streams[_quality];
     if (url == null) return;
     _hasError = false;
-    await _audioHandler.stop();
+    _errorMessage = null;
     try {
+      await _audioHandler.stop();
       await _player.setUrl(url);
+      await _audioHandler.play();
+      await _updateTrackInfo();
+      notifyListeners();
     } catch (e, s) {
       _hasError = true;
+      _errorMessage = 'Failed to start radio playback: ${e.toString()}';
+      _logPlaybackFailure('startStream', e, s);
       notifyListeners();
-      debugPrint('Failed to set radio stream URL: $e\n$s');
-      return;
     }
-    await _audioHandler.play();
-    await _updateTrackInfo();
   }
 
   void _startTrackInfoTimer() {
@@ -183,15 +193,27 @@ class RadioController extends ChangeNotifier {
   }
 
   Future<void> _initAudioHandler() async {
-    _audioHandler = await AudioService.init(
-      builder: () => _RadioAudioHandler(_player),
-      config: const AudioServiceConfig(
-        androidNotificationChannelId: 'm_club_radio_channel',
-        androidNotificationChannelName: 'M-Club Radio',
-        androidNotificationIcon: 'assets/images/Radio_RE_Logo.webp',
-        androidNotificationOngoing: true,
-      ),
-    );
+    try {
+      _audioHandler = await AudioService.init(
+        builder: () => _RadioAudioHandler(_player),
+        config: const AudioServiceConfig(
+          androidNotificationChannelId: 'm_club_radio_channel',
+          androidNotificationChannelName: 'M-Club Radio',
+          androidNotificationIcon: 'assets/images/Radio_RE_Logo.webp',
+          androidNotificationOngoing: true,
+        ),
+      );
+    } catch (e, s) {
+      _hasError = true;
+      _errorMessage = 'Audio service error: ${e.toString()}';
+      _logPlaybackFailure('initAudioHandler', e, s);
+      _audioHandler = _RadioAudioHandler(_player);
+    }
+  }
+
+  void _logPlaybackFailure(String context, Object error, StackTrace stack) {
+    debugPrint('Playback failure in $context: $error\n$stack');
+    // TODO: integrate analytics reporting here.
   }
 }
 

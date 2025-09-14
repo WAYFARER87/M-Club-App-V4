@@ -140,8 +140,9 @@ class _RadioView extends StatelessWidget {
                     const SizedBox(height: 12),
                   ],
                   if (controller.hasError) ...[
-                    const Text(
-                      'Playback error. Press Play to try again.',
+                    Text(
+                      controller.errorMessage ??
+                          'Playback error. Press Play to try again.',
                       textAlign: TextAlign.center,
                     ),
                     const SizedBox(height: 8),
