@@ -213,8 +213,8 @@ class _RadioView extends StatelessWidget {
                         ElevatedButton(
                           style: ElevatedButton.styleFrom(
                             shape: const CircleBorder(),
-                            padding: const EdgeInsets.all(20),
-                            minimumSize: const Size(64, 64),
+                            padding: const EdgeInsets.all(16),
+                            minimumSize: const Size(72, 72),
                           ),
                           onPressed: () =>
                               context.read<RadioController>().togglePlay(),
@@ -230,6 +230,7 @@ class _RadioView extends StatelessWidget {
                                   controller.isPlaying
                                       ? Icons.pause
                                       : Icons.play_arrow,
+                                  size: 36,
                                 ),
                         ),
                         if (controller.isConnecting)
@@ -249,7 +250,8 @@ class _RadioView extends StatelessWidget {
                     alignment: const Alignment(0.5, 0),
                     child: IconButton(
                       constraints:
-                          const BoxConstraints(minWidth: 44, minHeight: 44),
+                          const BoxConstraints(minWidth: 60, minHeight: 60),
+                      iconSize: 36,
                       onPressed: controller.isConnecting ||
                               controller.isBuffering
                           ? null
