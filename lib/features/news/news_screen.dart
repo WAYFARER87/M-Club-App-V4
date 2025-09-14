@@ -65,6 +65,7 @@ class _NewsScreenState extends State<NewsScreen> {
         children: [
           TabBar(
             isScrollable: true,
+            tabAlignment: TabAlignment.start,
             tabs: [
               const Tab(text: 'Все новости'),
               for (final cat in _categories) Tab(text: cat.name),
