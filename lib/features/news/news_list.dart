@@ -178,14 +178,17 @@ class NewsListItem extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           if (item.image.isNotEmpty)
-            Image.network(
-              item.image,
-              width: double.infinity,
-              height: imageHeight,
-              fit: BoxFit.cover,
-              errorBuilder: (_, __, ___) => Container(
+            Hero(
+              tag: item.id,
+              child: Image.network(
+                item.image,
+                width: double.infinity,
                 height: imageHeight,
-                color: Colors.grey.shade200,
+                fit: BoxFit.cover,
+                errorBuilder: (_, __, ___) => Container(
+                  height: imageHeight,
+                  color: Colors.grey.shade200,
+                ),
               ),
             )
           else

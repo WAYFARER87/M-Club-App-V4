@@ -88,8 +88,11 @@ class _NewsDetailScreenState extends State<NewsDetailScreen> {
             controller: _pageController,
             itemCount: _items.length,
             onPageChanged: _onPageChanged,
-            itemBuilder: (context, index) =>
-                NewsArticleView(item: _items[index]),
+            pageSnapping: true,
+            itemBuilder: (context, index) => NewsArticleView(
+              key: ValueKey(_items[index].id),
+              item: _items[index],
+            ),
           ),
           if (_isLoading)
             const Positioned(
