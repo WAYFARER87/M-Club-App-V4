@@ -299,6 +299,13 @@ class RadioController extends ChangeNotifier {
           androidNotificationOngoing: true,
         ),
       );
+      (_audioHandler! as _RadioAudioHandler).updateTrack(
+        RadioTrack(
+          artist: '',
+          title: 'Радио «Русские Эмираты»',
+          image: '',
+        ),
+      );
     } catch (e, s) {
       _hasError = true;
       _errorMessage = 'Audio service error: ${e.toString()}';
