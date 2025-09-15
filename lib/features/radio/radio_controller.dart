@@ -149,6 +149,7 @@ class RadioController extends ChangeNotifier {
   /// controller will operate without posting notifications.
   Future<void> init({String? quality, bool startService = true}) async {
     _notificationsEnabled = startService;
+    debugPrint('RadioController.init: notificationsEnabled=$_notificationsEnabled');
     if (startService) {
       await ensureAudioService();
       if (_hasError) {

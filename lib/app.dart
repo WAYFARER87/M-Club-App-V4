@@ -53,6 +53,7 @@ class _MyAppState extends State<MyApp> {
       }
     }
     await controller.init(startService: startService);
+    debugPrint('notificationsEnabled: ${controller.notificationsEnabled}');
   }
 
   @override
