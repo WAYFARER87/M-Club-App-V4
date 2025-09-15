@@ -182,6 +182,13 @@ class RadioController extends ChangeNotifier {
     try {
       await _audioHandler!.stop();
       await _player.setUrl(url);
+      (_audioHandler! as _RadioAudioHandler).updateTrack(
+        RadioTrack(
+          artist: '',
+          title: 'Радио «Русские Эмираты»',
+          image: '',
+        ),
+      );
       await _audioHandler!.play();
       await _updateTrackInfo();
       notifyListeners();
@@ -225,11 +232,30 @@ class RadioController extends ChangeNotifier {
     await _audioHandlerReady;
     try {
       final info = await _api.fetchTrackInfo();
-      if (info == null) return;
+      if (info == null) {
+        _track = null;
+        (_audioHandler! as _RadioAudioHandler).updateTrack(
+          RadioTrack(
+            artist: '',
+            title: 'Радио «Русские Эмираты»',
+            image: '',
+          ),
+        );
+        notifyListeners();
+        return;
+      }
       _track = info;
       (_audioHandler! as _RadioAudioHandler).updateTrack(info);
       notifyListeners();
     } catch (_) {
+      _track = null;
+      (_audioHandler! as _RadioAudioHandler).updateTrack(
+        RadioTrack(
+          artist: '',
+          title: 'Радио «Русские Эмираты»',
+          image: '',
+        ),
+      );
       // ignore errors
     }
   }
