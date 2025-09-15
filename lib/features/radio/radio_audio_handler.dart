@@ -36,14 +36,13 @@ class RadioAudioHandler extends BaseAudioHandler with SeekHandler {
   PlaybackState _transformEvent(PlaybackEvent event) {
     final playing = _player.playing;
     final controls = <MediaControl>[
-      MediaControl.play,
-      MediaControl.pause,
+      if (playing) MediaControl.pause else MediaControl.play,
       MediaControl.stop,
     ];
 
     return PlaybackState(
       controls: controls,
-      androidCompactActionIndices: const [0, 1, 2],
+      androidCompactActionIndices: const [0, 1],
       processingState: const {
         ProcessingState.idle: AudioProcessingState.idle,
         ProcessingState.loading: AudioProcessingState.loading,
