@@ -97,6 +97,14 @@ class RadioController extends ChangeNotifier {
     notifyListeners();
   }
 
+  /// Completely stops playback and releases audio resources.
+  Future<void> stop() async {
+    await _audioHandlerReady;
+    _trackTimer?.cancel();
+    await _audioHandler!.stop();
+    notifyListeners();
+  }
+
   /// Sets the player volume to a value between 0.0 and 1.0.
   Future<void> setVolume(double value) async {
     _volume = value.clamp(0.0, 1.0);
