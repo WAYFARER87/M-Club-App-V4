@@ -190,6 +190,8 @@ class RadioController extends ChangeNotifier {
           image: '',
         ),
       );
+      final session = await AudioSession.instance;
+      await session.setActive(true);
       await _audioHandler!.play();
       await _updateTrackInfo();
       notifyListeners();
@@ -374,6 +376,8 @@ class _RadioAudioHandler extends BaseAudioHandler with SeekHandler {
   @override
   Future<void> stop() async {
     await _player.stop();
+    final session = await AudioSession.instance;
+    await session.setActive(false);
   }
 }
 
