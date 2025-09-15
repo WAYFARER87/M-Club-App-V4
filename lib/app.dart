@@ -30,7 +30,7 @@ class _MyAppState extends State<MyApp> {
 
   Future<void> _initializeRadio() async {
     final controller = context.read<RadioController>();
-    var startService = true;
+    var startService = !Platform.isIOS;
     if (Platform.isAndroid) {
       final androidInfo = await DeviceInfoPlugin().androidInfo;
       if (androidInfo.version.sdkInt >= 33) {

@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:convert';
+import 'dart:io';
 
 import 'package:audio_service/audio_service.dart';
 import 'package:audio_session/audio_session.dart';
@@ -23,7 +24,11 @@ class RadioController extends ChangeNotifier {
       if (state == ProcessingState.idle && _player.audioSource != null) {
         _hasError = true;
         await _audioHandlerReady;
-        await _audioHandler!.stop();
+        if (_audioHandler != null) {
+          await _audioHandler!.stop();
+        } else {
+          await _player.stop();
+        }
       }
       notifyListeners();
     });
@@ -86,13 +91,23 @@ class RadioController extends ChangeNotifier {
   Future<void> togglePlay() async {
     await _audioHandlerReady;
     if (_player.playing) {
-      await _audioHandler!.stop();
+      if (_audioHandler != null) {
+        await _audioHandler!.stop();
+      } else {
+        await _player.stop();
+        final session = await AudioSession.instance;
+        await session.setActive(false);
+      }
       _trackTimer?.cancel();
     } else {
       if (_player.audioSource == null && _streams.isNotEmpty) {
         await _startStream();
       } else {
-        await _audioHandler!.play();
+        if (_audioHandler != null) {
+          await _audioHandler!.play();
+        } else {
+          await _player.play();
+        }
       }
     }
     _hasError = false;
@@ -104,7 +119,13 @@ class RadioController extends ChangeNotifier {
   Future<void> stop() async {
     await _audioHandlerReady;
     _trackTimer?.cancel();
-    await _audioHandler!.stop();
+    if (_audioHandler != null) {
+      await _audioHandler!.stop();
+    } else {
+      await _player.stop();
+      final session = await AudioSession.instance;
+      await session.setActive(false);
+    }
     notifyListeners();
   }
 
@@ -157,7 +178,11 @@ class RadioController extends ChangeNotifier {
         return;
       }
     } else {
-      _audioHandler ??= RadioAudioHandler(_player);
+      if (Platform.isAndroid) {
+        _audioHandler ??= RadioAudioHandler(_player);
+      } else {
+        _audioHandler = null;
+      }
       if (!_audioHandlerCompleter.isCompleted) {
         _audioHandlerCompleter.complete();
       }
@@ -209,15 +234,29 @@ class RadioController extends ChangeNotifier {
     _hasError = false;
     _errorMessage = null;
     try {
-      await _audioHandler!.stop();
+      if (_audioHandler != null) {
+        await _audioHandler!.stop();
+      } else {
+        await _player.stop();
+      }
       await _player.setUrl(url);
-      await _audioHandler!.updateTrack(
-        RadioTrack(
-          artist: '',
-          title: 'Радио «Русские Эмираты»',
-          image: '',
-        ),
-      );
+      if (_audioHandler != null) {
+        await _audioHandler!.updateTrack(
+          RadioTrack(
+            artist: '',
+            title: 'Радио «Русские Эмираты»',
+            image: '',
+          ),
+        );
+      } else {
+        await AudioServiceBackground.setMediaItem(
+          const MediaItem(
+            id: 'mclub_radio',
+            title: 'Радио «Русские Эмираты»',
+            artist: '',
+          ),
+        );
+      }
       try {
         await AudioSession.instance.then(
           (session) => session.setActive(true),
@@ -225,7 +264,11 @@ class RadioController extends ChangeNotifier {
       } catch (e, s) {
         _logPlaybackFailure('activateSession', e, s);
       }
-      await _audioHandler!.play();
+      if (_audioHandler != null) {
+        await _audioHandler!.play();
+      } else {
+        await _player.play();
+      }
       _startTrackInfoTimer();
       await _updateTrackInfo();
       notifyListeners();
@@ -271,6 +314,45 @@ class RadioController extends ChangeNotifier {
       final info = await _api.fetchTrackInfo();
       if (info == null) {
         _track = null;
+        if (_audioHandler != null) {
+          await _audioHandler!.updateTrack(
+            RadioTrack(
+              artist: '',
+              title: 'Радио «Русские Эмираты»',
+              image: '',
+            ),
+          );
+        } else {
+          await AudioServiceBackground.setMediaItem(
+            const MediaItem(
+              id: 'mclub_radio',
+              title: 'Радио «Русские Эмираты»',
+              artist: '',
+            ),
+          );
+        }
+        notifyListeners();
+        return;
+      }
+      _track = info;
+      if (_audioHandler != null) {
+        await _audioHandler!.updateTrack(info);
+      } else {
+        await AudioServiceBackground.setMediaItem(
+          MediaItem(
+            id: 'mclub_radio',
+            title: info.title.isNotEmpty ? info.title : 'Unknown Title',
+            artist: info.artist.isNotEmpty ? info.artist : 'Unknown Artist',
+            artUri: info.image.isNotEmpty
+                ? Uri.tryParse(info.image)
+                : null,
+          ),
+        );
+      }
+      notifyListeners();
+    } catch (_) {
+      _track = null;
+      if (_audioHandler != null) {
         await _audioHandler!.updateTrack(
           RadioTrack(
             artist: '',
@@ -278,21 +360,15 @@ class RadioController extends ChangeNotifier {
             image: '',
           ),
         );
-        notifyListeners();
-        return;
+      } else {
+        await AudioServiceBackground.setMediaItem(
+          const MediaItem(
+            id: 'mclub_radio',
+            title: 'Радио «Русские Эмираты»',
+            artist: '',
+          ),
+        );
       }
-      _track = info;
-      await _audioHandler!.updateTrack(info);
-      notifyListeners();
-    } catch (_) {
-      _track = null;
-      await _audioHandler!.updateTrack(
-        RadioTrack(
-          artist: '',
-          title: 'Радио «Русские Эмираты»',
-          image: '',
-        ),
-      );
       // ignore errors
     }
   }
@@ -315,7 +391,7 @@ class RadioController extends ChangeNotifier {
   /// This is useful when the app process restarts and needs to
   /// reconnect to a running background audio service.
   Future<void> ensureAudioService() async {
-    if (_audioHandler != null) {
+    if (_audioHandler != null || Platform.isIOS) {
       if (!_audioHandlerCompleter.isCompleted) {
         _audioHandlerCompleter.complete();
       }
