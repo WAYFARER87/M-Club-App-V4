@@ -217,9 +217,10 @@ class RadioController extends ChangeNotifier {
           image: '',
         ),
       );
-      final session = await AudioSession.instance;
       try {
-        await session.setActive(true);
+        await AudioSession.instance.then(
+          (session) => session.setActive(true),
+        );
       } catch (e, s) {
         _logPlaybackFailure('activateSession', e, s);
       }
