@@ -36,13 +36,14 @@ class RadioAudioHandler extends BaseAudioHandler with SeekHandler {
   PlaybackState _transformEvent(PlaybackEvent event) {
     final playing = _player.playing;
     final controls = <MediaControl>[
-      playing ? MediaControl.pause : MediaControl.play,
+      MediaControl.play,
+      MediaControl.pause,
       MediaControl.stop,
     ];
 
     return PlaybackState(
       controls: controls,
-      androidCompactActionIndices: const [0, 1],
+      androidCompactActionIndices: const [0, 1, 2],
       processingState: const {
         ProcessingState.idle: AudioProcessingState.idle,
         ProcessingState.loading: AudioProcessingState.loading,
@@ -58,16 +59,23 @@ class RadioAudioHandler extends BaseAudioHandler with SeekHandler {
   }
 
   @override
-  Future<void> play() => _player.play();
+  Future<void> play() async {
+    await _player.play();
+    playbackState.add(_transformEvent(_player.playbackEvent));
+  }
 
   @override
-  Future<void> pause() => _player.pause();
+  Future<void> pause() async {
+    await _player.pause();
+    playbackState.add(_transformEvent(_player.playbackEvent));
+  }
 
   @override
   Future<void> stop() async {
     await _player.stop();
     final session = await AudioSession.instance;
     await session.setActive(false);
+    playbackState.add(_transformEvent(_player.playbackEvent));
   }
 }
 
