@@ -13,8 +13,22 @@ class RadioScreen extends StatelessWidget {
   }
 }
 
-class _RadioView extends StatelessWidget {
+class _RadioView extends StatefulWidget {
   const _RadioView();
+
+  @override
+  State<_RadioView> createState() => _RadioViewState();
+}
+
+class _RadioViewState extends State<_RadioView> {
+  @override
+  void initState() {
+    super.initState();
+    // Ensure that the UI always connects to an existing audio service
+    // when the radio screen is opened, even after process restarts.
+    final controller = context.read<RadioController>();
+    controller.ensureAudioService();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -262,16 +276,29 @@ class _RadioView extends StatelessWidget {
                             ),
                           ],
                         ),
-                        if (controller.isConnecting)
-                          const Padding(
-                            padding: EdgeInsets.only(top: 8.0),
-                            child: Text('Подключаемся…'),
-                          ),
-                        if (controller.isBuffering)
-                          const Padding(
-                            padding: EdgeInsets.only(top: 8.0),
-                            child: Text('Буферизация…'),
-                          ),
+                        Consumer<RadioController>(
+                          builder: (context, state, _) {
+                            if (state.isBuffering) {
+                              return const Padding(
+                                padding: EdgeInsets.only(top: 8.0),
+                                child: Text('Буферизация…'),
+                              );
+                            }
+                            if (state.isPlaying) {
+                              return const Padding(
+                                padding: EdgeInsets.only(top: 8.0),
+                                child: Text('Воспроизведение'),
+                              );
+                            }
+                            if (state.isPaused) {
+                              return const Padding(
+                                padding: EdgeInsets.only(top: 8.0),
+                                child: Text('Пауза'),
+                              );
+                            }
+                            return const SizedBox.shrink();
+                          },
+                        ),
                       ],
                     ),
                   ),

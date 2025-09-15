@@ -280,6 +280,12 @@ class RadioController extends ChangeNotifier {
   @override
   void dispose() {
     _trackTimer?.cancel();
+    // Stop the background service only when nothing is playing to
+    // release resources while still allowing ongoing playback to
+    // continue when the UI is closed.
+    if (!_player.playing) {
+      _audioHandler?.stop();
+    }
     super.dispose();
   }
 
