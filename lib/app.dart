@@ -1,12 +1,47 @@
+import 'dart:io';
+
+import 'package:device_info_plus/device_info_plus.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
+import 'package:permission_handler/permission_handler.dart';
+
 import 'features/home/home_screen.dart';
 import 'core/widgets/auth_gate.dart';
 
-class MyApp extends StatelessWidget {
+class MyApp extends StatefulWidget {
   const MyApp({super.key});
 
+  @override
+  State<MyApp> createState() => _MyAppState();
+}
+
+class _MyAppState extends State<MyApp> {
   static const Color _primary = Color(0xFF182857);
+
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _requestNotificationPermission();
+    });
+  }
+
+  Future<void> _requestNotificationPermission() async {
+    if (!Platform.isAndroid) return;
+    final androidInfo = await DeviceInfoPlugin().androidInfo;
+    if (androidInfo.version.sdkInt >= 33) {
+      final status = await Permission.notification.request();
+      if (!status.isGranted && mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text(
+              'Для отображения медиа-уведомления необходимо разрешить уведомления.',
+            ),
+          ),
+        );
+      }
+    }
+  }
 
   @override
   Widget build(BuildContext context) {

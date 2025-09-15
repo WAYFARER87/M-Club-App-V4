@@ -33,6 +33,7 @@ dependencies:
   geolocator: ^10.1.0
   google_maps_flutter: ^2.6.0
   permission_handler: ^11.3.0
+  device_info_plus: ^10.1.0
 
   # Мультимедиа и ссылки
   just_audio: ^0.9.38
