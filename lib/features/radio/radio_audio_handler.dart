@@ -1,9 +1,12 @@
+import 'dart:io';
+
 import 'package:audio_service/audio_service.dart';
 import 'package:audio_session/audio_session.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 import 'package:just_audio/just_audio.dart';
 import 'package:m_club/features/radio/models/radio_track.dart';
+import 'package:path_provider/path_provider.dart';
 
 class RadioAudioHandler extends BaseAudioHandler with SeekHandler {
   RadioAudioHandler(this._player) {
@@ -12,30 +15,54 @@ class RadioAudioHandler extends BaseAudioHandler with SeekHandler {
 
   final AudioPlayer _player;
 
-  /// Updates the current track information for external clients.
+  /// Кладём ассет иконки во временный файл и возвращаем file:// URI.
+  /// Результат кэшируем между вызовами.
+  Uri? _cachedDefaultArtUri;
+
+  Future<Uri> _loadDefaultArtUri() async {
+    if (_cachedDefaultArtUri != null) return _cachedDefaultArtUri!;
+
+    final byteData =
+    await rootBundle.load('assets/images/radio_notification_icon.png');
+
+    final dir = await getTemporaryDirectory();
+    final file = File('${dir.path}/radio_notification_icon.png');
+
+    // Пишем файл только если его ещё нет или размер 0.
+    if (!await file.exists() || (await file.length()) == 0) {
+      await file.writeAsBytes(byteData.buffer.asUint8List(), flush: true);
+    }
+
+    _cachedDefaultArtUri = Uri.file(file.path);
+    return _cachedDefaultArtUri!;
+  }
+
+  /// Обновляет информацию о текущем треке для внешних клиентов (уведомления/lockscreen).
   Future<void> updateTrack(RadioTrack track) async {
     debugPrint('Updating track: ${track.title} - ${track.artist}');
+
     Uri? artUri;
+
+    // 1) Пытаемся взять картинку из трека, но только http/https.
     if (track.image.isNotEmpty) {
       final uri = Uri.tryParse(track.image);
       if (uri != null && (uri.scheme == 'http' || uri.scheme == 'https')) {
         artUri = uri;
       }
     }
-    if (artUri == null) {
-      final byteData =
-          await rootBundle.load('assets/images/radio_notification_icon.png');
-      artUri = Uri.dataFromBytes(
-        byteData.buffer.asUint8List(),
-        mimeType: 'image/png',
-      );
-    }
+
+    // 2) Если не получилось — используем ассет из временного файла (file://).
+    artUri ??= await _loadDefaultArtUri();
+
+    // Безопасные дефолты на случай пустых строк.
+    final title = (track.title.isNotEmpty) ? track.title : 'Unknown Title';
+    final artist = (track.artist.isNotEmpty) ? track.artist : 'Unknown Artist';
 
     mediaItem.add(
       MediaItem(
         id: 'mclub_radio',
-        title: track.title,
-        artist: track.artist,
+        title: title,
+        artist: artist,
         artUri: artUri,
       ),
     );
