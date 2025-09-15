@@ -7,6 +7,7 @@ import 'package:flutter/foundation.dart';
 import 'package:just_audio/just_audio.dart';
 import 'package:m_club/core/services/radio_api_service.dart';
 import 'package:m_club/features/radio/models/radio_track.dart';
+import 'package:m_club/features/radio/radio_audio_handler.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 /// Controller responsible for playing radio streams and
@@ -41,7 +42,7 @@ class RadioController extends ChangeNotifier {
 
   final RadioApiService _api = RadioApiService();
   static final AudioPlayer _player = AudioPlayer();
-  static AudioHandler? _audioHandler;
+  static RadioAudioHandler? _audioHandler;
   final Completer<void> _audioHandlerCompleter = Completer<void>();
 
   Future<void> get _audioHandlerReady => _audioHandlerCompleter.future;
@@ -195,7 +196,7 @@ class RadioController extends ChangeNotifier {
     try {
       await _audioHandler!.stop();
       await _player.setUrl(url);
-      (_audioHandler! as _RadioAudioHandler).updateTrack(
+      _audioHandler!.updateTrack(
         RadioTrack(
           artist: '',
           title: 'Радио «Русские Эмираты»',
@@ -250,7 +251,7 @@ class RadioController extends ChangeNotifier {
       final info = await _api.fetchTrackInfo();
       if (info == null) {
         _track = null;
-        (_audioHandler! as _RadioAudioHandler).updateTrack(
+        _audioHandler!.updateTrack(
           RadioTrack(
             artist: '',
             title: 'Радио «Русские Эмираты»',
@@ -261,11 +262,11 @@ class RadioController extends ChangeNotifier {
         return;
       }
       _track = info;
-      (_audioHandler! as _RadioAudioHandler).updateTrack(info);
+      _audioHandler!.updateTrack(info);
       notifyListeners();
     } catch (_) {
       _track = null;
-      (_audioHandler! as _RadioAudioHandler).updateTrack(
+      _audioHandler!.updateTrack(
         RadioTrack(
           artist: '',
           title: 'Радио «Русские Эмираты»',
@@ -288,14 +289,10 @@ class RadioController extends ChangeNotifier {
   /// This is useful when the app process restarts and needs to
   /// reconnect to a running background audio service.
   Future<void> ensureAudioService() async {
-    await _initAudioHandler();
-    if (!_audioHandlerCompleter.isCompleted) {
-      _audioHandlerCompleter.complete();
-    }
-  }
-
-  Future<void> _initAudioHandler() async {
     if (_audioHandler != null) {
+      if (!_audioHandlerCompleter.isCompleted) {
+        _audioHandlerCompleter.complete();
+      }
       return;
     }
     try {
@@ -304,15 +301,15 @@ class RadioController extends ChangeNotifier {
       await session.setActive(true);
 
       _audioHandler = await AudioService.init(
-        builder: () => _RadioAudioHandler(_player),
+        builder: () => RadioAudioHandler(_player),
         config: const AudioServiceConfig(
           androidNotificationChannelId: 'm_club_radio_channel',
           androidNotificationChannelName: 'M-Club Radio',
           androidNotificationIcon: 'drawable/radio_notification_icon',
           androidNotificationOngoing: true,
         ),
-      );
-      (_audioHandler! as _RadioAudioHandler).updateTrack(
+      ) as RadioAudioHandler;
+      _audioHandler!.updateTrack(
         RadioTrack(
           artist: '',
           title: 'Радио «Русские Эмираты»',
@@ -322,82 +319,17 @@ class RadioController extends ChangeNotifier {
     } catch (e, s) {
       _hasError = true;
       _errorMessage = 'Audio service error: ${e.toString()}';
-      _logPlaybackFailure('initAudioHandler', e, s);
-      _audioHandler ??= _RadioAudioHandler(_player);
+      _logPlaybackFailure('ensureAudioService', e, s);
+      _audioHandler ??= RadioAudioHandler(_player);
+    }
+    if (!_audioHandlerCompleter.isCompleted) {
+      _audioHandlerCompleter.complete();
     }
   }
 
   void _logPlaybackFailure(String context, Object error, StackTrace stack) {
     debugPrint('Playback failure in $context: $error\n$stack');
     // TODO: integrate analytics reporting here.
-  }
-}
-
-class _RadioAudioHandler extends BaseAudioHandler with SeekHandler {
-  _RadioAudioHandler(this._player) {
-    _player.playbackEventStream
-        .map(_transformEvent)
-        .listen(playbackState.add);
-  }
-
-  final AudioPlayer _player;
-
-  /// Updates the current track information for external clients.
-  void updateTrack(RadioTrack track) {
-    Uri? artUri;
-    if (track.image.isNotEmpty) {
-      final uri = Uri.tryParse(track.image);
-      if (uri != null && (uri.scheme == 'http' || uri.scheme == 'https')) {
-        artUri = uri;
-      }
-    }
-    artUri ??= Uri.parse('asset:///assets/images/Radio_RE_Logo.webp');
-
-    mediaItem.add(
-      MediaItem(
-        id: 'mclub_radio',
-        title: track.title,
-        artist: track.artist,
-        artUri: artUri,
-      ),
-    );
-  }
-
-  PlaybackState _transformEvent(PlaybackEvent event) {
-    final playing = _player.playing;
-    final controls = <MediaControl>[
-      playing ? MediaControl.pause : MediaControl.play,
-      MediaControl.stop,
-    ];
-
-    return PlaybackState(
-      controls: controls,
-      androidCompactActionIndices: const [0, 1],
-      processingState: const {
-        ProcessingState.idle: AudioProcessingState.idle,
-        ProcessingState.loading: AudioProcessingState.loading,
-        ProcessingState.buffering: AudioProcessingState.buffering,
-        ProcessingState.ready: AudioProcessingState.ready,
-        ProcessingState.completed: AudioProcessingState.completed,
-      }[event.processingState]!,
-      playing: playing,
-      updatePosition: _player.position,
-      bufferedPosition: _player.bufferedPosition,
-      speed: _player.speed,
-    );
-  }
-
-  @override
-  Future<void> play() => _player.play();
-
-  @override
-  Future<void> pause() => _player.pause();
-
-  @override
-  Future<void> stop() async {
-    await _player.stop();
-    final session = await AudioSession.instance;
-    await session.setActive(false);
   }
 }
 
