@@ -57,6 +57,7 @@ class RadioController extends ChangeNotifier {
   double _volume = 1.0;
   double _previousVolume = 1.0;
   String? _errorMessage;
+  bool _notificationsEnabled = true;
 
   static const String _cachedStreamsKey = 'radio_streams';
 
@@ -68,6 +69,7 @@ class RadioController extends ChangeNotifier {
   bool get streamsUnavailable => _streamsUnavailable;
   double get volume => _volume;
   String? get errorMessage => _errorMessage;
+  bool get notificationsEnabled => _notificationsEnabled;
 
   bool get isConnecting =>
       _playerState.processingState == ProcessingState.loading;
@@ -141,11 +143,23 @@ class RadioController extends ChangeNotifier {
   }
 
   /// Loads available streams and starts playback using selected [quality].
-  Future<void> init({String? quality}) async {
-    await ensureAudioService();
-    if (_hasError) {
-      notifyListeners();
-      return;
+  ///
+  /// If [startService] is `true`, the background audio service will be
+  /// initialized, enabling notification-based controls. When `false`, the
+  /// controller will operate without posting notifications.
+  Future<void> init({String? quality, bool startService = true}) async {
+    _notificationsEnabled = startService;
+    if (startService) {
+      await ensureAudioService();
+      if (_hasError) {
+        notifyListeners();
+        return;
+      }
+    } else {
+      _audioHandler ??= RadioAudioHandler(_player);
+      if (!_audioHandlerCompleter.isCompleted) {
+        _audioHandlerCompleter.complete();
+      }
     }
 
     _streamsUnavailable = false;
