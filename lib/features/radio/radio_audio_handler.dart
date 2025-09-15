@@ -23,10 +23,11 @@ class RadioAudioHandler extends BaseAudioHandler with SeekHandler {
       }
     }
     if (artUri == null) {
-      final byteData = await rootBundle.load('assets/images/Radio_RE_Logo.webp');
+      final byteData =
+          await rootBundle.load('assets/images/radio_notification_icon.png');
       artUri = Uri.dataFromBytes(
         byteData.buffer.asUint8List(),
-        mimeType: 'image/webp',
+        mimeType: 'image/png',
       );
     }
 
