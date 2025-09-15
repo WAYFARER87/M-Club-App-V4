@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:convert';
 
 import 'package:audio_service/audio_service.dart';
+import 'package:audio_session/audio_session.dart';
 import 'package:flutter/foundation.dart';
 import 'package:just_audio/just_audio.dart';
 import 'package:m_club/core/services/radio_api_service.dart';
@@ -283,6 +284,10 @@ class RadioController extends ChangeNotifier {
       return;
     }
     try {
+      final session = await AudioSession.instance;
+      await session.configure(const AudioSessionConfiguration.music());
+      await session.setActive(true);
+
       _audioHandler = await AudioService.init(
         builder: () => _RadioAudioHandler(_player),
         config: const AudioServiceConfig(
