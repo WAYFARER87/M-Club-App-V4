@@ -210,7 +210,7 @@ class RadioController extends ChangeNotifier {
     try {
       await _audioHandler!.stop();
       await _player.setUrl(url);
-      _audioHandler!.updateTrack(
+      await _audioHandler!.updateTrack(
         RadioTrack(
           artist: '',
           title: 'Радио «Русские Эмираты»',
@@ -270,7 +270,7 @@ class RadioController extends ChangeNotifier {
       final info = await _api.fetchTrackInfo();
       if (info == null) {
         _track = null;
-        _audioHandler!.updateTrack(
+        await _audioHandler!.updateTrack(
           RadioTrack(
             artist: '',
             title: 'Радио «Русские Эмираты»',
@@ -281,11 +281,11 @@ class RadioController extends ChangeNotifier {
         return;
       }
       _track = info;
-      _audioHandler!.updateTrack(info);
+      await _audioHandler!.updateTrack(info);
       notifyListeners();
     } catch (_) {
       _track = null;
-      _audioHandler!.updateTrack(
+      await _audioHandler!.updateTrack(
         RadioTrack(
           artist: '',
           title: 'Радио «Русские Эмираты»',
@@ -334,7 +334,7 @@ class RadioController extends ChangeNotifier {
           androidNotificationOngoing: true,
         ),
       ) as RadioAudioHandler;
-      _audioHandler!.updateTrack(
+      await _audioHandler!.updateTrack(
         RadioTrack(
           artist: '',
           title: 'Радио «Русские Эмираты»',

@@ -1,6 +1,7 @@
 import 'package:audio_service/audio_service.dart';
 import 'package:audio_session/audio_session.dart';
 import 'package:flutter/foundation.dart';
+import 'package:flutter/services.dart';
 import 'package:just_audio/just_audio.dart';
 import 'package:m_club/features/radio/models/radio_track.dart';
 
@@ -12,7 +13,7 @@ class RadioAudioHandler extends BaseAudioHandler with SeekHandler {
   final AudioPlayer _player;
 
   /// Updates the current track information for external clients.
-  void updateTrack(RadioTrack track) {
+  Future<void> updateTrack(RadioTrack track) async {
     debugPrint('Updating track: ${track.title} - ${track.artist}');
     Uri? artUri;
     if (track.image.isNotEmpty) {
@@ -21,7 +22,13 @@ class RadioAudioHandler extends BaseAudioHandler with SeekHandler {
         artUri = uri;
       }
     }
-    artUri ??= Uri.parse('asset:///assets/images/Radio_RE_Logo.webp');
+    if (artUri == null) {
+      final byteData = await rootBundle.load('assets/images/Radio_RE_Logo.webp');
+      artUri = Uri.dataFromBytes(
+        byteData.buffer.asUint8List(),
+        mimeType: 'image/webp',
+      );
+    }
 
     mediaItem.add(
       MediaItem(
