@@ -22,15 +22,6 @@ class _RadioView extends StatefulWidget {
 
 class _RadioViewState extends State<_RadioView> {
   @override
-  void initState() {
-    super.initState();
-    // Ensure that the UI always connects to an existing audio service
-    // when the radio screen is opened, even after process restarts.
-    final controller = context.read<RadioController>();
-    controller.ensureAudioService();
-  }
-
-  @override
   Widget build(BuildContext context) {
     final controller = context.watch<RadioController>();
     if (controller.streamsUnavailable) {
@@ -46,10 +37,11 @@ class _RadioViewState extends State<_RadioView> {
                   textAlign: TextAlign.center,
                 ),
                 const SizedBox(height: 12),
-                ElevatedButton(
-                  onPressed: () => controller.init(),
-                  child: const Text('Retry'),
-                ),
+                  ElevatedButton(
+                    onPressed: () => controller
+                        .init(startService: controller.notificationsEnabled),
+                    child: const Text('Retry'),
+                  ),
               ],
             ),
           ),

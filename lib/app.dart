@@ -7,6 +7,7 @@ import 'package:permission_handler/permission_handler.dart';
 
 import 'features/home/home_screen.dart';
 import 'core/widgets/auth_gate.dart';
+import 'features/radio/radio_controller.dart';
 
 class MyApp extends StatefulWidget {
   const MyApp({super.key});
@@ -22,25 +23,35 @@ class _MyAppState extends State<MyApp> {
   void initState() {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      _requestNotificationPermission();
+      _initializeRadio();
     });
   }
 
-  Future<void> _requestNotificationPermission() async {
-    if (!Platform.isAndroid) return;
-    final androidInfo = await DeviceInfoPlugin().androidInfo;
-    if (androidInfo.version.sdkInt >= 33) {
-      final status = await Permission.notification.request();
-      if (!status.isGranted && mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text(
-              'Для отображения медиа-уведомления необходимо разрешить уведомления.',
-            ),
-          ),
-        );
+  Future<void> _initializeRadio() async {
+    final controller = context.read<RadioController>();
+    var startService = true;
+    if (Platform.isAndroid) {
+      final androidInfo = await DeviceInfoPlugin().androidInfo;
+      if (androidInfo.version.sdkInt >= 33) {
+        var status = await Permission.notification.status;
+        if (!status.isGranted) {
+          status = await Permission.notification.request();
+        }
+        if (!status.isGranted) {
+          startService = false;
+          if (mounted) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(
+                content: Text(
+                  'Для отображения медиа-уведомления необходимо разрешить уведомления.',
+                ),
+              ),
+            );
+          }
+        }
       }
     }
+    await controller.init(startService: startService);
   }
 
   @override
