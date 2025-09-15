@@ -84,6 +84,7 @@ class RadioController extends ChangeNotifier {
     await _audioHandlerReady;
     if (_player.playing) {
       await _audioHandler!.stop();
+      _trackTimer?.cancel();
     } else {
       if (_player.audioSource == null && _streams.isNotEmpty) {
         await _startStream();
@@ -162,8 +163,11 @@ class RadioController extends ChangeNotifier {
     }
 
     _quality = quality ?? _streams.keys.first;
-    await _startStream();
-    _startTrackInfoTimer();
+    // Do not automatically start playback to prevent unwanted audio on
+    // application launch. The stream will start when the user presses play.
+    _trackTimer?.cancel();
+    _track = null;
+    notifyListeners();
   }
 
   /// Changes stream quality and restarts playback with a new URL.
@@ -193,6 +197,7 @@ class RadioController extends ChangeNotifier {
       final session = await AudioSession.instance;
       await session.setActive(true);
       await _audioHandler!.play();
+      _startTrackInfoTimer();
       await _updateTrackInfo();
       notifyListeners();
     } catch (e, s) {
