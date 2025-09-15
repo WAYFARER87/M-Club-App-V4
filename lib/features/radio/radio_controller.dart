@@ -333,6 +333,8 @@ class RadioController extends ChangeNotifier {
           androidNotificationChannelName: 'M-Club Radio',
           androidNotificationIcon: 'drawable/radio_notification_icon',
           androidNotificationOngoing: true,
+          iOSCategory: AVAudioSessionCategory.playback,
+          iOSCategoryOptions: {AVAudioSessionCategoryOptions.mixWithOthers},
         ),
       ) as RadioAudioHandler;
       await _audioHandler!.updateTrack(
