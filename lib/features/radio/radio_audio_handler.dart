@@ -7,13 +7,6 @@ import 'package:m_club/features/radio/models/radio_track.dart';
 class RadioAudioHandler extends BaseAudioHandler with SeekHandler {
   RadioAudioHandler(this._player) {
     _player.playbackEventStream.map(_transformEvent).listen(playbackState.add);
-    setSystemActions(
-      const {
-        MediaAction.play,
-        MediaAction.pause,
-        MediaAction.stop,
-      },
-    );
   }
 
   final AudioPlayer _player;
@@ -54,6 +47,11 @@ class RadioAudioHandler extends BaseAudioHandler with SeekHandler {
     return PlaybackState(
       controls: controls,
       androidCompactActionIndices: const [0, 1, 2],
+      systemActions: const {
+        MediaAction.play,
+        MediaAction.pause,
+        MediaAction.stop,
+      },
       processingState: const {
         ProcessingState.idle: AudioProcessingState.idle,
         ProcessingState.loading: AudioProcessingState.loading,
