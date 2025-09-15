@@ -1,19 +1,19 @@
 import 'package:audio_service/audio_service.dart';
 import 'package:audio_session/audio_session.dart';
+import 'package:flutter/foundation.dart';
 import 'package:just_audio/just_audio.dart';
 import 'package:m_club/features/radio/models/radio_track.dart';
 
 class RadioAudioHandler extends BaseAudioHandler with SeekHandler {
   RadioAudioHandler(this._player) {
-    _player.playbackEventStream
-        .map(_transformEvent)
-        .listen(playbackState.add);
+    _player.playbackEventStream.map(_transformEvent).listen(playbackState.add);
   }
 
   final AudioPlayer _player;
 
   /// Updates the current track information for external clients.
   void updateTrack(RadioTrack track) {
+    debugPrint('Updating track: ${track.title} - ${track.artist}');
     Uri? artUri;
     if (track.image.isNotEmpty) {
       final uri = Uri.tryParse(track.image);
@@ -35,6 +35,9 @@ class RadioAudioHandler extends BaseAudioHandler with SeekHandler {
 
   PlaybackState _transformEvent(PlaybackEvent event) {
     final playing = _player.playing;
+    debugPrint(
+      'Playback event - playing: $playing, processingState: ${event.processingState}',
+    );
     final controls = <MediaControl>[
       if (playing) MediaControl.pause else MediaControl.play,
       MediaControl.stop,
@@ -77,4 +80,3 @@ class RadioAudioHandler extends BaseAudioHandler with SeekHandler {
     playbackState.add(_transformEvent(_player.playbackEvent));
   }
 }
-
