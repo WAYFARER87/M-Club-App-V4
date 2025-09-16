@@ -1,14 +1,18 @@
 import 'dart:io';
+import 'dart:typed_data';
 
 import 'package:audio_service/audio_service.dart';
 import 'package:audio_session/audio_session.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
+import 'package:http/http.dart' as http;
 import 'package:just_audio/just_audio.dart';
 import 'package:m_club/features/radio/models/radio_track.dart';
 import 'package:path_provider/path_provider.dart';
 
 class RadioAudioHandler extends BaseAudioHandler with SeekHandler {
+  static const MethodChannel _nowPlayingChannel = MethodChannel('radio/now_playing');
+
   RadioAudioHandler(this._player) {
     _player.playbackEventStream.map(_transformEvent).listen(playbackState.add);
   }
@@ -66,6 +70,40 @@ class RadioAudioHandler extends BaseAudioHandler with SeekHandler {
         artUri: artUri,
       ),
     );
+
+    if (!kIsWeb && defaultTargetPlatform == TargetPlatform.iOS) {
+      Uint8List? artworkBytes;
+
+      try {
+        if (artUri != null) {
+          if (artUri.scheme == 'http' || artUri.scheme == 'https') {
+            final response = await http.get(artUri);
+            if (response.statusCode == 200) {
+              artworkBytes = response.bodyBytes;
+            }
+          } else if (artUri.scheme == 'file') {
+            final file = File.fromUri(artUri);
+            if (await file.exists()) {
+              artworkBytes = await file.readAsBytes();
+            }
+          }
+        }
+      } catch (error, stackTrace) {
+        debugPrint('Failed to load artwork bytes: $error\n$stackTrace');
+      }
+
+      try {
+        await _nowPlayingChannel.invokeMethod<void>('updateNowPlaying', {
+          'title': title,
+          'artist': artist,
+          'artwork': artworkBytes,
+        });
+      } on PlatformException catch (error, stackTrace) {
+        debugPrint(
+          'Failed to update iOS now playing info: $error\n$stackTrace',
+        );
+      }
+    }
   }
 
   PlaybackState _transformEvent(PlaybackEvent event) {
