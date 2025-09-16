@@ -44,6 +44,7 @@ class RadioController extends ChangeNotifier {
   static final AudioPlayer _player = AudioPlayer();
   static RadioAudioHandler? _audioHandler;
   static bool _isServiceHandler = false;
+  static bool _audioServiceInitCalled = false;
   Completer<void>? _audioHandlerCompleter;
 
   Future<void> get _audioHandlerReady =>
@@ -345,11 +346,17 @@ class RadioController extends ChangeNotifier {
       return;
     }
 
+    if (_audioServiceInitCalled) {
+      return;
+    }
+
     try {
+      _audioServiceInitCalled = true;
       final session = await AudioSession.instance;
       await session.configure(const AudioSessionConfiguration.music());
       await session.setActive(true);
 
+      _audioServiceInitCalled = true;
       final handler = await AudioService.init(
         builder: () => RadioAudioHandler(_player),
         config: const AudioServiceConfig(
@@ -377,6 +384,7 @@ class RadioController extends ChangeNotifier {
         ),
       );
     } catch (e, s) {
+      _audioServiceInitCalled = false;
       _hasError = true;
       _errorMessage = 'Audio service error: ${e.toString()}';
       _logPlaybackFailure('ensureAudioService', e, s);
