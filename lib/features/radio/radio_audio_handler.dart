@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'dart:typed_data';
 
 import 'package:audio_service/audio_service.dart';
 import 'package:audio_session/audio_session.dart';
@@ -22,11 +23,27 @@ class RadioAudioHandler extends BaseAudioHandler with SeekHandler {
   Future<Uri> _loadDefaultArtUri() async {
     if (_cachedDefaultArtUri != null) return _cachedDefaultArtUri!;
 
-    final byteData =
-    await rootBundle.load('assets/images/radio_notification_icon.png');
+    const defaultAssetPath = 'assets/images/radio_notification_icon.png';
+    const fallbackAssetPath = 'assets/images/Radio_RE_Logo.webp';
+
+    var assetPath = defaultAssetPath;
+    late ByteData byteData;
+
+    try {
+      byteData = await rootBundle.load(assetPath);
+    } on FlutterError catch (error, stackTrace) {
+      debugPrint(
+        'Failed to load $assetPath. Falling back to $fallbackAssetPath. Error: '
+        '$error',
+      );
+      debugPrint(stackTrace.toString());
+      assetPath = fallbackAssetPath;
+      byteData = await rootBundle.load(assetPath);
+    }
 
     final dir = await getTemporaryDirectory();
-    final file = File('${dir.path}/radio_notification_icon.png');
+    final fileName = assetPath.split('/').last;
+    final file = File('${dir.path}/$fileName');
 
     // Пишем файл только если его ещё нет или размер 0.
     if (!await file.exists() || (await file.length()) == 0) {
