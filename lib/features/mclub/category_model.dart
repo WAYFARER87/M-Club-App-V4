@@ -2,7 +2,7 @@ class Category {
   final String id;
   final String name;
   final String mIcon;
-
+//
   Category({required this.id, required this.name, required this.mIcon});
 
   factory Category.fromJson(Map<String, dynamic> json) {
