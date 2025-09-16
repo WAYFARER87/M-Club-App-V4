@@ -315,7 +315,8 @@ class RadioController extends ChangeNotifier {
   /// This is useful when the app process restarts and needs to
   /// reconnect to a running background audio service.
   Future<void> ensureAudioService() async {
-    if (AudioService.running == true && _audioHandler != null) {
+    final isConnected = AudioService.connected == true;
+    if (isConnected && _audioHandler != null) {
       _resetAudioHandlerCompleter();
       _completeAudioHandlerCompleter();
       return;
