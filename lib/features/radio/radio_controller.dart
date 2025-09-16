@@ -315,7 +315,9 @@ class RadioController extends ChangeNotifier {
   /// This is useful when the app process restarts and needs to
   /// reconnect to a running background audio service.
   Future<void> ensureAudioService() async {
-    final isConnected = AudioService.connected == true;
+    final isConnected = AudioService.playbackStateStream.hasValue &&
+        AudioService.playbackStateStream.value.processingState !=
+            AudioProcessingState.idle;
     if (isConnected && _audioHandler != null) {
       _resetAudioHandlerCompleter();
       _completeAudioHandlerCompleter();
@@ -328,22 +330,24 @@ class RadioController extends ChangeNotifier {
       await session.configure(const AudioSessionConfiguration.music());
       await session.setActive(true);
 
-      _audioHandler = await AudioService.init(
-        builder: () => RadioAudioHandler(_player),
-        config: const AudioServiceConfig(
-          androidNotificationChannelId: 'm_club_radio_channel',
-          androidNotificationChannelName: 'M-Club Radio',
-          androidNotificationIcon: 'drawable/radio_notification_icon',
-          androidNotificationOngoing: true,
-        ),
-      ) as RadioAudioHandler;
-      await _audioHandler!.updateTrack(
-        RadioTrack(
-          artist: '',
-          title: 'Радио «Русские Эмираты»',
-          image: '',
-        ),
-      );
+      if (_audioHandler == null || !isConnected) {
+        _audioHandler = await AudioService.init(
+          builder: () => RadioAudioHandler(_player),
+          config: const AudioServiceConfig(
+            androidNotificationChannelId: 'm_club_radio_channel',
+            androidNotificationChannelName: 'M-Club Radio',
+            androidNotificationIcon: 'drawable/radio_notification_icon',
+            androidNotificationOngoing: true,
+          ),
+        ) as RadioAudioHandler;
+        await _audioHandler!.updateTrack(
+          RadioTrack(
+            artist: '',
+            title: 'Радио «Русские Эмираты»',
+            image: '',
+          ),
+        );
+      }
     } catch (e, s) {
       _hasError = true;
       _errorMessage = 'Audio service error: ${e.toString()}';
