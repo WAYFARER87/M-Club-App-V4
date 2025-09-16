@@ -57,6 +57,24 @@ class _FakeGeolocator extends GeolocatorPlatform {
   Future<bool> isLocationServiceEnabled() async => true;
 }
 
+class _DeniedGeolocator extends GeolocatorPlatform {
+  @override
+  Future<LocationPermission> checkPermission() async =>
+      LocationPermission.denied;
+
+  @override
+  Future<LocationPermission> requestPermission() async =>
+      LocationPermission.denied;
+
+  @override
+  Future<Position> getCurrentPosition({LocationSettings? locationSettings}) {
+    throw UnimplementedError();
+  }
+
+  @override
+  Future<bool> isLocationServiceEnabled() async => false;
+}
+
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
 
@@ -131,6 +149,40 @@ void main() {
     final ratingSize = tester.getSize(ratingContainer);
     final dateSize = tester.getSize(dateContainer);
     expect(ratingSize.height, dateSize.height);
+  });
+
+  testWidgets('opens card and skips checkin when location unavailable',
+      (tester) async {
+    final api = ApiService();
+    api.dio.interceptors.clear();
+    RequestOptions? lastRequest;
+    api.dio.interceptors.add(
+      InterceptorsWrapper(onRequest: (options, handler) {
+        lastRequest = options;
+        handler.resolve(Response(requestOptions: options, data: {}));
+      }),
+    );
+
+    final originalGeolocator = GeolocatorPlatform.instance;
+    GeolocatorPlatform.instance = _DeniedGeolocator();
+    addTearDown(() {
+      GeolocatorPlatform.instance = originalGeolocator;
+    });
+
+    final offer = _buildOffer(
+      vote: 0,
+      rating: 0,
+      branches: [Branch(lat: 0, lng: 0)],
+    );
+
+    await tester.pumpWidget(MaterialApp(home: OfferDetailScreen(offer: offer)));
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.text('Клубная карта'));
+    await tester.pumpAndSettle();
+
+    expect(find.byType(ClubCardScreen), findsOneWidget);
+    expect(lastRequest, isNull);
   });
 
   testWidgets('opens card without checkin when far', (tester) async {
