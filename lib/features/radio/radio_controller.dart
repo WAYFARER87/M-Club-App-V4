@@ -391,7 +391,7 @@ class RadioController extends ChangeNotifier {
   /// This is useful when the app process restarts and needs to
   /// reconnect to a running background audio service.
   Future<void> ensureAudioService() async {
-    if (_audioHandler != null || Platform.isIOS) {
+    if (_audioHandler != null) {
       if (!_audioHandlerCompleter.isCompleted) {
         _audioHandlerCompleter.complete();
       }
@@ -399,7 +399,18 @@ class RadioController extends ChangeNotifier {
     }
     try {
       final session = await AudioSession.instance;
-      await session.configure(const AudioSessionConfiguration.music());
+      if (Platform.isIOS) {
+        await session.configure(
+          const AudioSessionConfiguration(
+            avAudioSessionCategory: AVAudioSessionCategory.playback,
+            avAudioSessionCategoryOptions: {
+              AVAudioSessionCategoryOptions.mixWithOthers,
+            },
+          ),
+        );
+      } else {
+        await session.configure(const AudioSessionConfiguration.music());
+      }
       await session.setActive(true);
 
       _audioHandler = await AudioService.init(
@@ -409,8 +420,6 @@ class RadioController extends ChangeNotifier {
           androidNotificationChannelName: 'M-Club Radio',
           androidNotificationIcon: 'drawable/radio_notification_icon',
           androidNotificationOngoing: true,
-          iOSCategory: AVAudioSessionCategory.playback,
-          iOSCategoryOptions: {AVAudioSessionCategoryOptions.mixWithOthers},
         ),
       ) as RadioAudioHandler;
       await _audioHandler!.updateTrack(
