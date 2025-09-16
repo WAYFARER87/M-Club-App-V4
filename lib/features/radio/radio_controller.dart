@@ -160,11 +160,11 @@ class RadioController extends ChangeNotifier {
       }
     }
 
-    _notificationsEnabled = serviceRunning || startService;
+    _notificationsEnabled = serviceRunning ? true : startService;
     debugPrint('RadioController.init: notificationsEnabled=$_notificationsEnabled');
 
     if (serviceRunning) {
-      _resetAudioHandlerCompleter();
+      _audioHandlerCompleter ??= Completer<void>();
       _completeAudioHandlerCompleter();
     } else if (!startService) {
       _isServiceHandler = false;
