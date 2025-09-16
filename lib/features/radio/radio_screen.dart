@@ -1,5 +1,9 @@
+import 'dart:io';
 import 'dart:math' as math;
+
+import 'package:device_info_plus/device_info_plus.dart';
 import 'package:flutter/material.dart';
+import 'package:permission_handler/permission_handler.dart';
 import 'package:provider/provider.dart';
 
 import 'package:m_club/features/radio/radio_controller.dart';
@@ -21,6 +25,49 @@ class _RadioView extends StatefulWidget {
 }
 
 class _RadioViewState extends State<_RadioView> {
+  @override
+  void initState() {
+    super.initState();
+    context.read<RadioController>().init(startService: false);
+  }
+
+  Future<void> _ensureServiceAndPlay() async {
+    final controller = context.read<RadioController>();
+    var startService = true;
+
+    if (Platform.isAndroid) {
+      final androidInfo = await DeviceInfoPlugin().androidInfo;
+      if (androidInfo.version.sdkInt >= 33) {
+        var status = await Permission.notification.status;
+        if (!status.isGranted) {
+          status = await Permission.notification.request();
+        }
+        if (!status.isGranted) {
+          startService = false;
+          if (mounted) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(
+                content: Text(
+                  'Для отображения медиа-уведомления необходимо разрешить уведомления.',
+                ),
+              ),
+            );
+          }
+        }
+      }
+    }
+
+    if (startService) {
+      if (!controller.notificationsEnabled) {
+        await controller.init(startService: true);
+      } else {
+        await controller.ensureAudioService();
+      }
+    }
+
+    await controller.togglePlay();
+  }
+
   @override
   Widget build(BuildContext context) {
     final controller = context.watch<RadioController>();
@@ -231,8 +278,7 @@ class _RadioViewState extends State<_RadioView> {
                                 shadowColor: Colors.grey,
                                 foregroundColor: Colors.black,
                               ),
-                              onPressed: () =>
-                                  context.read<RadioController>().togglePlay(),
+                              onPressed: () => _ensureServiceAndPlay(),
                               child: controller.isConnecting ||
                                       controller.isBuffering
                                   ? const SizedBox(
