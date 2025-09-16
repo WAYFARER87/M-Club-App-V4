@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_localizations/flutter_localizations.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 import 'features/home/home_screen.dart';
 import 'core/widgets/auth_gate.dart';
@@ -39,8 +39,8 @@ class _MyAppState extends State<MyApp> {
     return MaterialApp(
       title: 'M-Club',
       locale: const Locale('ru'),
-      supportedLocales: const [Locale('ru'), Locale('en')],
-      localizationsDelegates: GlobalMaterialLocalizations.delegates,
+      supportedLocales: AppLocalizations.supportedLocales,
+      localizationsDelegates: AppLocalizations.localizationsDelegates,
       theme: base.copyWith(
         appBarTheme: const AppBarTheme(
           backgroundColor: Colors.white,
