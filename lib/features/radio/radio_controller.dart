@@ -93,7 +93,7 @@ class RadioController extends ChangeNotifier {
       _trackTimer?.cancel();
     } else {
       if (_player.audioSource == null && _streams.isNotEmpty) {
-        await _startStream();
+        await startStream();
       } else {
         await _audioHandler!.play();
       }
@@ -140,7 +140,7 @@ class RadioController extends ChangeNotifier {
     if (_streams.isEmpty) {
       await init(quality: _quality);
     } else {
-      await _startStream();
+      await startStream();
     }
     notifyListeners();
   }
@@ -223,8 +223,12 @@ class RadioController extends ChangeNotifier {
   Future<void> setQuality(String quality) async {
     if (!_streams.containsKey(quality) || _quality == quality) return;
     _quality = quality;
-    await _startStream();
+    await startStream();
     notifyListeners();
+  }
+
+  Future<void> startStream() async {
+    await _startStream();
   }
 
   Future<void> _startStream() async {
