@@ -28,7 +28,8 @@ class _RadioViewState extends State<_RadioView> {
   @override
   void initState() {
     super.initState();
-    context.read<RadioController>().init(startService: false);
+    final controller = context.read<RadioController>();
+    controller.init(startService: controller.notificationsEnabled);
   }
 
   Future<void> _ensureServiceAndPlay() async {
