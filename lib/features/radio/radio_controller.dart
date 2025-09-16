@@ -315,10 +315,7 @@ class RadioController extends ChangeNotifier {
   /// This is useful when the app process restarts and needs to
   /// reconnect to a running background audio service.
   Future<void> ensureAudioService() async {
-    final isConnected = AudioService.playbackStateStream.hasValue &&
-        AudioService.playbackStateStream.value.processingState !=
-            AudioProcessingState.idle;
-    if (isConnected && _audioHandler != null) {
+    if (AudioService.connected && _audioHandler != null) {
       _resetAudioHandlerCompleter();
       _completeAudioHandlerCompleter();
       return;
@@ -330,7 +327,7 @@ class RadioController extends ChangeNotifier {
       await session.configure(const AudioSessionConfiguration.music());
       await session.setActive(true);
 
-      if (_audioHandler == null || !isConnected) {
+      if (_audioHandler == null || !AudioService.connected) {
         _audioHandler = await AudioService.init(
           builder: () => RadioAudioHandler(_player),
           config: const AudioServiceConfig(

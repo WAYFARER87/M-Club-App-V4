@@ -33,7 +33,6 @@ class _RadioViewState extends State<_RadioView> {
 
   Future<void> _ensureServiceAndPlay() async {
     final controller = context.read<RadioController>();
-    var startService = true;
 
     if (Platform.isAndroid) {
       final androidInfo = await DeviceInfoPlugin().androidInfo;
@@ -43,7 +42,6 @@ class _RadioViewState extends State<_RadioView> {
           status = await Permission.notification.request();
         }
         if (!status.isGranted) {
-          startService = false;
           if (mounted) {
             ScaffoldMessenger.of(context).showSnackBar(
               const SnackBar(
@@ -53,16 +51,15 @@ class _RadioViewState extends State<_RadioView> {
               ),
             );
           }
+          return;
         }
       }
     }
 
-    if (startService) {
-      if (!controller.notificationsEnabled) {
-        await controller.init(startService: true);
-      } else {
-        await controller.ensureAudioService();
-      }
+    if (!controller.notificationsEnabled) {
+      await controller.init(startService: true);
+    } else {
+      await controller.ensureAudioService();
     }
 
     await controller.togglePlay();
