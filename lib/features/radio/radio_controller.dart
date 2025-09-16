@@ -43,6 +43,7 @@ class RadioController extends ChangeNotifier {
   final RadioApiService _api = RadioApiService();
   static final AudioPlayer _player = AudioPlayer();
   static RadioAudioHandler? _audioHandler;
+  static bool _isServiceHandler = false;
   Completer<void>? _audioHandlerCompleter;
 
   Future<void> get _audioHandlerReady =>
@@ -158,7 +159,8 @@ class RadioController extends ChangeNotifier {
         return;
       }
     } else {
-      _audioHandler ??= RadioAudioHandler(_player);
+      _isServiceHandler = false;
+      _audioHandler = RadioAudioHandler(_player);
       _resetAudioHandlerCompleter();
       _completeAudioHandlerCompleter();
     }
@@ -316,7 +318,7 @@ class RadioController extends ChangeNotifier {
   /// reconnect to a running background audio service.
   Future<void> ensureAudioService() async {
     _resetAudioHandlerCompleter();
-    if (_audioHandler != null) {
+    if (_audioHandler != null && _isServiceHandler) {
       _completeAudioHandlerCompleter();
       return;
     }
@@ -338,6 +340,7 @@ class RadioController extends ChangeNotifier {
 
       if (handler is RadioAudioHandler) {
         _audioHandler = handler;
+        _isServiceHandler = true;
       } else {
         throw StateError(
           'Unexpected audio handler type: ${handler.runtimeType}',
@@ -355,7 +358,8 @@ class RadioController extends ChangeNotifier {
       _hasError = true;
       _errorMessage = 'Audio service error: ${e.toString()}';
       _logPlaybackFailure('ensureAudioService', e, s);
-      _audioHandler ??= RadioAudioHandler(_player);
+      _audioHandler = RadioAudioHandler(_player);
+      _isServiceHandler = false;
     } finally {
       _completeAudioHandlerCompleter();
     }
