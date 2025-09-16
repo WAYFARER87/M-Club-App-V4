@@ -246,14 +246,6 @@ class RadioController extends ChangeNotifier {
         await _audioHandler!.updateTrack(
           RadioTrack(artist: '', title: 'Радио «Русские Эмираты»', image: ''),
         );
-      } else {
-        await AudioServiceBackground.setMediaItem(
-          const MediaItem(
-            id: 'mclub_radio',
-            title: 'Радио «Русские Эмираты»',
-            artist: '',
-          ),
-        );
       }
       try {
         await AudioSession.instance.then((session) => session.setActive(true));
@@ -314,14 +306,6 @@ class RadioController extends ChangeNotifier {
           await _audioHandler!.updateTrack(
             RadioTrack(artist: '', title: 'Радио «Русские Эмираты»', image: ''),
           );
-        } else {
-          await AudioServiceBackground.setMediaItem(
-            const MediaItem(
-              id: 'mclub_radio',
-              title: 'Радио «Русские Эмираты»',
-              artist: '',
-            ),
-          );
         }
         notifyListeners();
         return;
@@ -329,15 +313,6 @@ class RadioController extends ChangeNotifier {
       _track = info;
       if (_audioHandler != null) {
         await _audioHandler!.updateTrack(info);
-      } else {
-        await AudioServiceBackground.setMediaItem(
-          MediaItem(
-            id: 'mclub_radio',
-            title: info.title.isNotEmpty ? info.title : 'Unknown Title',
-            artist: info.artist.isNotEmpty ? info.artist : 'Unknown Artist',
-            artUri: info.image.isNotEmpty ? Uri.tryParse(info.image) : null,
-          ),
-        );
       }
       notifyListeners();
     } catch (_) {
@@ -345,14 +320,6 @@ class RadioController extends ChangeNotifier {
       if (_audioHandler != null) {
         await _audioHandler!.updateTrack(
           RadioTrack(artist: '', title: 'Радио «Русские Эмираты»', image: ''),
-        );
-      } else {
-        await AudioServiceBackground.setMediaItem(
-          const MediaItem(
-            id: 'mclub_radio',
-            title: 'Радио «Русские Эмираты»',
-            artist: '',
-          ),
         );
       }
       // ignore errors
