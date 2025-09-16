@@ -150,15 +150,7 @@ class RadioController extends ChangeNotifier {
   /// initialized, enabling notification-based controls. When `false`, the
   /// controller will operate without posting notifications.
   Future<void> init({String? quality, bool startService = true}) async {
-    var serviceRunning = _isServiceHandler && _audioHandler != null;
-
-    if (!serviceRunning) {
-      try {
-        serviceRunning = await AudioService.running;
-      } catch (_) {
-        serviceRunning = false;
-      }
-    }
+    final serviceRunning = await _isBackgroundServiceRunning();
 
     _notificationsEnabled = serviceRunning ? true : startService;
     debugPrint('RadioController.init: notificationsEnabled=$_notificationsEnabled');
@@ -208,6 +200,18 @@ class RadioController extends ChangeNotifier {
     _trackTimer?.cancel();
     _track = null;
     notifyListeners();
+  }
+
+  Future<bool> _isBackgroundServiceRunning() async {
+    if (_isServiceHandler && _audioHandler != null) {
+      return true;
+    }
+
+    try {
+      return await AudioService.running;
+    } catch (_) {
+      return false;
+    }
   }
 
   /// Changes stream quality and restarts playback with a new URL.
