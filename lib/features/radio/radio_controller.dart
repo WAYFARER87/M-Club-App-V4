@@ -43,9 +43,10 @@ class RadioController extends ChangeNotifier {
   final RadioApiService _api = RadioApiService();
   static final AudioPlayer _player = AudioPlayer();
   static RadioAudioHandler? _audioHandler;
-  final Completer<void> _audioHandlerCompleter = Completer<void>();
+  Completer<void>? _audioHandlerCompleter;
 
-  Future<void> get _audioHandlerReady => _audioHandlerCompleter.future;
+  Future<void> get _audioHandlerReady =>
+      (_audioHandlerCompleter ??= Completer<void>()).future;
 
   Map<String, String> _streams = {};
   String? _quality;
@@ -158,9 +159,8 @@ class RadioController extends ChangeNotifier {
       }
     } else {
       _audioHandler ??= RadioAudioHandler(_player);
-      if (!_audioHandlerCompleter.isCompleted) {
-        _audioHandlerCompleter.complete();
-      }
+      _resetAudioHandlerCompleter();
+      _completeAudioHandlerCompleter();
     }
 
     _streamsUnavailable = false;
@@ -315,12 +315,13 @@ class RadioController extends ChangeNotifier {
   /// This is useful when the app process restarts and needs to
   /// reconnect to a running background audio service.
   Future<void> ensureAudioService() async {
-    if (_audioHandler != null) {
-      if (!_audioHandlerCompleter.isCompleted) {
-        _audioHandlerCompleter.complete();
-      }
+    if (AudioService.connected == true && _audioHandler != null) {
+      _resetAudioHandlerCompleter();
+      _completeAudioHandlerCompleter();
       return;
     }
+
+    _resetAudioHandlerCompleter();
     try {
       final session = await AudioSession.instance;
       await session.configure(const AudioSessionConfiguration.music());
@@ -348,8 +349,19 @@ class RadioController extends ChangeNotifier {
       _logPlaybackFailure('ensureAudioService', e, s);
       _audioHandler ??= RadioAudioHandler(_player);
     }
-    if (!_audioHandlerCompleter.isCompleted) {
-      _audioHandlerCompleter.complete();
+    _completeAudioHandlerCompleter();
+  }
+
+  void _resetAudioHandlerCompleter() {
+    if (_audioHandlerCompleter == null || _audioHandlerCompleter!.isCompleted) {
+      _audioHandlerCompleter = Completer<void>();
+    }
+  }
+
+  void _completeAudioHandlerCompleter() {
+    final completer = _audioHandlerCompleter;
+    if (completer != null && !completer.isCompleted) {
+      completer.complete();
     }
   }
 
