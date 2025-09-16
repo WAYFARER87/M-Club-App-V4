@@ -150,9 +150,30 @@ class RadioController extends ChangeNotifier {
   /// initialized, enabling notification-based controls. When `false`, the
   /// controller will operate without posting notifications.
   Future<void> init({String? quality, bool startService = true}) async {
-    _notificationsEnabled = startService;
+    var serviceRunning = false;
+    if (!startService) {
+      serviceRunning = _isServiceHandler && _audioHandler != null;
+      if (!serviceRunning) {
+        try {
+          serviceRunning = await AudioService.running;
+        } catch (_) {
+          serviceRunning = false;
+        }
+      }
+    }
+
+    if (serviceRunning) {
+      _notificationsEnabled = true;
+    } else {
+      _notificationsEnabled = startService;
+    }
+
     debugPrint('RadioController.init: notificationsEnabled=$_notificationsEnabled');
-    if (startService) {
+
+    if (serviceRunning) {
+      _resetAudioHandlerCompleter();
+      _completeAudioHandlerCompleter();
+    } else if (_notificationsEnabled) {
       await ensureAudioService();
       if (_hasError) {
         notifyListeners();
