@@ -315,43 +315,50 @@ class RadioController extends ChangeNotifier {
   /// This is useful when the app process restarts and needs to
   /// reconnect to a running background audio service.
   Future<void> ensureAudioService() async {
-    if (AudioService.running && _audioHandler != null) {
-      _resetAudioHandlerCompleter();
+    _resetAudioHandlerCompleter();
+    if (_audioHandler != null) {
       _completeAudioHandlerCompleter();
       return;
     }
 
-    _resetAudioHandlerCompleter();
     try {
       final session = await AudioSession.instance;
       await session.configure(const AudioSessionConfiguration.music());
       await session.setActive(true);
 
-      if (_audioHandler == null || !AudioService.running) {
-        _audioHandler = await AudioService.init(
-          builder: () => RadioAudioHandler(_player),
-          config: const AudioServiceConfig(
-            androidNotificationChannelId: 'm_club_radio_channel',
-            androidNotificationChannelName: 'M-Club Radio',
-            androidNotificationIcon: 'drawable/radio_notification_icon',
-            androidNotificationOngoing: true,
-          ),
-        ) as RadioAudioHandler;
-        await _audioHandler!.updateTrack(
-          RadioTrack(
-            artist: '',
-            title: 'Радио «Русские Эмираты»',
-            image: '',
-          ),
+      final handler = await AudioService.init(
+        builder: () => RadioAudioHandler(_player),
+        config: const AudioServiceConfig(
+          androidNotificationChannelId: 'm_club_radio_channel',
+          androidNotificationChannelName: 'M-Club Radio',
+          androidNotificationIcon: 'drawable/radio_notification_icon',
+          androidNotificationOngoing: true,
+        ),
+      );
+
+      if (handler is RadioAudioHandler) {
+        _audioHandler = handler;
+      } else {
+        throw StateError(
+          'Unexpected audio handler type: ${handler.runtimeType}',
         );
       }
+
+      await _audioHandler!.updateTrack(
+        RadioTrack(
+          artist: '',
+          title: 'Радио «Русские Эмираты»',
+          image: '',
+        ),
+      );
     } catch (e, s) {
       _hasError = true;
       _errorMessage = 'Audio service error: ${e.toString()}';
       _logPlaybackFailure('ensureAudioService', e, s);
       _audioHandler ??= RadioAudioHandler(_player);
+    } finally {
+      _completeAudioHandlerCompleter();
     }
-    _completeAudioHandlerCompleter();
   }
 
   void _resetAudioHandlerCompleter() {
