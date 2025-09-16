@@ -91,8 +91,8 @@ class RadioAudioHandler extends BaseAudioHandler with SeekHandler {
       'Playback event - playing: $playing, processingState: ${event.processingState}',
     );
     const controls = <MediaControl>[
-      MediaControl.play,
       MediaControl.pause,
+      MediaControl.play,
       MediaControl.stop,
     ];
 
