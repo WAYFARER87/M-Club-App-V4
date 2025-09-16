@@ -72,12 +72,12 @@ class RadioAudioHandler extends BaseAudioHandler with SeekHandler {
     artUri ??= await _loadDefaultArtUri();
 
     // Безопасные дефолты на случай пустых строк.
-    final title = (track.title.isNotEmpty) ? track.title : 'Unknown Title';
-    final artist = (track.artist.isNotEmpty) ? track.artist : 'Unknown Artist';
+    final title = (track.title.isNotEmpty) ? track.title : 'M-Club Radio';
+    final artist = (track.artist.isNotEmpty) ? track.artist : 'Live';
 
     mediaItem.add(
       MediaItem(
-        id: 'mclub_radio',
+        id: 'mclub-radio',
         title: title,
         artist: artist,
         artUri: artUri,
