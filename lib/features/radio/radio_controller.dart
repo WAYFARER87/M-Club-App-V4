@@ -50,6 +50,18 @@ class RadioController extends ChangeNotifier {
   static RadioAudioHandler? _audioHandler;
   final Completer<void> _audioHandlerCompleter = Completer<void>();
 
+  static const MediaItem _defaultMediaItem = MediaItem(
+    id: 'mclub_radio',
+    title: 'Радио «Русские Эмираты»',
+    artist: '',
+  );
+
+  static final RadioTrack _defaultRadioTrack = RadioTrack(
+    artist: '',
+    title: 'Радио «Русские Эмираты»',
+    image: '',
+  );
+
   Future<void> get _audioHandlerReady => _audioHandlerCompleter.future;
 
   Map<String, String> _streams = {};
@@ -241,11 +253,14 @@ class RadioController extends ChangeNotifier {
       } else {
         await _player.stop();
       }
-      await _player.setUrl(url);
+      await _player.setAudioSource(
+        AudioSource.uri(
+          Uri.parse(url),
+          tag: _defaultMediaItem,
+        ),
+      );
       if (_audioHandler != null) {
-        await _audioHandler!.updateTrack(
-          RadioTrack(artist: '', title: 'Радио «Русские Эмираты»', image: ''),
-        );
+        await _audioHandler!.updateTrack(_defaultRadioTrack);
       }
       try {
         await AudioSession.instance.then((session) => session.setActive(true));
@@ -302,28 +317,57 @@ class RadioController extends ChangeNotifier {
       final info = await _api.fetchTrackInfo();
       if (info == null) {
         _track = null;
+        _updatePlayerMediaItem(_defaultMediaItem);
         if (_audioHandler != null) {
-          await _audioHandler!.updateTrack(
-            RadioTrack(artist: '', title: 'Радио «Русские Эмираты»', image: ''),
-          );
+          await _audioHandler!.updateTrack(_defaultRadioTrack);
         }
         notifyListeners();
         return;
       }
       _track = info;
+      _updatePlayerMediaItem(_mediaItemForTrack(info));
       if (_audioHandler != null) {
         await _audioHandler!.updateTrack(info);
       }
       notifyListeners();
     } catch (_) {
       _track = null;
+      _updatePlayerMediaItem(_defaultMediaItem);
       if (_audioHandler != null) {
-        await _audioHandler!.updateTrack(
-          RadioTrack(artist: '', title: 'Радио «Русские Эмираты»', image: ''),
-        );
+        await _audioHandler!.updateTrack(_defaultRadioTrack);
       }
       // ignore errors
     }
+  }
+
+  void _updatePlayerMediaItem(MediaItem mediaItem) {
+    final source = _player.audioSource;
+    if (source != null) {
+      source.tag = mediaItem;
+    }
+  }
+
+  MediaItem _mediaItemForTrack(RadioTrack track) {
+    final title =
+        track.title.isNotEmpty ? track.title : _defaultRadioTrack.title;
+    final artist =
+        track.artist.isNotEmpty ? track.artist : 'Unknown Artist';
+
+    Uri? artUri;
+    if (track.image.isNotEmpty) {
+      final candidate = Uri.tryParse(track.image);
+      if (candidate != null &&
+          (candidate.scheme == 'http' || candidate.scheme == 'https')) {
+        artUri = candidate;
+      }
+    }
+
+    return MediaItem(
+      id: _defaultMediaItem.id,
+      title: title,
+      artist: artist,
+      artUri: artUri,
+    );
   }
 
   @override
@@ -376,9 +420,7 @@ class RadioController extends ChangeNotifier {
                 ),
               )
               as RadioAudioHandler;
-      await _audioHandler!.updateTrack(
-        RadioTrack(artist: '', title: 'Радио «Русские Эмираты»', image: ''),
-      );
+      await _audioHandler!.updateTrack(_defaultRadioTrack);
     } catch (e, s) {
       _hasError = true;
       _errorMessage = 'Audio service error: ${e.toString()}';
