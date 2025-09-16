@@ -7,5 +7,6 @@
   "cancel": "Cancel",
   "save": "Save",
   "retry": "Retry",
-  "logout": "Logout"
+  "logout": "Logout",
+  "showMap": "Show map"
 }

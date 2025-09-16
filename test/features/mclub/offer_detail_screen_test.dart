@@ -1,5 +1,6 @@
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:geolocator_platform_interface/geolocator_platform_interface.dart';
@@ -7,6 +8,7 @@ import 'package:m_club/core/services/api_service.dart';
 import 'package:m_club/features/auth/club_card_screen.dart';
 import 'package:m_club/features/mclub/offer_detail_screen.dart';
 import 'package:m_club/features/mclub/offer_model.dart';
+import 'package:url_launcher_platform_interface/url_launcher_platform_interface.dart';
 
 Offer _buildOffer({
   required int vote,
@@ -57,13 +59,47 @@ class _FakeGeolocator extends GeolocatorPlatform {
   Future<bool> isLocationServiceEnabled() async => true;
 }
 
+class _FakeUrlLauncher extends UrlLauncherPlatform {
+  String? launchedUrl;
+  LaunchOptions? lastOptions;
+
+  @override
+  LinkDelegate? get linkDelegate => null;
+
+  @override
+  Future<bool> canLaunch(String url) async => true;
+
+  @override
+  Future<bool> launchUrl(String url, LaunchOptions options) async {
+    launchedUrl = url;
+    lastOptions = options;
+    return true;
+  }
+
+  @override
+  Future<void> closeWebView() async {}
+}
+
+Widget _buildApp(Offer offer) {
+  return MaterialApp(
+    locale: const Locale('ru'),
+    supportedLocales: AppLocalizations.supportedLocales,
+    localizationsDelegates: AppLocalizations.localizationsDelegates,
+    home: OfferDetailScreen(offer: offer),
+  );
+}
+
+Future<void> _pumpOffer(WidgetTester tester, Offer offer) async {
+  await tester.pumpWidget(_buildApp(offer));
+  await tester.pumpAndSettle();
+}
+
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
 
   testWidgets('highlights upvote and shows rating', (tester) async {
     final offer = _buildOffer(vote: 1, rating: 42);
-    await tester.pumpWidget(MaterialApp(home: OfferDetailScreen(offer: offer)));
-    await tester.pumpAndSettle();
+    await _pumpOffer(tester, offer);
 
     final upIcon = tester.widget<Icon>(find.byIcon(Icons.arrow_upward));
     final downIcon =
@@ -75,8 +111,7 @@ void main() {
 
   testWidgets('highlights downvote and shows rating', (tester) async {
     final offer = _buildOffer(vote: -1, rating: 7);
-    await tester.pumpWidget(MaterialApp(home: OfferDetailScreen(offer: offer)));
-    await tester.pumpAndSettle();
+    await _pumpOffer(tester, offer);
 
     final upIcon =
         tester.widget<Icon>(find.byIcon(Icons.arrow_upward_outlined));
@@ -88,16 +123,14 @@ void main() {
 
   testWidgets('shows formatted end date', (tester) async {
     final offer = _buildOffer(vote: 0, rating: 0, dateEnd: DateTime(2024, 5, 20));
-    await tester.pumpWidget(MaterialApp(home: OfferDetailScreen(offer: offer)));
-    await tester.pumpAndSettle();
+    await _pumpOffer(tester, offer);
 
     expect(find.text('Действует до 20.05.2024'), findsOneWidget);
   });
 
   testWidgets('lays out vote row horizontally', (tester) async {
     final offer = _buildOffer(vote: 0, rating: 10);
-    await tester.pumpWidget(MaterialApp(home: OfferDetailScreen(offer: offer)));
-    await tester.pumpAndSettle();
+    await _pumpOffer(tester, offer);
 
     final upPos =
         tester.getTopLeft(find.byIcon(Icons.arrow_upward_outlined));
@@ -114,8 +147,7 @@ void main() {
   testWidgets('rating and date containers have equal height', (tester) async {
     final offer =
         _buildOffer(vote: 0, rating: 5, dateEnd: DateTime(2024, 5, 20));
-    await tester.pumpWidget(MaterialApp(home: OfferDetailScreen(offer: offer)));
-    await tester.pumpAndSettle();
+    await _pumpOffer(tester, offer);
 
     final ratingContainer = find.ancestor(
       of: find.byIcon(Icons.arrow_upward_outlined),
@@ -131,6 +163,34 @@ void main() {
     final ratingSize = tester.getSize(ratingContainer);
     final dateSize = tester.getSize(dateContainer);
     expect(ratingSize.height, dateSize.height);
+  });
+
+  testWidgets('shows map button and opens route', (tester) async {
+    final previous = UrlLauncherPlatform.instance;
+    final launcher = _FakeUrlLauncher();
+    UrlLauncherPlatform.instance = launcher;
+    addTearDown(() {
+      UrlLauncherPlatform.instance = previous;
+    });
+
+    final offer = _buildOffer(
+      vote: 0,
+      rating: 0,
+      branches: [Branch(lat: 55, lng: 37)],
+    );
+
+    await _pumpOffer(tester, offer);
+
+    final context = tester.element(find.byType(OfferDetailScreen));
+    final mapText = AppLocalizations.of(context)!.showMap;
+    final mapButton = find.widgetWithText(FilledButton, mapText);
+    expect(mapButton, findsOneWidget);
+
+    await tester.tap(mapButton);
+    await tester.pumpAndSettle();
+
+    expect(launcher.launchedUrl, 'https://maps.google.com/?q=55.0,37.0');
+    expect(launcher.lastOptions?.mode, PreferredLaunchMode.externalApplication);
   });
 
   testWidgets('opens card without checkin when far', (tester) async {
@@ -165,8 +225,7 @@ void main() {
       branches: [Branch(lat: 10, lng: 10)],
     );
 
-    await tester.pumpWidget(MaterialApp(home: OfferDetailScreen(offer: offer)));
-    await tester.pumpAndSettle();
+    await _pumpOffer(tester, offer);
 
     await tester.tap(find.text('Клубная карта'));
     await tester.pumpAndSettle();
@@ -207,8 +266,7 @@ void main() {
       branches: [Branch(lat: 0, lng: 0)],
     );
 
-    await tester.pumpWidget(MaterialApp(home: OfferDetailScreen(offer: offer)));
-    await tester.pumpAndSettle();
+    await _pumpOffer(tester, offer);
 
     await tester.tap(find.text('Клубная карта'));
     await tester.pumpAndSettle();

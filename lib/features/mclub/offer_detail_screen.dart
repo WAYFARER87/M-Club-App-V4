@@ -8,6 +8,7 @@ import 'package:geolocator/geolocator.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:intl/intl.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import '../../core/services/api_service.dart';
 import '../../core/widgets/primary_button.dart';
 import '../../core/widgets/secondary_button.dart';
@@ -605,6 +606,28 @@ class _OfferDetailScreenState extends State<OfferDetailScreen> {
                   final email = b.email ?? '';
                   final address = b.address ?? 'Филиал';
                   final distanceLabel = _distanceLabelTo(lat, lng);
+                  final l10n = AppLocalizations.of(context);
+
+                  final trailingActions = <Widget>[
+                    if (lat != null && lng != null)
+                      SecondaryButton(
+                        text: l10n?.showMap ?? 'Показать карту',
+                        icon: Icons.map_outlined,
+                        onPressed: () => _openRouteTo(lat, lng),
+                      ),
+                    if (phone.isNotEmpty)
+                      IconButton(
+                        tooltip: 'Позвонить',
+                        icon: const Icon(Icons.call),
+                        onPressed: () => _openPhone(phone),
+                      ),
+                    if (email.isNotEmpty)
+                      IconButton(
+                        tooltip: 'Написать',
+                        icon: const Icon(Icons.mail_outline),
+                        onPressed: () => _mailto(email),
+                      ),
+                  ];
 
                   return Column(
                     children: [
@@ -639,30 +662,30 @@ class _OfferDetailScreenState extends State<OfferDetailScreen> {
                                       padding: const EdgeInsets.only(top: 2),
                                       child: Text(
                                         distanceLabel,
-                                        style: Theme.of(context).textTheme.bodySmall?.copyWith(color: Colors.black54),
+                                        style: Theme.of(context)
+                                            .textTheme
+                                            .bodySmall
+                                            ?.copyWith(color: Colors.black54),
                                       ),
                                     ),
                                 ],
                               ),
                             ),
-                            if (lat != null && lng != null)
-                              IconButton(
-                                tooltip: 'Маршрут',
-                                icon: const Icon(Icons.directions),
-                                onPressed: () => _openRouteTo(lat, lng),
+                            if (trailingActions.isNotEmpty) ...[
+                              const SizedBox(width: 12),
+                              Flexible(
+                                child: Align(
+                                  alignment: Alignment.topRight,
+                                  child: Wrap(
+                                    spacing: 4,
+                                    runSpacing: 4,
+                                    alignment: WrapAlignment.end,
+                                    crossAxisAlignment: WrapCrossAlignment.center,
+                                    children: trailingActions,
+                                  ),
+                                ),
                               ),
-                            if (phone.isNotEmpty)
-                              IconButton(
-                                tooltip: 'Позвонить',
-                                icon: const Icon(Icons.call),
-                                onPressed: () => _openPhone(phone),
-                              ),
-                            if (email.isNotEmpty)
-                              IconButton(
-                                tooltip: 'Написать',
-                                icon: const Icon(Icons.mail_outline),
-                                onPressed: () => _mailto(email),
-                              ),
+                            ],
                           ],
                         ),
                       ),
