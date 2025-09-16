@@ -151,14 +151,18 @@ class RadioController extends ChangeNotifier {
   /// controller will operate without posting notifications.
   Future<void> init({String? quality, bool startService = true}) async {
     final serviceRunning = await _isBackgroundServiceRunning();
+    final shouldUseService = serviceRunning || startService;
 
-    _notificationsEnabled = serviceRunning ? true : startService;
+    // Preserve notification controls whenever the background service is
+    // already active (or will be started) so we reuse the existing handler
+    // instead of downgrading to the local player-only implementation.
+    _notificationsEnabled = shouldUseService;
     debugPrint('RadioController.init: notificationsEnabled=$_notificationsEnabled');
 
     if (serviceRunning) {
       _audioHandlerCompleter ??= Completer<void>();
       _completeAudioHandlerCompleter();
-    } else if (!startService) {
+    } else if (!shouldUseService) {
       _isServiceHandler = false;
       _audioHandler = RadioAudioHandler(_player);
       _resetAudioHandlerCompleter();
