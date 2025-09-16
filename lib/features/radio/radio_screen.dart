@@ -67,135 +67,138 @@ class _RadioViewState extends State<_RadioView> {
                     0.8;
                 return Align(
                   alignment: Alignment.center,
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Stack(
-                        children: [
-                          ClipRRect(
-                            borderRadius: BorderRadius.circular(24),
-                            child: SizedBox(
-                              width: size,
-                              height: size,
-                              child: track != null && track.image.isNotEmpty
-                                  ? Image.network(
-                                      track.image,
-                                      fit: BoxFit.cover,
-                                    )
-                                  : Image.asset(
-                                      'assets/images/Radio_RE_Logo.webp',
-                                      fit: BoxFit.contain,
-                                    ),
-                            ),
-                          ),
-                          if (controller.quality != null)
-                            Positioned(
-                              top: 8,
-                              right: 8,
+                  child: SingleChildScrollView(
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Stack(
+                          children: [
+                            ClipRRect(
+                              borderRadius: BorderRadius.circular(24),
                               child: SizedBox(
-                                child: Material(
-                                  color: Colors.black54,
-                                  borderRadius: BorderRadius.circular(12),
-                                  child: InkWell(
+                                width: size,
+                                height: size,
+                                child: track != null && track.image.isNotEmpty
+                                    ? Image.network(
+                                        track.image,
+                                        fit: BoxFit.cover,
+                                      )
+                                    : Image.asset(
+                                        'assets/images/Radio_RE_Logo.webp',
+                                        fit: BoxFit.contain,
+                                      ),
+                              ),
+                            ),
+                            if (controller.quality != null)
+                              Positioned(
+                                top: 8,
+                                right: 8,
+                                child: SizedBox(
+                                  child: Material(
+                                    color: Colors.black54,
                                     borderRadius: BorderRadius.circular(12),
-                                    onTap: () {
-                                      showModalBottomSheet(
-                                        context: context,
-                                        builder: (context) {
-                                          return SafeArea(
-                                            child: Column(
-                                              mainAxisSize: MainAxisSize.min,
-                                              children: controller.streams.keys
-                                                  .map((quality) => ListTile(
-                                                        title: Text(quality),
-                                                        trailing: controller
-                                                                    .quality ==
-                                                                quality
-                                                            ? const Icon(
-                                                                Icons.check)
-                                                            : null,
-                                                        onTap: () {
-                                                          controller.setQuality(
-                                                              quality);
-                                                          Navigator.pop(
-                                                              context);
-                                                        },
-                                                      ))
-                                                  .toList(),
-                                            ),
-                                          );
-                                        },
-                                      );
-                                    },
-                                    child: Container(
-                                      constraints:
-                                          const BoxConstraints(minHeight: 44),
-                                      padding: const EdgeInsets.symmetric(
-                                          horizontal: 8, vertical: 4),
-                                      child: Center(
-                                        child: Text(
-                                          controller.quality!,
-                                          style: const TextStyle(
-                                              color: Colors.white,
-                                              fontSize: 12),
+                                    child: InkWell(
+                                      borderRadius: BorderRadius.circular(12),
+                                      onTap: () {
+                                        showModalBottomSheet(
+                                          context: context,
+                                          builder: (context) {
+                                            return SafeArea(
+                                              child: Column(
+                                                mainAxisSize: MainAxisSize.min,
+                                                children: controller.streams.keys
+                                                    .map((quality) => ListTile(
+                                                          title: Text(quality),
+                                                          trailing: controller
+                                                                      .quality ==
+                                                                  quality
+                                                              ? const Icon(
+                                                                  Icons.check)
+                                                              : null,
+                                                          onTap: () {
+                                                            controller
+                                                                .setQuality(
+                                                                    quality);
+                                                            Navigator.pop(
+                                                                context);
+                                                          },
+                                                        ))
+                                                    .toList(),
+                                              ),
+                                            );
+                                          },
+                                        );
+                                      },
+                                      child: Container(
+                                        constraints: const BoxConstraints(
+                                            minHeight: 44),
+                                        padding: const EdgeInsets.symmetric(
+                                            horizontal: 8, vertical: 4),
+                                        child: Center(
+                                          child: Text(
+                                            controller.quality!,
+                                            style: const TextStyle(
+                                                color: Colors.white,
+                                                fontSize: 12),
+                                          ),
                                         ),
                                       ),
                                     ),
                                   ),
                                 ),
                               ),
-                            ),
-                        ],
-                      ),
-                      const SizedBox(height: 16),
-                      if (controller.hasError) ...[
-                        Chip(
-                          label: const Text('ERROR'),
-                          labelStyle: const TextStyle(color: Colors.white),
-                          backgroundColor: Colors.red,
-                        ),
-                        TextButton(
-                          onPressed: () =>
-                              context.read<RadioController>().retry(),
-                          child: const Text('Повторить'),
+                          ],
                         ),
                         const SizedBox(height: 16),
-                      ],
-                      Text(
-                        artist,
-                        style: Theme.of(context)
-                            .textTheme
-                            .headlineMedium
-                            ?.copyWith(fontWeight: FontWeight.bold),
-                        textAlign: TextAlign.center,
-                        softWrap: true,
-                      ),
-                      const SizedBox(height: 8),
-                      Text(
-                        title,
-                        style: Theme.of(context).textTheme.titleLarge,
-                        textAlign: TextAlign.center,
-                        softWrap: true,
-                      ),
-                      const SizedBox(height: 12),
-                      if (track != null)
-                        Container(
-                          padding: const EdgeInsets.symmetric(
-                              horizontal: 12, vertical: 4),
-                          decoration: BoxDecoration(
-                            color: Colors.red,
-                            borderRadius: BorderRadius.circular(16),
+                        if (controller.hasError) ...[
+                          Chip(
+                            label: const Text('ERROR'),
+                            labelStyle: const TextStyle(color: Colors.white),
+                            backgroundColor: Colors.red,
                           ),
-                          child: const Text(
-                            'LIVE',
-                            style: TextStyle(
-                              color: Colors.white,
-                              fontSize: 14,
-                              fontWeight: FontWeight.bold,
+                          TextButton(
+                            onPressed: () =>
+                                context.read<RadioController>().retry(),
+                            child: const Text('Повторить'),
+                          ),
+                          const SizedBox(height: 16),
+                        ],
+                        Text(
+                          artist,
+                          style: Theme.of(context)
+                              .textTheme
+                              .headlineMedium
+                              ?.copyWith(fontWeight: FontWeight.bold),
+                          textAlign: TextAlign.center,
+                          softWrap: true,
+                        ),
+                        const SizedBox(height: 8),
+                        Text(
+                          title,
+                          style: Theme.of(context).textTheme.titleLarge,
+                          textAlign: TextAlign.center,
+                          softWrap: true,
+                        ),
+                        const SizedBox(height: 12),
+                        if (track != null)
+                          Container(
+                            padding: const EdgeInsets.symmetric(
+                                horizontal: 12, vertical: 4),
+                            decoration: BoxDecoration(
+                              color: Colors.red,
+                              borderRadius: BorderRadius.circular(16),
+                            ),
+                            child: const Text(
+                              'LIVE',
+                              style: TextStyle(
+                                color: Colors.white,
+                                fontSize: 14,
+                                fontWeight: FontWeight.bold,
+                              ),
                             ),
                           ),
-                        ),
-                    ],
+                      ],
+                    ),
                   ),
                 );
               },
