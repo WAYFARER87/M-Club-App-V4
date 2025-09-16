@@ -10,6 +10,7 @@ import 'package:url_launcher/url_launcher.dart';
 import 'package:intl/intl.dart';
 import '../../core/services/api_service.dart';
 import '../../core/widgets/primary_button.dart';
+import '../../core/widgets/secondary_button.dart';
 import 'offer_model.dart';
 import '../auth/club_card_screen.dart';
 import 'widgets/rating_widget.dart';
@@ -539,24 +540,43 @@ class _OfferDetailScreenState extends State<OfferDetailScreen> {
                       ),
 
                     const SizedBox(height: 16),
-                    Row(
-                      children: [
-                        Expanded(
-                          child: PrimaryButton(
-                            text: 'Отказали в скидке?',
-                            onPressed: () {},
-                          ),
-                        ),
-                        const SizedBox(width: 12),
-                        Expanded(
-                          child: PrimaryButton(
-                            text: 'Контакт менеджера',
-                            onPressed: (sponsorEmail == null || sponsorEmail.trim().isEmpty)
-                                ? null
-                                : () => _mailto(sponsorEmail!),
-                          ),
-                        ),
-                      ],
+                    LayoutBuilder(
+                      builder: (context, constraints) {
+                        const spacing = 12.0;
+                        final maxWidth = constraints.maxWidth.isFinite
+                            ? constraints.maxWidth
+                            : MediaQuery.of(context).size.width;
+                        final useFullWidth = maxWidth <= 400;
+                        final buttonWidth = useFullWidth
+                            ? maxWidth
+                            : (maxWidth - spacing) / 2;
+
+                        return Wrap(
+                          spacing: spacing,
+                          runSpacing: 8,
+                          children: [
+                            SizedBox(
+                              width: buttonWidth,
+                              child: SecondaryButton(
+                                text: 'Отказали в скидке?',
+                                icon: Icons.support_agent,
+                                onPressed: () {},
+                              ),
+                            ),
+                            SizedBox(
+                              width: buttonWidth,
+                              child: SecondaryButton(
+                                text: 'Контакт менеджера',
+                                icon: Icons.mail,
+                                onPressed:
+                                    (sponsorEmail == null || sponsorEmail.trim().isEmpty)
+                                        ? null
+                                        : () => _mailto(sponsorEmail!),
+                              ),
+                            ),
+                          ],
+                        );
+                      },
                     ),
 
                     // Подзаголовок "Адреса"
