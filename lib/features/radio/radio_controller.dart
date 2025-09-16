@@ -170,7 +170,9 @@ class RadioController extends ChangeNotifier {
   /// controller will operate without posting notifications.
   Future<void> init({String? quality, bool startService = true}) async {
     _notificationsEnabled = startService;
-    debugPrint('RadioController.init: notificationsEnabled=$_notificationsEnabled');
+    debugPrint(
+      'RadioController.init: notificationsEnabled=$_notificationsEnabled',
+    );
     if (startService) {
       await ensureAudioService();
       if (_hasError) {
@@ -242,11 +244,7 @@ class RadioController extends ChangeNotifier {
       await _player.setUrl(url);
       if (_audioHandler != null) {
         await _audioHandler!.updateTrack(
-          RadioTrack(
-            artist: '',
-            title: 'Радио «Русские Эмираты»',
-            image: '',
-          ),
+          RadioTrack(artist: '', title: 'Радио «Русские Эмираты»', image: ''),
         );
       } else {
         await AudioServiceBackground.setMediaItem(
@@ -258,9 +256,7 @@ class RadioController extends ChangeNotifier {
         );
       }
       try {
-        await AudioSession.instance.then(
-          (session) => session.setActive(true),
-        );
+        await AudioSession.instance.then((session) => session.setActive(true));
       } catch (e, s) {
         _logPlaybackFailure('activateSession', e, s);
       }
@@ -316,11 +312,7 @@ class RadioController extends ChangeNotifier {
         _track = null;
         if (_audioHandler != null) {
           await _audioHandler!.updateTrack(
-            RadioTrack(
-              artist: '',
-              title: 'Радио «Русские Эмираты»',
-              image: '',
-            ),
+            RadioTrack(artist: '', title: 'Радио «Русские Эмираты»', image: ''),
           );
         } else {
           await AudioServiceBackground.setMediaItem(
@@ -343,9 +335,7 @@ class RadioController extends ChangeNotifier {
             id: 'mclub_radio',
             title: info.title.isNotEmpty ? info.title : 'Unknown Title',
             artist: info.artist.isNotEmpty ? info.artist : 'Unknown Artist',
-            artUri: info.image.isNotEmpty
-                ? Uri.tryParse(info.image)
-                : null,
+            artUri: info.image.isNotEmpty ? Uri.tryParse(info.image) : null,
           ),
         );
       }
@@ -354,11 +344,7 @@ class RadioController extends ChangeNotifier {
       _track = null;
       if (_audioHandler != null) {
         await _audioHandler!.updateTrack(
-          RadioTrack(
-            artist: '',
-            title: 'Радио «Русские Эмираты»',
-            image: '',
-          ),
+          RadioTrack(artist: '', title: 'Радио «Русские Эмираты»', image: ''),
         );
       } else {
         await AudioServiceBackground.setMediaItem(
@@ -403,9 +389,8 @@ class RadioController extends ChangeNotifier {
         await session.configure(
           const AudioSessionConfiguration(
             avAudioSessionCategory: AVAudioSessionCategory.playback,
-            avAudioSessionCategoryOptions: {
-              AVAudioSessionCategoryOptions.mixWithOthers,
-            },
+            avAudioSessionCategoryOptions:
+                AVAudioSessionCategoryOptions.mixWithOthers,
           ),
         );
       } else {
@@ -413,21 +398,19 @@ class RadioController extends ChangeNotifier {
       }
       await session.setActive(true);
 
-      _audioHandler = await AudioService.init(
-        builder: () => RadioAudioHandler(_player),
-        config: const AudioServiceConfig(
-          androidNotificationChannelId: 'm_club_radio_channel',
-          androidNotificationChannelName: 'M-Club Radio',
-          androidNotificationIcon: 'drawable/radio_notification_icon',
-          androidNotificationOngoing: true,
-        ),
-      ) as RadioAudioHandler;
+      _audioHandler =
+          await AudioService.init(
+                builder: () => RadioAudioHandler(_player),
+                config: const AudioServiceConfig(
+                  androidNotificationChannelId: 'm_club_radio_channel',
+                  androidNotificationChannelName: 'M-Club Radio',
+                  androidNotificationIcon: 'drawable/radio_notification_icon',
+                  androidNotificationOngoing: true,
+                ),
+              )
+              as RadioAudioHandler;
       await _audioHandler!.updateTrack(
-        RadioTrack(
-          artist: '',
-          title: 'Радио «Русские Эмираты»',
-          image: '',
-        ),
+        RadioTrack(artist: '', title: 'Радио «Русские Эмираты»', image: ''),
       );
     } catch (e, s) {
       _hasError = true;
@@ -445,4 +428,3 @@ class RadioController extends ChangeNotifier {
     // TODO: integrate analytics reporting here.
   }
 }
-
