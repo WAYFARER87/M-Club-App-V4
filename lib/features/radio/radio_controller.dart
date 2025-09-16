@@ -160,28 +160,23 @@ class RadioController extends ChangeNotifier {
       }
     }
 
-    if (serviceRunning) {
-      _notificationsEnabled = true;
-    } else {
-      _notificationsEnabled = startService;
-    }
-
+    _notificationsEnabled = serviceRunning || startService;
     debugPrint('RadioController.init: notificationsEnabled=$_notificationsEnabled');
 
     if (serviceRunning) {
       _resetAudioHandlerCompleter();
       _completeAudioHandlerCompleter();
-    } else if (_notificationsEnabled) {
+    } else if (!startService) {
+      _isServiceHandler = false;
+      _audioHandler = RadioAudioHandler(_player);
+      _resetAudioHandlerCompleter();
+      _completeAudioHandlerCompleter();
+    } else {
       await ensureAudioService();
       if (_hasError) {
         notifyListeners();
         return;
       }
-    } else {
-      _isServiceHandler = false;
-      _audioHandler = RadioAudioHandler(_player);
-      _resetAudioHandlerCompleter();
-      _completeAudioHandlerCompleter();
     }
 
     _streamsUnavailable = false;
