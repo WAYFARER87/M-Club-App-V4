@@ -90,6 +90,57 @@ class _NewsArticleViewState extends State<NewsArticleView> {
     final overlayStyle = _collapsed
         ? SystemUiOverlayStyle.dark
         : (dark ? SystemUiOverlayStyle.light : SystemUiOverlayStyle.dark);
+    final theme = Theme.of(context);
+    final textTheme = theme.textTheme;
+    final titleColor =
+        textTheme.headlineSmall?.color ?? theme.colorScheme.onBackground;
+    final rubricColor = theme.colorScheme.primary;
+    final previewColor =
+        (textTheme.titleMedium?.color ?? textTheme.bodyMedium?.color ??
+                theme.colorScheme.onBackground)
+            .withOpacity(0.8);
+    final metaColor =
+        (textTheme.bodyMedium?.color ?? theme.colorScheme.onBackground)
+            .withOpacity(0.6);
+    final titleStyle = textTheme.headlineSmall?.copyWith(
+          fontWeight: FontWeight.w700,
+          height: 1.2,
+          color: titleColor,
+        ) ??
+        TextStyle(
+          fontSize: 26,
+          fontWeight: FontWeight.w700,
+          height: 1.2,
+          color: titleColor,
+        );
+    final rubricStyle = textTheme.labelMedium?.copyWith(
+          fontSize: 14,
+          fontWeight: FontWeight.w600,
+          letterSpacing: 0.8,
+          color: rubricColor,
+        ) ??
+        TextStyle(
+          fontSize: 14,
+          fontWeight: FontWeight.w600,
+          letterSpacing: 0.8,
+          color: rubricColor,
+        );
+    final previewStyle = textTheme.titleMedium?.copyWith(
+          height: 1.5,
+          color: previewColor,
+        ) ??
+        TextStyle(
+          fontSize: 18,
+          height: 1.5,
+          color: previewColor,
+        );
+    final metaStyle = textTheme.bodyMedium?.copyWith(
+          color: metaColor,
+        ) ??
+        TextStyle(
+          fontSize: 16,
+          color: metaColor,
+        );
 
     final descPlain = item.contentPreview
         .replaceAll(RegExp(r'<[^>]*>'), ' ')
@@ -136,13 +187,9 @@ class _NewsArticleViewState extends State<NewsArticleView> {
               ],
               systemOverlayStyle: overlayStyle,
               flexibleSpace: FlexibleSpaceBar(
-                background: Stack(
-                  fit: StackFit.expand,
-                  children: [
-                    if (item.image.isEmpty)
-                      Container(color: Colors.grey.shade200)
-                    else
-                      Hero(
+                background: item.image.isEmpty
+                    ? Container(color: Colors.grey.shade200)
+                    : Hero(
                         tag: item.id,
                         child: Image.network(
                           item.image,
@@ -151,111 +198,40 @@ class _NewsArticleViewState extends State<NewsArticleView> {
                               Container(color: Colors.grey.shade200),
                         ),
                       ),
-                    Positioned.fill(
-                      child: IgnorePointer(
-                        child: DecoratedBox(
-                          decoration: BoxDecoration(
-                            gradient: LinearGradient(
-                              begin: Alignment.topCenter,
-                              end: Alignment.bottomCenter,
-                              colors: [
-                                Colors.transparent,
-                                Colors.black.withOpacity(0.1),
-                                Colors.black.withOpacity(0.3),
-                                Colors.black.withOpacity(0.5),
-                              ],
-                              stops: const [0.5, 0.75, 0.9, 1.0],
-                            ),
-                          ),
-                        ),
-                      ),
-                    ),
-                    Positioned(
-                      left: 12,
-                      right: 12,
-                      bottom: 12,
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          if (item.rubric != null &&
-                              item.rubric!.name.isNotEmpty)
-                            Text(
-                              item.rubric!.name.toUpperCase(),
-                              style: const TextStyle(
-                                color: Colors.white70,
-                                fontSize: 14,
-                                fontWeight: FontWeight.w500,
-                                shadows: [
-                                  Shadow(
-                                    color: Colors.black54,
-                                    blurRadius: 4,
-                                    offset: Offset(0, 1),
-                                  )
-                                ],
-                              ),
-                            ),
-                          Text(
-                            item.title,
-                            maxLines: 2,
-                            overflow: TextOverflow.ellipsis,
-                            style: const TextStyle(
-                              color: Colors.white,
-                              fontSize: 24,
-                              fontWeight: FontWeight.w600,
-                              height: 1.2,
-                              shadows: [
-                                Shadow(
-                                  color: Colors.black54,
-                                  blurRadius: 4,
-                                  offset: Offset(0, 1),
-                                )
-                              ],
-                            ),
-                          ),
-                          if (descPlain.isNotEmpty) ...[
-                            const SizedBox(height: 8),
-                            Text(
-                              descPlain,
-                              maxLines: 3,
-                              overflow: TextOverflow.ellipsis,
-                              style: const TextStyle(
-                                color: Colors.white,
-                                fontSize: 18,
-                                height: 1.25,
-                                shadows: [
-                                  Shadow(
-                                    color: Colors.black54,
-                                    blurRadius: 4,
-                                    offset: Offset(0, 1),
-                                  )
-                                ],
-                              ),
-                            ),
-                          ],
-                        ],
-                      ),
-                    ),
-                  ],
-                ),
               ),
             ),
             SliverToBoxAdapter(
               child: Padding(
-                padding: const EdgeInsets.all(12),
+                padding: const EdgeInsets.fromLTRB(16, 20, 16, 16),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    if (meta.isNotEmpty)
-                      Padding(
-                        padding: const EdgeInsets.only(bottom: 12),
-                        child: Text(
-                          meta,
-                          style: const TextStyle(
-                            fontSize: 16,
-                            color: Colors.grey,
-                          ),
-                        ),
+                    if (item.rubric != null && item.rubric!.name.isNotEmpty) ...[
+                      Text(
+                        item.rubric!.name.toUpperCase(),
+                        style: rubricStyle,
                       ),
+                      const SizedBox(height: 8),
+                    ],
+                    Text(
+                      item.title,
+                      style: titleStyle,
+                    ),
+                    if (descPlain.isNotEmpty) ...[
+                      const SizedBox(height: 12),
+                      Text(
+                        descPlain,
+                        style: previewStyle,
+                      ),
+                    ],
+                    if (meta.isNotEmpty) ...[
+                      const SizedBox(height: 16),
+                      Text(
+                        meta,
+                        style: metaStyle,
+                      ),
+                    ],
+                    const SizedBox(height: 24),
                     Html(
                       data: item.contentFull,
                       style: {
