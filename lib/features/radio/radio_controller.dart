@@ -24,8 +24,9 @@ class RadioController extends ChangeNotifier {
     _player.processingStateStream.listen((state) async {
       if (state == ProcessingState.idle && _player.audioSource != null) {
         _hasError = true;
-        await _audioHandlerReady;
-        await _audioHandler!.stop();
+        if (_audioHandler != null) {
+          await _audioHandler!.stop();
+        }
       }
       notifyListeners();
     });
