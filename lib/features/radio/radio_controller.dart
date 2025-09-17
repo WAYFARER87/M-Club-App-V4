@@ -366,7 +366,7 @@ class RadioController extends ChangeNotifier {
         config: const AudioServiceConfig(
           androidNotificationChannelId: 'm_club_radio_channel',
           androidNotificationChannelName: 'M-Club Radio',
-          androidNotificationIcon: 'drawable/radio_notification_icon',
+          androidNotificationIcon: 'mipmap/ic_launcher',
           androidNotificationOngoing: true,
         ),
       );
