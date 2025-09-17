@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:convert';
+import 'dart:io' show Platform;
 
 import 'package:audio_service/audio_service.dart';
 import 'package:audio_session/audio_session.dart';
@@ -8,6 +9,7 @@ import 'package:just_audio/just_audio.dart';
 import 'package:m_club/core/services/radio_api_service.dart';
 import 'package:m_club/features/radio/models/radio_track.dart';
 import 'package:m_club/features/radio/radio_audio_handler.dart';
+import 'package:permission_handler/permission_handler.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 /// Controller responsible for playing radio streams and
@@ -359,6 +361,19 @@ class RadioController extends ChangeNotifier {
       final session = await AudioSession.instance;
       await session.configure(const AudioSessionConfiguration.music());
       await session.setActive(true);
+
+      if (Platform.isAndroid) {
+        try {
+          final status = await Permission.notification.status;
+          if (!status.isGranted) {
+            await Permission.notification.request();
+          }
+        } catch (e, s) {
+          debugPrint(
+            'Failed to handle notification permission: $e\n$s',
+          );
+        }
+      }
 
       _audioServiceInitCalled = true;
       final handler = await AudioService.init(
