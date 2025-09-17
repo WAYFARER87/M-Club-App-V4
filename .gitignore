@@ -8,4 +8,7 @@ web/
 windows/
 macos/
 build/
+android/key.properties
+*.jks
+
 
