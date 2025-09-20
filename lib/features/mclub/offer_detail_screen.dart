@@ -449,42 +449,51 @@ class _OfferDetailScreenState extends State<OfferDetailScreen> {
                   child: PrimaryButton(
                     text: 'Клубная карта',
                     onPressed: () async {
-                      double curLat;
-                      double curLng;
                       final pos = await _getPositionWithPermission();
-                      if (pos == null) return;
-                      curLat = pos.latitude;
-                      curLng = pos.longitude;
 
-                      var isNear = false;
-                      for (final b in widget.offer.branches) {
-                        final lat = b.lat;
-                        final lng = b.lng;
-                        if (lat == null || lng == null) continue;
-                        final d = Geolocator.distanceBetween(
-                            curLat, curLng, lat, lng);
-                        if (d <= 300) {
-                          isNear = true;
-                          break;
+                      if (pos != null) {
+                        final curLat = pos.latitude;
+                        final curLng = pos.longitude;
+
+                        var isNear = false;
+                        for (final b in widget.offer.branches) {
+                          final lat = b.lat;
+                          final lng = b.lng;
+                          if (lat == null || lng == null) continue;
+                          final d = Geolocator.distanceBetween(
+                              curLat, curLng, lat, lng);
+                          if (d <= 300) {
+                            isNear = true;
+                            break;
+                          }
                         }
-                      }
-                      final id = int.tryParse(widget.offer.id);
+                        final id = int.tryParse(widget.offer.id);
 
-                      if (isNear && id != null) {
-                        try {
-                          await _api.checkinBenefit(id, curLat, curLng);
-                        } on DioException catch (e) {
-                          if (mounted) {
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              SnackBar(content: Text('Ошибка сети: $e')),
-                            );
+                        if (isNear && id != null) {
+                          try {
+                            await _api.checkinBenefit(id, curLat, curLng);
+                          } on DioException catch (e) {
+                            if (mounted) {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                SnackBar(content: Text('Ошибка сети: $e')),
+                              );
+                            }
+                          } catch (e) {
+                            if (mounted) {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                SnackBar(content: Text('Ошибка: $e')),
+                              );
+                            }
                           }
-                        } catch (e) {
-                          if (mounted) {
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              SnackBar(content: Text('Ошибка: $e')),
-                            );
-                          }
+                        }
+                      } else {
+                        if (mounted) {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(
+                              content: Text(
+                                  'Авточекин пропущен: геолокация недоступна'),
+                            ),
+                          );
                         }
                       }
 
